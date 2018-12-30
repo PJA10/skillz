@@ -1,7 +1,6 @@
 from elf_kingdom import *
 
 ICE = "ice"
-LAVA = "lava"
 
 def do_turn(game):
 
