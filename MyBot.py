@@ -10,10 +10,51 @@ def do_turn(game):
     
     mana = game.default_mana_per_turn + game.get_my_mana() 
 	
-    handle_elves(game)
+    #handle_elves(game)
     handle_portals(game)
+    if game.turn < 50:
+        game.get_my_living_elves()[0].move_to(Location(0,0))
+    else:
+        for elf in game.get_my_living_elves():
+            a = call(game, elf, game.get_enemy_castle(), {
+            "attack_closest_enemy": (0.8,attack_closest_enemy) ,
+            "attack_closest_portal": (0.9,attack_closest_portal),
+            "attack_closest_elf": (1,attack_closest_elf)
+        })
+            print a, elf
+            a(game, elf, 10000)
 
 
+def normalize(game, elf, destination, func):
+    d = 0
+    if func == attack_closest_enemy:
+        try:
+            d= 1/elf.distance(get_closest_enemy(game, elf))
+        except:
+            d= 0
+    
+    if func == attack_closest_portal:
+        try:
+            d= 1/elf.distance(get_closest_portal(game, elf))
+        except:
+            d= 0
+    
+    if func == attack_closest_elf:
+        try:
+            d= 1/elf.distance(closest(game,elf, game.get_enemy_living_elves()))
+        except:
+            d= 0
+    print d
+    return d
+
+    
+
+def call(game, elf, destination, sliders):
+    normal = max(sliders.items(), key = lambda slider: slider[1][0] * normalize(game, elf, destination, slider[1][1]))
+    return normal[1][1]
+
+    
+    
 
 def get_locations(game, objs):
   	
@@ -43,7 +84,7 @@ def elf_movment(elf, loc):
     print loc, elf
     elf.move_to(loc)
     
-def mkportal(game, loc, elf):
+def make_portal(game, loc, elf):
     
     # Assumes Mana!
     
@@ -123,7 +164,7 @@ def handle_elves(game):
     if port_def == None or port_def.distance(game.get_my_castle()) > 2000:
         port_atk = port_def
         port_def = None
-        if not mkportal(game, game.get_my_castle().get_location().towards(game.get_enemy_castle(), 1000), elf_def):
+        if not make_portal(game, game.get_my_castle().get_location().towards(game.get_enemy_castle(), 1000), elf_def):
             if not attack_closest_portal(game, elf_def, max_distance):
                 attack_closest_enemy(game, elf_def, max_distance)
     else:
@@ -132,7 +173,7 @@ def handle_elves(game):
     
     if elf_atk != None:
         if port_atk == None:
-            if not mkportal(game, game.get_enemy_castle().get_location().towards(game.get_my_castle(),1000), elf_atk):
+            if not make_portal(game, game.get_enemy_castle().get_location().towards(game.get_my_castle(),1000), elf_atk):
                 if not attack_closest_portal(game, elf_atk, max_distance):
                     attack_closest_enemy(game, elf_atk, max_distance)
         else:
@@ -188,6 +229,22 @@ def attack_closest_portal(game, elf, max_distance):
             elf_movment(elf, target)
             return True
 
+def attack_closest_elf(game, elf, max_distance):
+    try:
+        target = game.get_enemy_living_elves()[0]
+    except:
+        return False
+    if not target:
+        return False
+        
+    if target.distance(elf) < max_distance:
+        if elf.in_attack_range(target):
+            elf.attack(target)
+            return True
+        else:
+            elf_movment(elf, target)
+            return True
+            
 
 def handle_portals(game):
     ports = game.get_my_portals()
