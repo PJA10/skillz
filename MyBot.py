@@ -1,10 +1,40 @@
+"""
+############
+MyBot
+############
+.. module:: MyBot
+   :platform: Unix, Windows
+   :synopsis: A useful module indeed.
+
+.. moduleauthor:: Andrew Carter <andrew@invalid.com>
+
+
+"""
+
 from elf_kingdom import *
+from trainingBot import *
 
 ICE = "ice"
 LAVA = "lava"
 
+def do_turn(curr_turn_game_status):
+    """
 
-def do_turn(game):
+    This function is the main function of the bot which is called every turn.
+
+    link to :py:func:`~trainingBot.is_targeted_by_icetroll`
+
+    :param curr_turn_game_status: the game status, given by the game engine
+    :type curr_turn_game_status: Game
+    :return: None
+    """
+    global game
+    game = curr_turn_game_status # make game global
+    print is_targeted_by_icetroll(game.get_my_living_elves()[0])
+
+
+
+def old_do_turn(game):
     if game.turn == 1:
         prev_turns_elf_locations = get_locations(game, game.get_enemy_living_elves())
 
