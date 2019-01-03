@@ -37,9 +37,6 @@ _hx_classes = {}
 
 
 class Enum(object):
-    """
-    something
-    """
     _hx_class_name = u"Enum"
     __slots__ = (u"tag", u"index", u"params")
     _hx_fields = [u"tag", u"index", u"params"]
