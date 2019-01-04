@@ -14,7 +14,6 @@ MyBot
 from elf_kingdom import *
 from trainingBot import *
 from Slider import *
-print "s"
 ICE = "ice"
 LAVA = "lava"
 
