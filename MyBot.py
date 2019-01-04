@@ -30,7 +30,7 @@ def do_turn(curr_turn_game_status):
     :return: None
     """
     global game
-    game = curr_turn_game_status # make game global
+    game = curr_turn_game_status # make game globalr
     print is_targeted_by_icetroll(game.get_my_living_elves()[0])
 
 
