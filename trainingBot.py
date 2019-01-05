@@ -61,12 +61,7 @@ def get_locations(game, map_objects_list):
     :type: [Location]
     """
 
-<<<<<<< HEAD
-    return [map_object.get_location() for map_object in map_objacts]
-
-=======
     return [map_object.get_location() for map_object in map_objects_list]
->>>>>>> f3018172ee089c74c0d723d9c440129cdccf4552
 
 
 def closest_portal(game, map_object):
