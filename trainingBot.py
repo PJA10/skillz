@@ -27,7 +27,7 @@ def is_targeted_by_icetroll(game, map_object):
     """
     my_units = game.get_my_creatures() + game.get_my_living_elves()
     icetrolls_that_target_me = [icetroll for icetroll in game.get_enemy_ice_trolls() \
-                            if closest(icetroll, my_units) == map_object]
+                            if closest(game, icetroll, my_units) == map_object]
     return icetrolls_that_target_me
 
 
@@ -47,7 +47,7 @@ def closest(game, main_map_object, map_objects_list):
     if not map_objects_list:
         return None
     else:
-        return min(map_objects_list, key = lambda map_object: main_map_object.distance(map_objects_list))
+        return min(map_objects_list, key = lambda map_object: main_map_object.distance(map_object))
 
 
 def get_locations(game, map_objects_list):
@@ -64,30 +64,30 @@ def get_locations(game, map_objects_list):
     return [map_object.get_location() for map_object in map_objects_list]
 
 
-def closest_portal(game, map_object):
+def get_closest_enemy_portal(game, map_object):
     """
 
-    This function get a map object and return the close portal to it
+    This function return the closest enemy portal to a given map object
 
-     :param game, map_object: an object on the map in order to find the closest portal to it
-     :type map_object: MapObject map_object
-     :return: the closest portal to map_object
-     :type: [Location]
+    :param map_object: an object on the map in order to find the closest portal to it
+    :type map_object: MapObject map_object
+    :return: the closest enemy's portal to map_object
+    :type: Portal
     """
 
     return closest(game, map_object,game.get_enemy_portals())
 
 
 
-def closest_elf(game,map_object):
+def get_closest_enemy_elf(game, map_object):
     """
 
-    This function return the closest elf to the given map object
+    This function return the closest enemy elf to a given map object
 
-    :param game, map_object: an object on the map in order to find the closest elf to it
-    :type map object: MapObject map_object
-    :return: the closest elf to map_object
-    :type: [location]
+    :param map_object: an object on the map in order to find the closest elf to it
+    :type map_object: MapObject map_object
+    :return: the closest enemy's elf to map_object
+    :type: Elf
     """
 
     return closest(game, map_object, game.get_enemy_living_elves())

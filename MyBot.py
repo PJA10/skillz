@@ -10,7 +10,6 @@ MyBot
 
 
 """
-print k
 from elf_kingdom import *
 from trainingBot import *
 from Slider import *
@@ -27,9 +26,16 @@ def do_turn(game):
     :type curr_turn_game_status: Game
     :return: None
     """
-    print is_targeted_by_icetroll(game.get_my_living_elves()[0])
-    print get_locations(game.get_all_elves())
+    
+    #tests(game)
     old_do_turn(game)
+
+
+def tests(game):
+    print is_targeted_by_icetroll(game, game.get_my_living_elves()[0])
+    print get_locations(game, game.get_all_elves())
+    print get_closest_enemy_elf(game, game.get_my_living_elves()[0])
+    print get_closest_enemy_portal(game, game.get_my_living_elves()[0])
 
 def old_do_turn(game):
     if game.turn == 1:
@@ -93,7 +99,7 @@ def call(game, elf, destination, sliders):
     return normal[1][1]
 
 
-def get_locations(game, objs):
+"""def get_locations(game, objs):
     if objs is []:
         print "You gave me an empty array"
         print "objs", objs
@@ -102,7 +108,7 @@ def get_locations(game, objs):
     locs = []
     for obj in objs:
         locs.append(obj.get_location())
-        return locs
+        return locs"""
 
 
 def is_elf_attacking_portal():
@@ -161,12 +167,12 @@ def summon(game, portal, summon_str):
     return True
 
 
-def closest(game, other, obj_list):
+"""def closest(game, other, obj_list):
     # Get closest object to other in obj_array
 
     if not obj_list or len(obj_list) == 0:
         return None
-    return (min(obj_list, key=lambda obj: obj.distance(other)))
+    return min(obj_list, key=lambda obj: obj.distance(other))"""
 
 
 def handle_elves(game):
@@ -331,4 +337,3 @@ def handle_portals(game):
                 summon(game, port_def, ICE)
     if port_atk != None:
         summon(game, port_atk, LAVA)
-
