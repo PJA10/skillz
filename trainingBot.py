@@ -148,8 +148,8 @@ def summon(game, portal, creature_type_str):
     :type: Boolean
     """
     summon_dic = {
-        "ice": (poratl.can_summon_lava_giant, portal.summon_ice_troll),
-        "lava": (portal.can_summon_ice_troll, portal.summon_lava_giant)
+        "ice": (portal.can_summon_ice_troll, portal.summon_ice_troll),
+        "lava": (portal.can_summon_lava_giant(), portal.summon_lava_giant)
     }
     if creature_type_str not in summon_dic.keys():
         return False
