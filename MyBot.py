@@ -17,23 +17,19 @@ from Slider import *
 ICE = "ice"
 LAVA = "lava"
 
-def do_turn(curr_turn_game_status):
+def do_turn(game):
     """
 
     This function is the main function of the bot which is called every turn.
 
-    link to :py:func:`~trainingBot.is_targeted_by_icetroll`
 
     :param curr_turn_game_status: the game status, given by the game engine
     :type curr_turn_game_status: Game
     :return: None
     """
-
-    global game
-    game = curr_turn_game_status # make game globalr
     print is_targeted_by_icetroll(game.get_my_living_elves()[0])
-
-
+    print get_locations(game.get_all_elves())
+    old_do_turn(game)
 
 def old_do_turn(game):
     if game.turn == 1:
