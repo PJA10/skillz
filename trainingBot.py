@@ -65,3 +65,17 @@ def get_locations(map_objects_list):
     """
 
     return [map_object.get_location() for map_object in map_objacts]
+
+
+def closest_portal(game, map_object):
+    """
+
+    This function get a map object and return the close portal to it
+
+     :param game, map_object: an object in order to get the closest portal to it
+     :type map_object: MapObject map_object
+     :return: the closest portal to map_object
+     :type: [Location]
+    """
+
+    return (closest(game, map_object,game.GetEnemyPortals()))

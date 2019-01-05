@@ -10,7 +10,7 @@ MyBot
 
 
 """
-
+print k
 from elf_kingdom import *
 from trainingBot import *
 from Slider import *
