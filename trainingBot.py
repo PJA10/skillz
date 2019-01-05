@@ -70,7 +70,7 @@ def get_closest_enemy_portal(game, map_object):
     This function return the closest enemy portal to a given map object
 
     :param map_object: an object on the map in order to find the closest portal to it
-    :type map_object: MapObject map_object
+    :type map_object: MapObject
     :return: the closest enemy's portal to map_object
     :type: Portal
     """
@@ -85,9 +85,79 @@ def get_closest_enemy_elf(game, map_object):
     This function return the closest enemy elf to a given map object
 
     :param map_object: an object on the map in order to find the closest elf to it
-    :type map_object: MapObject map_object
+    :type map_object: MapObject
     :return: the closest enemy's elf to map_object
     :type: Elf
     """
 
     return closest(game, map_object, game.get_enemy_living_elves())
+
+
+def get_closest_enemy_creature(game, map_object):
+    """
+
+    This function return the closest enemy creature to a given map object
+
+    :param map_object: an object on the map in order to find the closest creature to it
+    :return: the closest enemy's creature to map_object
+    :type: Creature
+    """
+
+    return closest(game, map_object, game.get_enemy_creatures())
+
+
+def get_closest_enemy_unit(game, map_object):
+    """
+
+    This function return the closest enemy unit(creature + elf) to a given map object
+
+    :param map_object: an object on the map in order to find the closest unit to it
+    :return: the closest enemy's unit to map_object
+    :type: Creature/Elf
+    """
+    closest_creature = get_closest_enemy_creature(game, map_object)
+    closest_elf = get_closest_enemy_elf(game, map_object)
+    return min([closest_elf,closest_creature], key = lambda unit: unit.distance(map_object))
+
+
+def in_object_range(game, target_map_object, map_objects_list, max_range):
+    """
+
+    This function return a list of all the map object from a given list that are in a given range from an target map obj
+
+    :param target_map_object: the target map object which the the range is from
+    :param map_objects_list: the list of map object which to search from
+    :param max_range: the max distance to which a onj is defined in_range
+    :return: list of all the map object from map_objects_list that are in max_range from target_map_object
+    :type: [MapObject]
+    """
+
+    return [map_object for map_object in map_objects_list if map_object.distance(target_map_object) < max_range]
+
+
+def summon(game, portal, creature_type_str):
+    """
+
+    This function summon a creature from a given portal
+
+    :param portal: the portal to summon from
+    :type portal: Portal
+    :param creature_type_str: the type of creature to summon in string
+    :type creature_type_str: String
+    :return: if the summon was succeeded
+    :type: Boolean
+    """
+    summon_dic = {
+        "ice": (poratl.can_summon_lava_giant, portal.summon_ice_troll),
+        "lava": (portal.can_summon_ice_troll, portal.summon_lava_giant)
+    }
+    if creature_type_str not in summon_dic.keys():
+        return False
+    else:
+        if summon_dic[creature_type_str][0](): # if portal.can_summon_creature
+            summon_dic[creature_type_str][1]() # portal.summon_creature
+            return True
+        else:
+            return False
+
+

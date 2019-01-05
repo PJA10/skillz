@@ -76,13 +76,13 @@ def normalize(game, elf, destination, func):
         if len(game.get_enemy_creatures()) == 0:
             normal = 0
         else:
-            normal = 1.0 / elf.distance(get_closest_creature(game, elf))
+            normal = 1.0 / elf.distance(get_closest_enemy_creature(game, elf))
 
     if func == attack_closest_portal:
         if len(game.get_enemy_portals()) == 0:
             normal = 0
         else:
-            normal = 1.0 / (elf.distance(get_closest_portal(game, elf)) + 50)
+            normal = 1.0 / (elf.distance(get_closest_enemy_portal(game, elf)) + 50)
 
     if func == attack_closest_elf:
         if len(game.get_enemy_living_elves()) == 0:
@@ -116,13 +116,6 @@ def is_elf_attacking_portal():
     enemy_locs = get_locations(game, enemy_elfs)
 
 
-def is_enemy_in_object_range(game, map_object, rng):
-    closest_enemy = get_closest_enemy(game, game.get_my_castle())
-    if closest_enemy == None:
-        return False
-    return closest_enemy.get_location().distance(map_object.get_location()) < rng
-
-
 def get_portals_in_range(game, map_object, rng):
     return [portal for portal in game.get_my_portals() if portal.distance(map_object) <= rng]
 
@@ -148,31 +141,6 @@ def make_portal(game, loc, elf):
         print("Move elf")
         elf_movment(elf, loc)
         return True
-
-
-def summon(game, portal, summon_str):
-    # Assumes Mana!
-    if not portal.can_summon_lava_giant() and summon_str == "lava":
-        return False
-
-    if not portal.can_summon_ice_troll() and summon_str == "ice":
-        return False
-
-    # Convert from string to
-    summon_dic = {
-        "ice": portal.summon_ice_troll,
-        "lava": portal.summon_lava_giant
-    }
-    summon_dic[summon_str]()
-    return True
-
-
-"""def closest(game, other, obj_list):
-    # Get closest object to other in obj_array
-
-    if not obj_list or len(obj_list) == 0:
-        return None
-    return min(obj_list, key=lambda obj: obj.distance(other))"""
 
 
 def handle_elves(game):
@@ -219,32 +187,9 @@ def handle_elves(game):
                 attack_closest_enemy(game, elf_atk, max_distance)
 
 
-def get_closest_creature(game, map_object):
-    enemys = game.get_enemy_creatures()
-    if len(enemys) == 0:
-        return None
-    closest_enemy = enemys[0]
-    for enemy in enemys:
-        if map_object.distance(enemy) < map_object.distance(closest_enemy):
-            closest_enemy = enemy
-
-    return closest_enemy
-
-
-def get_closest_enemy(game, map_object):
-    closest_creature = get_closest_creature(game, map_object)
-    closest_elf = closest(game, map_object, game.get_enemy_living_elves())
-    if not closest_creature and not closest_elf:
-        return None
-    if not closest_creature:
-        return closest_elf
-    if not closest_elf:
-        return closest_creature
-    return min((closest_creature, closest_elf), key=lambda enemy: enemy.distance(map_object))
-
 
 def attack_closest_enemy(game, elf, max_distance):
-    target = get_closest_enemy(game, elf)
+    target = get_closest_enemy_unit(game, elf)
     if not target:
         return False
 
@@ -257,20 +202,9 @@ def attack_closest_enemy(game, elf, max_distance):
             return True
 
 
-def get_closest_portal(game, map_object):
-    portals = game.get_enemy_portals()
-    if len(portals) == 0:
-        return None
-    closest_portal = portals[0]
-    for portal in portals:
-        if map_object.distance(portal) < map_object.distance(closest_portal):
-            closest_portal = portal
-
-    return closest_portal
-
 
 def attack_closest_portal(game, elf, max_distance):
-    target = get_closest_portal(game, elf)
+    target = get_closest_enemy_portal(game, elf)
     if not target:
         return False
 
@@ -303,7 +237,7 @@ def attack_closest_elf(game, elf, max_distance):
 
 
 def attack_closest_creature(game, elf, max_distance):
-    target = get_closest_creature(game, elf)
+    target = get_closest_enemy_creature(game, elf)
     if not target:
         return False
 
@@ -331,7 +265,7 @@ def handle_portals(game):
         port_atk = port_def
         port_def = None
     if port_def != None:
-        if is_enemy_in_object_range(game, game.get_my_castle(), 3000):
+        if in_object_range(game, game.get_my_castle(), game.get_enemy_creatures() + game.get_enemy_living_elves(), 3000):
             print("in if in handle_portals")
             if (game.get_my_ice_trolls() is None or len(game.get_my_ice_trolls()) < 3) or game.get_my_mana() > 200:
                 summon(game, port_def, ICE)
