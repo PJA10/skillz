@@ -24,7 +24,7 @@ def do_turn(game):
     
     global prev_game
     if game.turn == 0:
-        prev_game == game
+        prev_game = game
 
     update_portal_activeness(game)
         
@@ -42,7 +42,7 @@ def do_turn(game):
     old_do_turn(game)
     
     #MUST STAY IN THE END OF do_turn()
-    prev_game == game
+    prev_game = game
 
 
 def tests(game):
@@ -83,14 +83,25 @@ def create_defensive_portal(game, defensive_elf, castle):
     This function tells a given elf to place a portal between a given castle and all active portals +- a radius
 
 
-    :param defensive_elf: the elf that is ment to create the defensive portal
-    :type: elf
-    :param castle: the castle that the given portal is ment to defend
-    :type: Castle
+    :param defensive_elf: the elf that is meant to create the defensive portal
+    :type Elf:
+    :param castle: the castle that the given portal is meant to defend
+    :type Castle:
     :return: returns False if no portals need to be created
     :type: Boolean
     """
     active_portals = []
+    for port in game.get_enemy_portals():
+        turns_to_castle = castle.distance(port)/game.lava_giant_max_speed
+        life_expectancy_of_lava_giant = game.lava_giant_max_health / game.lava_giant_suffocation_per_turn
+        if portal_activeness[port.id] < life_expectancy_of_lava_giant - turns_to_castle: #the closer a portal is to our castle the more aware we want to be
+            active_portals.append(port)
+
+    minimum_distance = game.castle_size + game.portal_size + 50
+    defense_positions = []
+    for port in active_portals:
+        defense_positions.append(castle.towards(port), minimum_distance)
+        
 
 
 def update_portal_activeness(game):
@@ -99,11 +110,6 @@ def update_portal_activeness(game):
     a function that updates portal_activeness
     portal_activeness: A global dictionary that stores how many turns ago a portal was active. key - portal id.
 
-
-    :param game: the elf that is ment to create the defensive portal
-    :type castle: the castle that the given portal is ment to defend
-    :return: returns False if no portals need to be created
-    :type: Boolean
     """
     
     global portal_activeness
@@ -117,7 +123,6 @@ def update_portal_activeness(game):
             else:
                 portal_activeness[port.id] = 0
             
-
 
 def normalize(game, elf, destination, func):
     normal = 0
