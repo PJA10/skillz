@@ -20,11 +20,6 @@ LAVA = "lava"
 
 
 def do_turn(game):
-
-    if game.turn == 1:
-        Globals.init()
-        Globals.prev_game = game
-
     """
 
     This function is the main function of the bot which is called every turn.
@@ -34,11 +29,17 @@ def do_turn(game):
     :type curr_turn_game_status: Game
     :return: None
     """
+    if game.turn == 1:
+        Globals.init()
+        Globals.prev_game = game
+
+    update_portal_activeness(game)
+
     # tests(game)
     old_do_turn(game)
     update_portal_activeness(game)
     print Globals.portal_activeness
-    
+
     #MUST STAY IN THE END OF do_turn()
     Globals.prev_game = game
 
@@ -48,7 +49,7 @@ def tests(game):
     print get_locations(game, game.get_all_elves())
     print get_closest_enemy_elf(game, game.get_my_living_elves()[0])
     print get_closest_enemy_portal(game, game.get_my_living_elves()[0])
-    
+
 
 def old_do_turn(game):
     if game.turn == 1:
