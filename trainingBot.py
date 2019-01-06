@@ -12,7 +12,6 @@ trainingBot
 """
 
 from elf_kingdom import *
-import Globals
 
 
 def is_targeted_by_icetroll(game, map_object):
@@ -162,55 +161,3 @@ def summon(game, portal, creature_type_str):
             return False
 
 
-def create_defensive_portal(game, defensive_elf, castle):
-    """
-
-    This function tells a given elf to place a portal between a given castle and all active portals +- a radius
-
-
-    :param defensive_elf: the elf that is ment to create the defensive portal
-    :type defensive_elf: Elf
-    :param castle: the castle that the given portal is meant to defend
-    :type castle: Castle
-    :return: returns False if no portals need to be created
-    :type: Boolean
-    """
-
-    pass
-
-
-def update_portal_activeness(game):
-    """
-
-    a function that updates portal_activeness
-    portal_activeness: A global dictionary that stores how many turns ago a portal was active. key - portal id.
-
-    """
-    enemy_portals = game.get_enemy_portals()
-    for port in enemy_portals:
-        if port.currently_summoning:
-            Globals.portal_activeness[port.id] = 0
-        else:
-            if port.id in Globals.portal_activeness:
-                Globals.portal_activeness[port.id] += 1
-            else:
-                Globals.portal_activeness[port.id] = 0
-
-
-def attack(game, elf, map_object):
-    """
-
-    This function attck with an elf a map object
-    if the map object is too far the elf will move towards the map object
-    WILL CRASH IF GET NONE
-
-    :param elf: the elf to attck with
-    :param map_object: the map_object to attck
-    """
-    if not elf or not map_object:
-        print "attack() got None"
-
-    if elf.in_attack_range(map_object):
-        elf.attack(map_object)
-    else:
-        elf.move_to(map_object)
