@@ -101,6 +101,8 @@ def create_defensive_portal(game, defensive_elf, castle):
     defense_positions = []
     for port in active_portals:
         defense_positions.append(castle.towards(port), minimum_distance)
+
+    return False
         
 
 
