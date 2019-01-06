@@ -149,9 +149,10 @@ def create_defensive_portal(game, defensive_elf, castle):
     :return: returns False if no portals need to be created
     :type: Boolean
     """
+
     active_portals = []
     for port in game.get_enemy_portals():
-        turns_to_castle = castle.distance(port)/game.lava_giant_max_speed
+        turns_to_castle = castle.distance(port) / game.lava_giant_max_speed
         life_expectancy_of_lava_giant = game.lava_giant_max_health / game.lava_giant_suffocation_per_turn
         if Globals.portal_activeness[port.id] < life_expectancy_of_lava_giant - turns_to_castle: #the closer a portal is to our castle the more aware we want to be
             active_portals.append(port)
@@ -161,7 +162,6 @@ def create_defensive_portal(game, defensive_elf, castle):
     for port in active_portals:
         defense_positions.append(castle.towards(port), minimum_distance)
 
-    return False
 
 
 def update_portal_activeness(game):
@@ -174,13 +174,27 @@ def update_portal_activeness(game):
 
     enemy_portals = game.get_enemy_portals()
     for port in enemy_portals:
-        if port.currently_summoning:
+        if port.currently_summoning or port.id not in Globals.portal_activeness:
             Globals.portal_activeness[port.id] = 0
         else:
-            if port.id in Globals.portal_activeness:
-                Globals.portal_activeness[port.id] += 1
-            else:
-                Globals.portal_activeness[port.id] = 0
+            Globals.portal_activeness[port.id] += 1
+
+
+def attack(game, elf, map_object):
+    """
+     This function attck with an elf a map object
+    if the map object is too far the elf will move towards the map object
+    WILL CRASH IF GET NONE
+     :param elf: the elf to attck with
+    :param map_object: the map_object to attck
+    """
+    if not elf or not map_object:
+        print "attack() got None"
+
+     if elf.in_attack_range(map_object):
+        elf.attack(map_object)
+    else:
+        elf.move_to(map_object)
 
 
 def summon(game, portal, creature_type_str):
