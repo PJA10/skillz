@@ -24,7 +24,9 @@ def do_turn(game):
     
     global prev_game
     if game.turn == 0:
-        prev_game == game;
+        prev_game == game
+
+    update_portal_activeness(game)
         
     """
 
@@ -40,7 +42,8 @@ def do_turn(game):
     old_do_turn(game)
     
     #MUST STAY IN THE END OF do_turn()
-    prev_game == game;
+    prev_game == game
+
 
 def tests(game):
     print is_targeted_by_icetroll(game, game.get_my_living_elves()[0])
@@ -87,8 +90,7 @@ def create_defensive_portal(game, defensive_elf, castle):
     :return: returns False if no portals need to be created
     :type: Boolean
     """
-
-    pass
+    active_portals = []
 
 
 def update_portal_activeness(game):
@@ -98,7 +100,7 @@ def update_portal_activeness(game):
     portal_activeness: A global dictionary that stores how many turns ago a portal was active. key - portal id.
 
 
-    :param defensive_elf: the elf that is ment to create the defensive portal
+    :param game: the elf that is ment to create the defensive portal
     :type castle: the castle that the given portal is ment to defend
     :return: returns False if no portals need to be created
     :type: Boolean
@@ -110,7 +112,10 @@ def update_portal_activeness(game):
         if port.currently_summoning:
             portal_activeness[port.id] = 0
         else:
-            portal_activeness[port.id] += 1
+            if port.id in portal_activeness:
+                portal_activeness[port.id] += 1
+            else:
+                portal_activeness[port.id] = 0
             
 
 
