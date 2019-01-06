@@ -13,21 +13,13 @@ MyBot
 from elf_kingdom import *
 from trainingBot import *
 from Slider import *
+import Globals
 
 ICE = "ice"
 LAVA = "lava"
 
-prev_game = None #A variable used to save the previous game state
-portal_activeness = {} #A global dictionary that stores how many turns ago a portal was active. key - portal id 
 
 def do_turn(game):
-    
-    global prev_game
-    if game.turn == 0:
-        prev_game = game
-
-    update_portal_activeness(game)
-        
     """
 
     This function is the main function of the bot which is called every turn.
@@ -37,12 +29,19 @@ def do_turn(game):
     :type curr_turn_game_status: Game
     :return: None
     """
-    
-    #tests(game)
+    if game.turn == 1:
+        Globals.init()
+        Globals.prev_game = game
+
+    update_portal_activeness(game)
+
+    # tests(game)
     old_do_turn(game)
-    
+    update_portal_activeness(game)
+    print Globals.portal_activeness
+
     #MUST STAY IN THE END OF do_turn()
-    prev_game = game
+    Globals.prev_game = game
 
 
 def tests(game):
@@ -50,7 +49,7 @@ def tests(game):
     print get_locations(game, game.get_all_elves())
     print get_closest_enemy_elf(game, game.get_my_living_elves()[0])
     print get_closest_enemy_portal(game, game.get_my_living_elves()[0])
-    
+
 
 def old_do_turn(game):
     if game.turn == 1:
@@ -103,7 +102,7 @@ def create_defensive_portal(game, defensive_elf, castle):
         defense_positions.append(castle.towards(port), minimum_distance)
 
     return False
-        
+
 
 
 def update_portal_activeness(game):
@@ -113,7 +112,7 @@ def update_portal_activeness(game):
     portal_activeness: A global dictionary that stores how many turns ago a portal was active. key - portal id.
 
     """
-    
+
     global portal_activeness
     enemy_portals = game.get_enemy_portals()
     for port in enemy_portals:
@@ -124,7 +123,7 @@ def update_portal_activeness(game):
                 portal_activeness[port.id] += 1
             else:
                 portal_activeness[port.id] = 0
-            
+
 
 def normalize(game, elf, destination, func):
     normal = 0
@@ -245,10 +244,13 @@ def handle_elves(game):
             if not make_portal(game, game.get_enemy_castle().get_location().towards(game.get_my_castle(), 1000),
                                elf_atk):
                 if not attack_closest_portal(game, elf_atk, max_distance):
-                    attack_closest_enemy(game, elf_atk, max_distance)
+                    if not attack_closest_enemy(game, elf_atk, max_distance):
+                        attack(game, elf_atk, game.get_enemy_castle())
         else:
             if not attack_closest_portal(game, elf_atk, max_distance):
-                attack_closest_enemy(game, elf_atk, max_distance)
+                if not attack_closest_enemy(game, elf_atk, max_distance):
+                    attack(game, elf_atk, game.get_enemy_castle())
+
 
 
 
