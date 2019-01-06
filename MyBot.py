@@ -13,19 +13,18 @@ MyBot
 from elf_kingdom import *
 from trainingBot import *
 from Slider import *
+import Globals
 
 ICE = "ice"
 LAVA = "lava"
 
-prev_game = None #A variable used to save the previous game state
-portal_activeness = {} #A global dictionary that stores how many turns ago a portal was active. key - portal id 
 
 def do_turn(game):
-    
-    global prev_game
-    if game.turn == 0:
-        prev_game == game;
-        
+
+    if game.turn == 1:
+        Globals.init()
+        Globals.prev_game = game
+
     """
 
     This function is the main function of the bot which is called every turn.
@@ -35,12 +34,14 @@ def do_turn(game):
     :type curr_turn_game_status: Game
     :return: None
     """
-    
-    #tests(game)
+    # tests(game)
     old_do_turn(game)
+    update_portal_activeness(game)
+    print Globals.portal_activeness
     
     #MUST STAY IN THE END OF do_turn()
-    prev_game == game;
+    Globals.prev_game = game
+
 
 def tests(game):
     print is_targeted_by_icetroll(game, game.get_my_living_elves()[0])
@@ -73,45 +74,6 @@ def old_do_turn(game):
             else:
                 func(game, elf, 10000)
 
-
-def create_defensive_portal(game, defensive_elf, castle):
-    """
-
-    This function tells a given elf to place a portal between a given castle and all active portals +- a radius
-
-
-    :param defensive_elf: the elf that is ment to create the defensive portal
-    :type: elf
-    :param castle: the castle that the given portal is ment to defend
-    :type: Castle
-    :return: returns False if no portals need to be created
-    :type: Boolean
-    """
-
-    pass
-
-
-def update_portal_activeness(game):
-    """
-
-    a function that updates portal_activeness
-    portal_activeness: A global dictionary that stores how many turns ago a portal was active. key - portal id.
-
-
-    :param defensive_elf: the elf that is ment to create the defensive portal
-    :type castle: the castle that the given portal is ment to defend
-    :return: returns False if no portals need to be created
-    :type: Boolean
-    """
-    
-    global portal_activeness
-    enemy_portals = game.get_enemy_portals()
-    for port in enemy_portals:
-        if port.currently_summoning:
-            portal_activeness[port.id] = 0
-        else:
-            portal_activeness[port.id] += 1
-            
 
 
 def normalize(game, elf, destination, func):
@@ -233,10 +195,13 @@ def handle_elves(game):
             if not make_portal(game, game.get_enemy_castle().get_location().towards(game.get_my_castle(), 1000),
                                elf_atk):
                 if not attack_closest_portal(game, elf_atk, max_distance):
-                    attack_closest_enemy(game, elf_atk, max_distance)
+                    if not attack_closest_enemy(game, elf_atk, max_distance):
+                        attack(game, elf_atk, game.get_enemy_castle())
         else:
             if not attack_closest_portal(game, elf_atk, max_distance):
-                attack_closest_enemy(game, elf_atk, max_distance)
+                if not attack_closest_enemy(game, elf_atk, max_distance):
+                    attack(game, elf_atk, game.get_enemy_castle())
+
 
 
 

@@ -6,6 +6,7 @@ Slider
 
 """
 
+
 MAX_INT = 2147483647
 MIN_INT = -2147483648
 
@@ -19,7 +20,7 @@ class Slider(object):
 	MIN_LIM = 0
 	MAX_LIM = 1
 
-	def __init__(self, value=0, boundaries=(MIN_INT, MAX_INT)):
+	def __init__(self, value=0, boundaries=(MIN_INT , MAX_INT)):
 		'''
 		value is the corrent value of the slider while boundaries are the maximum and minmum values "value" can be.
 		'''
@@ -177,7 +178,7 @@ class Slider(object):
 
 
 def main():
-	s = Slider(2, (0, 100))
+	s = Slider(0, (0, 100))
 	
 	if s:
 		print s
