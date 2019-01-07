@@ -14,6 +14,7 @@ trainingBot
 from elf_kingdom import *
 import Globals
 import math
+import copy 
 
 
 def is_targeted_by_icetroll(game, map_object):
@@ -301,6 +302,8 @@ def turns_to_travel(game, map_object, destination, max_speed):
 def smart_movement(game, elf, destination):
     """
 
+
+
     :param game:
     :param elf:
     :param destination:
@@ -368,16 +371,18 @@ def get_closest_friendly_creature(game, map_object):
 def get_circle(game, circle_location, radius):
     """
 
+    This function create a circle around a given location in a given radius
+
     :param game:
-    :param circle_location:
+    :param circle_location: The location of the center of the circle
     :type circle_location: Location
-    :param radius:
+    :param radius: the length of the radius
     :return: a list of point on a circle with circle_location as a the center and with radius equals radius
     :type: [Location]
     """
 
     circle_points = []
-    for angle in range(360):
+    for angle in range(0, 360, 15):
         angle_in_radius = math.radians(angle)
         x_part = radius * math.cos(angle_in_radius)
         y_part = radius * math.sin(angle_in_radius)
@@ -392,7 +397,7 @@ def is_in_game_map(game, location):
     This function check if a given location is inside the game map
 
     :param game:
-    :param location:
+    :param location: the location to check
     :return: if *location* is inside the game map
     """
 
@@ -411,10 +416,10 @@ def predict_next_turn_creatures(game):
 
     :param game:
     :return: the list of my next turn lava giants, the list of the enemy's next turn lava giants
-    the list of my next turn trolls, the list of the enemy's next turn trolls
-    :type:([LavaGiants], [LavaGiants], [IceTroll], [IceTroll])
+        the list of my next turn trolls, the list of the enemy's next turn trolls
+    :type: ([LavaGiants], [LavaGiants], [IceTroll], [IceTroll])
     """
-
+    
     next_turn_my_lava_giant_list, next_turn_enemy_lava_giant_list = predict_next_turn_lava_giant(game)
     next_turn_my_icetrolls_list, next_turn_enemy_icetrolls_list = predict_next_turn_ice_trolls(game)
 
@@ -435,17 +440,19 @@ def predict_next_turn_ice_trolls(game):
     next_turn_my_icetroll_list = []
 
     for my_icetroll in game.get_my_ice_trolls():
-        next_turn_my_icetroll = my_icetroll
-        target = get_closest_enemy_unit()
-        next_turn_my_icetroll.location = my_icetroll.get_location().towards(target, my_icetroll.max_speed)
+        next_turn_my_icetroll = copy.deepcopy(my_icetroll)
+        target = get_closest_enemy_unit(game, my_icetroll)
+        if my_icetroll.distance(target) > my_icetroll.attack_range:
+            next_turn_my_icetroll.location = my_icetroll.get_location().towards(target, game.ice_troll_max_speed)
         next_turn_my_icetroll_list.append(next_turn_my_icetroll)
 
     next_turn_enemy_icetroll_list = []
 
     for enemy_icetroll in game.get_enemy_ice_trolls():
-        next_turn_enemy_icetroll = enemy_icetroll
+        next_turn_enemy_icetroll = copy.deepcopy(enemy_icetroll)
         target = get_closest_friendly_unit(game, enemy_icetroll)
-        next_turn_enemy_icetroll.location = enemy_icetroll.get_location().towards(target, enemy_icetroll.max_speed)
+        if enemy_icetroll.distance(target) > enemy_icetroll.attack_range:
+            next_turn_enemy_icetroll.location = enemy_icetroll.get_location().towards(target, game.ice_troll_max_speed)
         next_turn_enemy_icetroll_list.append(next_turn_enemy_icetroll)
 
     return next_turn_my_icetroll_list, next_turn_enemy_icetroll_list
@@ -465,16 +472,18 @@ def predict_next_turn_lava_giant(game):
     target = game.get_enemy_castle()
 
     for my_lava_giant in game.get_my_lava_giants():
-        next_turn_my_lava_giant = my_lava_giant
-        next_turn_my_lava_giant.location = my_lava_giant.get_location.towards(target, my_lava_giant.max_speed)
+        next_turn_my_lava_giant = copy.deepcopy(my_lava_giant)
+        if my_lava_giant.distance(target) > my_lava_giant.attack_range:
+            next_turn_my_lava_giant.location = my_lava_giant.get_location().towards(target, game.lava_giant_max_speed)
         next_turn_my_lava_giant_list.append(next_turn_my_lava_giant)
-
+    
     next_turn_enemy_lava_giant_list = []
     target = game.get_my_castle()
 
     for enemy_lava_giant in game.get_enemy_lava_giants():
-        next_turn_enemy_lava_gian = enemy_lava_giant
-        next_turn_enemy_lava_gian.location = enemy_lava_giant.get_location().towards(target, enemy_lava_giant.max_speed)
+        next_turn_enemy_lava_gian = copy.deepcopy(enemy_lava_giant)
+        if enemy_lava_giant.distance(target) > enemy_lava_giant.attack_range:
+            next_turn_enemy_lava_gian.location = enemy_lava_giant.get_location().towards(target, game.lava_giant_max_speed)
         next_turn_enemy_lava_giant_list.append(next_turn_enemy_lava_gian)
 
     return next_turn_my_lava_giant_list, next_turn_enemy_lava_giant_list

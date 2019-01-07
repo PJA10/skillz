@@ -38,17 +38,54 @@ def do_turn(game):
     # tests(game)
     old_do_turn(game)
     update_portal_activeness(game)
-    print Globals.portal_activeness
 
     # MUST STAY IN THE END OF do_turn()
     Globals.prev_game = game
 
 
 def tests(game):
+    """
     print is_targeted_by_icetroll(game, game.get_my_living_elves()[0])
     print get_locations(game, game.get_all_elves())
     print get_closest_enemy_elf(game, game.get_my_living_elves()[0])
     print get_closest_enemy_portal(game, game.get_my_living_elves()[0])
+    """
+    print " ----------start--------- "
+
+    
+    print " ---------predict_next_turn_creatures---------- "
+    print predict_next_turn_creatures(game)
+    print "predict my lava:\n", predict_next_turn_creatures(game)[0]
+    print "predict enemy lava:\n", predict_next_turn_creatures(game)[1]
+    print "predict my ice:\n", predict_next_turn_creatures(game)[2]
+    print "predict enemy ice:\n", predict_next_turn_creatures(game)[3]
+    
+
+
+    print "actual my lava:\n", game.get_my_lava_giants()
+    print "actual enemy lava:\n", game.get_enemy_lava_giants()
+    print "actual my ice:\n",  game.get_my_ice_trolls()
+    print "actual enemy ice:\n", game.get_enemy_ice_trolls()
+    
+    """
+    print " ----------is_in_game_map--------- "
+    print "should be True, actual:\n", is_in_game_map(game, Location(0,0))
+    print "should be True, actual:\n", is_in_game_map(game, Location(200,300))
+    print "should be False, actual:\n", is_in_game_map(game, Location(-10,200))
+    print "should be False, actual:\n", is_in_game_map(game, Location(5000000,200))
+    print "should be False, actual:\n", is_in_game_map(game, Location(500,-1))
+    print "should be False, actual:\n", is_in_game_map(game, Location(500,100000000))
+    """
+
+    print " ----------get_circle--------- "
+    print "should include (0,10), (-10,0) , (10,0) and (0,-10) actual:\n", get_circle(game, Location(0, 0), 10)
+
+    """
+    print " ----------turns_to_travel--------- "
+    print "should be 10, actual:\n", turns_to_travel(game, Location(0, 0), Location(1000, 0), 100)
+    """
+
+    print " ----------end--------- "
 
 
 def old_do_turn(game):
@@ -71,7 +108,7 @@ def old_do_turn(game):
             elf.move_to(Location(0, 0))
         else:
             if func == make_portal:
-                func(game, elf.location, elf)
+                func(game, elf, elf.get_location())
             else:
                 func(game, elf, 10000)
 
@@ -83,9 +120,11 @@ def normalize(game, elf, destination, func):
         if not elf.can_build_portal():
             normal = 0
         else:
-            normal = 1 / (max(len(get_portals_in_range(game, elf, 3000)), 1) * abs(
-                (1200 - min((elf.distance(game.get_enemy_castle()), elf.distance(game.get_my_castle()))))))
-
+            num_of_portals = max(len(get_portals_in_range(game, elf, 3000)), 1)
+            d =  abs((1200 - min((elf.distance(game.get_enemy_castle()), elf.distance(game.get_my_castle())))))
+            normal = 1.0 / (d*num_of_portals)
+            
+            
     if func == attack_closest_creature:
         if len(game.get_enemy_creatures()) == 0:
             normal = 0
@@ -104,7 +143,7 @@ def normalize(game, elf, destination, func):
         else:
             normal = 1.0 / elf.distance(closest(game, elf, game.get_enemy_living_elves()))
 
-    print normal * 10000
+    print func, normal * 10000
     return normal
 
 
@@ -199,9 +238,7 @@ def attack_closest_portal(game, elf, max_distance):
 
 def attack_closest_elf(game, elf, max_distance):
     try:
-        print "in try"
         target = closest(game, elf, game.get_enemy_living_elves())
-        print target
     except:
         return False
     if not target:
@@ -235,7 +272,6 @@ def handle_portals(game):
     if len(ports) == 0:
         return
     port_def = closest(game, game.get_my_castle(), ports)
-    print "port_def", port_def
     ports.remove(port_def)
     port_atk = None
     if len(ports) != 0:
@@ -246,7 +282,6 @@ def handle_portals(game):
         port_def = None
     if port_def != None:
         if in_object_range(game, game.get_my_castle(), game.get_enemy_creatures() + game.get_enemy_living_elves(), 3000):
-            print("in if in handle_portals")
             if (game.get_my_ice_trolls() is None or len(game.get_my_ice_trolls()) < 3) or game.get_my_mana() > 200:
                 summon(game, port_def, ICE)
     if port_atk != None:
