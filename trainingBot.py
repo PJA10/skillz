@@ -170,9 +170,24 @@ def create_defensive_portal(game, defensive_elf, castle):
             active_portals.append(port)
 
     minimum_distance = game.castle_size + game.portal_size + 50
-    defense_positions = []
-    for port in active_portals:
-        defense_positions.append(castle.towards(port), minimum_distance)
+    defense_positions = [port for port in active_portals, castle.towards((port), minimum_distance)]
+
+    for pos in defense_positions:
+        for portal in game.get_my_portals():
+            if portal.distance(pos) < game.portal_size * 2:
+                defense_positions.remove(pos)
+                continue
+
+    """find a fix for this"""
+    for pos in defense_positions:
+        for pos2 in defense_positions:
+            if pos == pos2:
+                continue
+            if pos.distance(pos2) < game.portal_size * 2:
+                defense_positions.append(pos.towards(pos2), pos.distance(pos2)/2)
+                defense_positions.remove(pos)
+                defense_positions.remove(pos2)
+
 
 
 def update_portal_activeness(game):
@@ -203,6 +218,7 @@ def attack(game, elf, map_object):
     """
 
     if not elf or not map_object:
+
         print "attack() got None"
 
     if elf.in_attack_range(map_object):
