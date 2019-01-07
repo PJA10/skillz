@@ -13,6 +13,7 @@ trainingBot
 
 from elf_kingdom import *
 import Globals
+import math
 
 
 def is_targeted_by_icetroll(game, map_object):
@@ -26,9 +27,9 @@ def is_targeted_by_icetroll(game, map_object):
     :return: return a list of the ice trolls which target obj
     :type: [Creature]
     """
-    my_units = game.get_my_creatures() + game.get_my_living_elves()
-    icetrolls_that_target_me = [icetroll for icetroll in game.get_enemy_ice_trolls() \
-                            if closest(game, icetroll, my_units) == map_object]
+
+    icetrolls_that_target_me = [icetroll for icetroll in game.get_enemy_ice_trolls()
+                                if get_closest_friendly_unit(game, icetroll) == map_object]
     return icetrolls_that_target_me
 
 
@@ -79,7 +80,6 @@ def get_closest_enemy_portal(game, map_object):
     return closest(game, map_object,game.get_enemy_portals())
 
 
-
 def get_closest_enemy_elf(game, map_object):
     """
 
@@ -119,6 +119,16 @@ def get_closest_enemy_unit(game, map_object):
 
     closest_creature = get_closest_enemy_creature(game, map_object)
     closest_elf = get_closest_enemy_elf(game, map_object)
+
+    if not closest_creature and not closest_elf:
+        return None
+
+    if not closest_creature:
+        return closest_elf
+
+    if not closest_elf:
+        return closest_creature
+
     return min([closest_elf,closest_creature], key = lambda unit: unit.distance(map_object))
 
 
@@ -162,7 +172,6 @@ def create_defensive_portal(game, defensive_elf, castle):
     defense_positions = []
     for port in active_portals:
         defense_positions.append(castle.towards(port), minimum_distance)
-
 
 
 def update_portal_activeness(game):
@@ -270,3 +279,202 @@ def elf_movement(game, elf, map_object):
     # print "elf: %s moves towards %s" % (elf, map_object)
     elf.move_to(map_object)
     return True
+
+
+def turns_to_travel(game, map_object, destination, max_speed):
+    """
+
+    This function calculate the amount of turns a given path will take with an object with a given speed
+
+    :param map_object: the start point of the travel
+    :param destination: the destination of the travel
+    :param max_speed: the speed of the object traveling
+    :return: the amount of turns needed to complete the travel
+    :type: int
+    """
+
+    distance = map_object.distance(destination)
+    number_of_turns = math.ceil(distance/max_speed)
+    return number_of_turns
+
+
+def smart_movement(game, elf, destination):
+    """
+
+    :param game:
+    :param elf:
+    :param destination:
+    :type destination: MapObject
+    :return:
+    """
+    """
+    circle_points = get_circle(game, elf.get_location(), elf.max_speed)
+    circle_points = [point for point in circle_points if is_in_game_map(game, point)]"""
+    pass
+
+
+def get_closest_friendly_unit(game, map_object):
+    """
+
+    This function return the closest friendly unit(creature + elf) to a given map object
+
+    :param map_object: an object on the map in order to find the closest unit to it
+    :return: the closest enemy's unit to map_object
+    :type: Creature/Elf
+    """
+
+    closest_creature = get_closest_friendly_creature(game, map_object)
+    closest_elf = get_closest_friendly_creature(game, map_object)
+
+    if not closest_creature and not closest_elf:
+        return None
+
+    if not closest_creature:
+        return closest_elf
+
+    if not closest_elf:
+        return closest_creature
+
+    return min([closest_elf,closest_creature], key=lambda unit: unit.distance(map_object))
+
+
+def get_closest_friendly_elf(game, map_object):
+    """
+
+    This function return the closest friendly elf to a given map object
+
+    :param map_object: an object on the map in order to find the closest elf to it
+    :type map_object: MapObject
+    :return: the closest enemy's elf to map_object
+    :type: Elf
+    """
+
+    return closest(game, map_object, game.get_my_living_elves())
+
+
+def get_closest_friendly_creature(game, map_object):
+    """
+
+    This function return the closest friendly creature to a given map object
+
+    :param map_object: an object on the map in order to find the closest creature to it
+    :return: the closest enemy's creature to map_object
+    :type: Creature
+    """
+
+    return closest(game, map_object, game.get_my_creatures())
+
+
+def get_circle(game, circle_location, radius):
+    """
+
+    :param game:
+    :param circle_location:
+    :type circle_location: Location
+    :param radius:
+    :return: a list of point on a circle with circle_location as a the center and with radius equals radius
+    :type: [Location]
+    """
+
+    circle_points = []
+    for angle in range(360):
+        angle_in_radius = math.radians(angle)
+        x_part = radius * math.cos(angle_in_radius)
+        y_part = radius * math.sin(angle_in_radius)
+        pos = Location(x_part, y_part)
+        circle_points.append(circle_location.add(pos))
+    return circle_points
+
+
+def is_in_game_map(game, location):
+    """
+
+    This function check if a given location is inside the game map
+
+    :param game:
+    :param location:
+    :return: if *location* is inside the game map
+    """
+
+    if location.row > game.rows or location.row < 0:
+        return False
+    if location.col > game.cols or location.col < 0:
+        return False
+
+    return True
+
+
+def predict_next_turn_creatures(game):
+    """
+
+    This function predict the locations of all creatures for next turn
+
+    :param game:
+    :return: the list of my next turn lava giants, the list of the enemy's next turn lava giants
+    the list of my next turn trolls, the list of the enemy's next turn trolls
+    :type:([LavaGiants], [LavaGiants], [IceTroll], [IceTroll])
+    """
+
+    next_turn_my_lava_giant_list, next_turn_enemy_lava_giant_list = predict_next_turn_lava_giant(game)
+    next_turn_my_icetrolls_list, next_turn_enemy_icetrolls_list = predict_next_turn_ice_trolls(game)
+
+    return next_turn_my_lava_giant_list, next_turn_enemy_lava_giant_list,\
+            next_turn_my_icetrolls_list, next_turn_enemy_icetrolls_list
+
+
+def predict_next_turn_ice_trolls(game):
+    """
+
+    This function predict the locations of the ice trolls for next turn
+
+    :param game:
+    :return: the list of my next turn trolls, the list of the enemy's next turn trolls
+    :type: ([IceTroll], [IceTroll])
+    """
+
+    next_turn_my_icetroll_list = []
+
+    for my_icetroll in game.get_my_ice_trolls():
+        next_turn_my_icetroll = my_icetroll
+        target = get_closest_enemy_unit()
+        next_turn_my_icetroll.location = my_icetroll.get_location().towards(target, my_icetroll.max_speed)
+        next_turn_my_icetroll_list.append(next_turn_my_icetroll)
+
+    next_turn_enemy_icetroll_list = []
+
+    for enemy_icetroll in game.get_enemy_ice_trolls():
+        next_turn_enemy_icetroll = enemy_icetroll
+        target = get_closest_friendly_unit(game, enemy_icetroll)
+        next_turn_enemy_icetroll.location = enemy_icetroll.get_location().towards(target, enemy_icetroll.max_speed)
+        next_turn_enemy_icetroll_list.append(next_turn_enemy_icetroll)
+
+    return next_turn_my_icetroll_list, next_turn_enemy_icetroll_list
+
+
+def predict_next_turn_lava_giant(game):
+    """
+
+    This function predict the locations of the lava giants for next turn
+
+    :param game:
+    :return: the list of my next turn lava giants, the list of the enemy's next turn lava giants
+    :type: ([LavaGiants], [LavaGiants])
+    """
+
+    next_turn_my_lava_giant_list = []
+    target = game.get_enemy_castle()
+
+    for my_lava_giant in game.get_my_lava_giants():
+        next_turn_my_lava_giant = my_lava_giant
+        next_turn_my_lava_giant.location = my_lava_giant.get_location.towards(target, my_lava_giant.max_speed)
+        next_turn_my_lava_giant_list.append(next_turn_my_lava_giant)
+
+    next_turn_enemy_lava_giant_list = []
+    target = game.get_my_castle()
+
+    for enemy_lava_giant in game.get_enemy_lava_giants():
+        next_turn_enemy_lava_gian = enemy_lava_giant
+        next_turn_enemy_lava_gian.location = enemy_lava_giant.get_location().towards(target, enemy_lava_giant.max_speed)
+        next_turn_enemy_lava_giant_list.append(next_turn_enemy_lava_gian)
+
+    return next_turn_my_lava_giant_list, next_turn_enemy_lava_giant_list
