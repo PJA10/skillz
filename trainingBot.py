@@ -116,6 +116,7 @@ def get_closest_enemy_unit(game, map_object):
     :return: the closest enemy's unit to map_object
     :type: Creature/Elf
     """
+
     closest_creature = get_closest_enemy_creature(game, map_object)
     closest_elf = get_closest_enemy_elf(game, map_object)
     return min([closest_elf,closest_creature], key = lambda unit: unit.distance(map_object))
@@ -182,16 +183,19 @@ def update_portal_activeness(game):
 
 def attack(game, elf, map_object):
     """
-     This function attck with an elf a map object
+
+    This function attack with an elf a map object
     if the map object is too far the elf will move towards the map object
     WILL CRASH IF GET NONE
-     :param elf: the elf to attck with
-    :param map_object: the map_object to attck
+
+    :param elf: the elf to attck with
+    :param map_object: the map_object to attack
     """
+
     if not elf or not map_object:
         print "attack() got None"
 
-     if elf.in_attack_range(map_object):
+    if elf.in_attack_range(map_object):
         elf.attack(map_object)
     else:
         elf.move_to(map_object)
@@ -209,6 +213,7 @@ def summon(game, portal, creature_type_str):
     :return: if the summon was succeeded
     :type: Boolean
     """
+
     summon_dic = {
         "ice": (portal.can_summon_ice_troll, portal.summon_ice_troll),
         "lava": (portal.can_summon_lava_giant, portal.summon_lava_giant)
@@ -223,3 +228,45 @@ def summon(game, portal, creature_type_str):
             return False
 
 
+def make_portal(game, elf, loc):
+    """
+
+    This function make a portal with a given elf at a specific location
+    If the elf isn't at this position the elf will move towards the location
+
+    :param elf: the elf to build a portal with
+    :param loc: the location to build a portal at
+    :type loc: Location
+    :return: if the an action has been made with the elf, can be movement or building portal
+    :type: Boolean
+    """
+
+    if not elf:
+        return None
+
+    if elf.get_location() == loc:
+        if elf.can_build_portal():
+            elf.build_portal()
+            return True
+        else:
+            print ("Elf " + str(elf) + " Can't build portal at " + str(loc))
+            return False
+    else:
+        elf_movement(game, elf, loc)
+        return True
+
+
+def elf_movement(game, elf, map_object):
+    """
+
+    This function takes a elf and moves is towards a spisific map_object
+
+    :param elf: the elf to move towards map_object
+    :param map_object: the map object to move to
+    :return: if the an action has been made with the elf
+    :type: Boolean
+    """
+
+    # print "elf: %s moves towards %s" % (elf, map_object)
+    elf.move_to(map_object)
+    return True

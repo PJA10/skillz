@@ -40,7 +40,7 @@ def do_turn(game):
     update_portal_activeness(game)
     print Globals.portal_activeness
 
-    #MUST STAY IN THE END OF do_turn()
+    # MUST STAY IN THE END OF do_turn()
     Globals.prev_game = game
 
 
@@ -113,18 +113,6 @@ def call(game, elf, destination, sliders):
     return normal[1][1]
 
 
-"""def get_locations(game, objs):
-    if objs is []:
-        print "You gave me an empty array"
-        print "objs", objs
-        return False
-
-    locs = []
-    for obj in objs:
-        locs.append(obj.get_location())
-        return locs"""
-
-
 def is_elf_attacking_portal():
     enemy_elfs = game.get_enemy_living_elves()
     enemy_locs = get_locations(game, enemy_elfs)
@@ -133,28 +121,6 @@ def is_elf_attacking_portal():
 def get_portals_in_range(game, map_object, rng):
     return [portal for portal in game.get_my_portals() if portal.distance(map_object) <= rng]
 
-
-def elf_movment(elf, loc):
-    print loc, elf
-    elf.move_to(loc)
-
-
-def make_portal(game, loc, elf):
-    # Assumes Mana!
-
-    if elf == None:
-        return None
-    if elf.get_location() == loc:
-        if elf.can_build_portal():
-            elf.build_portal()
-            return True
-        else:
-            game.debug("Elf " + str(elf) + " Can't build portal at " + str(loc))
-            return False
-    else:
-        print("Move elf")
-        elf_movment(elf, loc)
-        return True
 
 
 def handle_elves(game):
@@ -203,8 +169,6 @@ def handle_elves(game):
                     attack(game, elf_atk, game.get_enemy_castle())
 
 
-
-
 def attack_closest_enemy(game, elf, max_distance):
     target = get_closest_enemy_unit(game, elf)
     if not target:
@@ -215,9 +179,8 @@ def attack_closest_enemy(game, elf, max_distance):
             elf.attack(target)
             return True
         else:
-            elf_movment(elf, target)
+            elf_movement(game, elf, target)
             return True
-
 
 
 def attack_closest_portal(game, elf, max_distance):
@@ -230,7 +193,7 @@ def attack_closest_portal(game, elf, max_distance):
             elf.attack(target)
             return True
         else:
-            elf_movment(elf, target)
+            elf_movement(game, elf, target)
             return True
 
 
@@ -249,7 +212,7 @@ def attack_closest_elf(game, elf, max_distance):
             elf.attack(target)
             return True
         else:
-            elf_movment(elf, target)
+            elf_movement(game, elf, target)
             return True
 
 
@@ -263,7 +226,7 @@ def attack_closest_creature(game, elf, max_distance):
             elf.attack(target)
             return True
         else:
-            elf_movment(elf, target)
+            elf_movement(game, elf, target)
             return True
 
 
