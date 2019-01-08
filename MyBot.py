@@ -51,7 +51,6 @@ def tests(game):
     print get_closest_enemy_portal(game, game.get_my_living_elves()[0])
     """
     print " ----------start--------- "
-
     
     print " ---------predict_next_turn_creatures---------- "
     print predict_next_turn_creatures(game)
@@ -59,8 +58,6 @@ def tests(game):
     print "predict enemy lava:\n", predict_next_turn_creatures(game)[1]
     print "predict my ice:\n", predict_next_turn_creatures(game)[2]
     print "predict enemy ice:\n", predict_next_turn_creatures(game)[3]
-    
-
 
     print "actual my lava:\n", game.get_my_lava_giants()
     print "actual enemy lava:\n", game.get_enemy_lava_giants()
@@ -94,8 +91,9 @@ def old_do_turn(game):
 
     mana = game.default_mana_per_turn + game.get_my_mana()
 
-    # handle_elves(game)
+    handle_elves(game)
     handle_portals(game)
+    """
     for elf in game.get_my_living_elves():
         func = call(game, elf, game.get_enemy_castle(), {
             "attack_closest_creature": (1, attack_closest_creature),
@@ -111,6 +109,7 @@ def old_do_turn(game):
                 func(game, elf, elf.get_location())
             else:
                 func(game, elf, 10000)
+    """
 
 
 def normalize(game, elf, destination, func):
@@ -161,7 +160,6 @@ def get_portals_in_range(game, map_object, rng):
     return [portal for portal in game.get_my_portals() if portal.distance(map_object) <= rng]
 
 
-
 def handle_elves(game):
     if len(game.get_my_living_elves()) == 0:
         return
@@ -188,7 +186,7 @@ def handle_elves(game):
     if port_def == None or port_def.distance(game.get_my_castle()) > 2000:
         port_atk = port_def
         port_def = None
-        if not make_portal(game, game.get_my_castle().get_location().towards(game.get_enemy_castle(), 1000), elf_def):
+        if not make_portal(game, elf_def, game.get_my_castle().get_location().towards(game.get_enemy_castle(), 1000)):
             if not attack_closest_portal(game, elf_def, max_distance):
                 attack_closest_enemy(game, elf_def, max_distance)
     else:
@@ -197,8 +195,8 @@ def handle_elves(game):
 
     if elf_atk != None:
         if port_atk == None:
-            if not make_portal(game, game.get_enemy_castle().get_location().towards(game.get_my_castle(), 1000),
-                               elf_atk):
+            if not make_portal(game, elf_atk,
+                               game.get_enemy_castle().get_location().towards(game.get_my_castle(), 1000)):
                 if not attack_closest_portal(game, elf_atk, max_distance):
                     if not attack_closest_enemy(game, elf_atk, max_distance):
                         attack(game, elf_atk, game.get_enemy_castle())

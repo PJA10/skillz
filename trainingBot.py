@@ -14,7 +14,9 @@ trainingBot
 from elf_kingdom import *
 import Globals
 import math
-import copy 
+import copy
+
+RISK_AMOUNT = 1
 
 
 def is_targeted_by_icetroll(game, map_object):
@@ -278,7 +280,7 @@ def make_portal(game, elf, loc):
             print ("Elf " + str(elf) + " Can't build portal at " + str(loc))
             return False
     else:
-        elf_movement(game, elf, loc)
+        smart_movement(game, elf, loc)
         return True
 
 
@@ -318,18 +320,83 @@ def turns_to_travel(game, map_object, destination, max_speed):
 def smart_movement(game, elf, destination):
     """
 
-
+    This function is moving an given elf towards a given destination safely
+    The function will go the the next position which will get the lest damage to the elf
 
     :param game:
-    :param elf:
-    :param destination:
+    :param elf: the elf that need to be moved
+    :param destination: the destination to move toward
     :type destination: MapObject
     :return:
     """
+
+    next_turn_my_lava_giant_list, next_turn_enemy_lava_giant_list, next_turn_my_icetrolls_list, \
+        next_turn_enemy_icetrolls_list = predict_next_turn_creatures(game)
+
+    possible_movement_points = get_possible_movement_points(game, elf, destination, next_turn_enemy_icetrolls_list)
+
+    my_other_elves = copy.deepcopy(game.get_my_living_elves())
+    my_other_elves.remove(elf)
+
+    next_turn_my_creatures = next_turn_my_lava_giant_list + next_turn_my_icetrolls_list
+
+    for point in possible_movement_points:
+        curr_next_turn_elf = copy.deepcopy(elf)
+        curr_next_turn_elf.location = point[0]
+
+        for enemy_elf in game.get_enemy_living_elves():
+            if enemy_elf != destination:
+                if enemy_elf.distance(elf.get_location()) < game.elf_attack_range:
+                    if enemy_elf.distance(point[0]) <= game.elf_attack_range + 10:
+                        point[1] += RISK_AMOUNT * game.elf_attack_multiplier * 2
+                elif enemy_elf.distance(point[0]) <= game.elf_attack_range + game.elf_max_speed + 10:
+                    point[1] += RISK_AMOUNT * game.elf_attack_multiplier * 2
+
+        for next_turn_enemy_ice_troll in next_turn_enemy_icetrolls_list:
+            if next_turn_enemy_ice_troll != destination and closest(game, next_turn_enemy_ice_troll,
+                                                                    next_turn_my_creatures + my_other_elves +
+                                                                    [curr_next_turn_elf]) == curr_next_turn_elf:
+                point[1] += RISK_AMOUNT
+                if next_turn_enemy_ice_troll.distance(curr_next_turn_elf.location) <= game.ice_troll_attack_range + 10:
+                    point[1] += RISK_AMOUNT * game.ice_troll_attack_multiplier * 2
+
+    possible_movement_points.sort(key=lambda possible_point:
+                                  possible_point[0].distance(destination) + 1000000 * possible_point[1])
+
+    print "possible_movment_points:", possible_movement_points
+    elf_movement(game, elf, possible_movement_points[0][0])
+
+
+def get_possible_movement_points(game, elf, destination, next_turn_enemy_icetrolls_list):
     """
+
+    This function gets all possible location to move to with an elf
+    All the postion will be max_speed distance from the current elf's position
+    If the elf can get to the destination, then the destination will be included
+    A movement point is the location followed by the risk of the location
+
+    :param game:
+    :param elf: the elf which to find all possible movement points
+    :param destination: the elf's destination
+    :param next_turn_enemy_icetrolls_list: a list of next turn enemy's ice trolls
+    :return: a list of all possible *points*
+    :type: [[Location, int]]
+   """
+
     circle_points = get_circle(game, elf.get_location(), elf.max_speed)
-    circle_points = [point for point in circle_points if is_in_game_map(game, point)]"""
-    pass
+    possible_movement_points = [[point, 1] for point in circle_points if is_in_game_map(game, point)]
+
+    if elf.distance(destination) <= elf.max_speed:
+        possible_movement_points.append([destination, 1])
+
+    optional_danger = next_turn_enemy_icetrolls_list + game.get_enemy_living_elves()
+    if optional_danger:
+        closest_danger = min(optional_danger, key=lambda danger: danger.distance(elf))
+        run_location = elf.get_location().towards(closest_danger, -elf.max_speed)
+        if is_in_game_map(game, run_location):
+            possible_movement_points.append([run_location, 1])
+
+    return possible_movement_points
 
 
 def get_closest_friendly_unit(game, map_object):
@@ -343,7 +410,7 @@ def get_closest_friendly_unit(game, map_object):
     """
 
     closest_creature = get_closest_friendly_creature(game, map_object)
-    closest_elf = get_closest_friendly_creature(game, map_object)
+    closest_elf = get_closest_friendly_elf(game, map_object)
 
     if not closest_creature and not closest_elf:
         return None
@@ -400,8 +467,8 @@ def get_circle(game, circle_location, radius):
     circle_points = []
     for angle in range(0, 360, 15):
         angle_in_radius = math.radians(angle)
-        x_part = radius * math.cos(angle_in_radius)
-        y_part = radius * math.sin(angle_in_radius)
+        x_part = int((radius * math.cos(angle_in_radius)))
+        y_part = int((radius * math.sin(angle_in_radius)))
         pos = Location(x_part, y_part)
         circle_points.append(circle_location.add(pos))
     return circle_points
@@ -417,9 +484,9 @@ def is_in_game_map(game, location):
     :return: if *location* is inside the game map
     """
 
-    if location.row > game.rows or location.row < 0:
+    if location.row >= game.rows or location.row <= 0:
         return False
-    if location.col > game.cols or location.col < 0:
+    if location.col >= game.cols or location.col <= 0:
         return False
 
     return True
@@ -435,7 +502,7 @@ def predict_next_turn_creatures(game):
         the list of my next turn trolls, the list of the enemy's next turn trolls
     :type: ([LavaGiants], [LavaGiants], [IceTroll], [IceTroll])
     """
-    
+
     next_turn_my_lava_giant_list, next_turn_enemy_lava_giant_list = predict_next_turn_lava_giant(game)
     next_turn_my_icetrolls_list, next_turn_enemy_icetrolls_list = predict_next_turn_ice_trolls(game)
 
@@ -458,7 +525,7 @@ def predict_next_turn_ice_trolls(game):
     for my_icetroll in game.get_my_ice_trolls():
         next_turn_my_icetroll = copy.deepcopy(my_icetroll)
         target = get_closest_enemy_unit(game, my_icetroll)
-        if my_icetroll.distance(target) > my_icetroll.attack_range:
+        if target and my_icetroll.distance(target) > my_icetroll.attack_range:
             next_turn_my_icetroll.location = my_icetroll.get_location().towards(target, game.ice_troll_max_speed)
         next_turn_my_icetroll_list.append(next_turn_my_icetroll)
 
@@ -467,9 +534,29 @@ def predict_next_turn_ice_trolls(game):
     for enemy_icetroll in game.get_enemy_ice_trolls():
         next_turn_enemy_icetroll = copy.deepcopy(enemy_icetroll)
         target = get_closest_friendly_unit(game, enemy_icetroll)
-        if enemy_icetroll.distance(target) > enemy_icetroll.attack_range:
+        if target and enemy_icetroll.distance(target) > enemy_icetroll.attack_range:
             next_turn_enemy_icetroll.location = enemy_icetroll.get_location().towards(target, game.ice_troll_max_speed)
         next_turn_enemy_icetroll_list.append(next_turn_enemy_icetroll)
+
+    # adding new ice trolls
+
+    for portal in game.get_all_portals():
+        if portal.currently_summoning == "IceTroll" and portal.turns_to_summon == 1:
+            new_icetroll = IceTroll()
+            new_icetroll.max_speed = game.ice_troll_max_speed
+            new_icetroll.attack_range = game.ice_troll_attack_range
+            new_icetroll.attack_multiplier = game.ice_troll_attack_multiplier
+            new_icetroll.summoner = portal
+            new_icetroll.location = portal.get_location()
+            new_icetroll.owner = portal.owner
+            new_icetroll.type = "IceTroll"
+            new_icetroll.id = -1
+            new_icetroll.unique_id = -1
+
+            if new_icetroll.owner == game.get_myself():
+                next_turn_my_icetroll_list.append(new_icetroll)
+            elif new_icetroll.owner == game.get_enemy():
+                next_turn_enemy_icetroll_list.append(new_icetroll)
 
     return next_turn_my_icetroll_list, next_turn_enemy_icetroll_list
 
@@ -492,7 +579,7 @@ def predict_next_turn_lava_giant(game):
         if my_lava_giant.distance(target) > my_lava_giant.attack_range:
             next_turn_my_lava_giant.location = my_lava_giant.get_location().towards(target, game.lava_giant_max_speed)
         next_turn_my_lava_giant_list.append(next_turn_my_lava_giant)
-    
+
     next_turn_enemy_lava_giant_list = []
     target = game.get_my_castle()
 
@@ -501,5 +588,25 @@ def predict_next_turn_lava_giant(game):
         if enemy_lava_giant.distance(target) > enemy_lava_giant.attack_range:
             next_turn_enemy_lava_gian.location = enemy_lava_giant.get_location().towards(target, game.lava_giant_max_speed)
         next_turn_enemy_lava_giant_list.append(next_turn_enemy_lava_gian)
+
+    # adding new lava_giants
+
+    for portal in game.get_all_portals():
+        if portal.currently_summoning == "LavaGiant" and portal.turns_to_summon == 1:
+            new_lava_giant = LavaGiant()
+            new_lava_giant.max_speed = game.lava_giant_max_speed
+            new_lava_giant.attack_range = game.lava_giant_attack_range
+            new_lava_giant.attack_multiplier = game.lava_giant_attack_multiplier
+            new_lava_giant.summoner = portal
+            new_lava_giant.location = portal.get_location()
+            new_lava_giant.owner = portal.owner
+            new_lava_giant.type = "LavaGiant"
+            new_lava_giant.id = -1
+            new_lava_giant.unique_id = -1
+
+            if new_lava_giant.owner == game.get_myself():
+                next_turn_my_lava_giant_list.append(new_lava_giant)
+            elif new_lava_giant.owner == game.get_enemy():
+                next_turn_enemy_lava_giant_list.append(new_lava_giant)
 
     return next_turn_my_lava_giant_list, next_turn_enemy_lava_giant_list
