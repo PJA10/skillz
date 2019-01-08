@@ -14,6 +14,10 @@ trainingBot
 from elf_kingdom import *
 import Globals
 
+ICE = "ice"
+LAVA = "lava"
+
+
 
 def is_targeted_by_icetroll(game, map_object):
     """
@@ -158,8 +162,9 @@ def create_defensive_portal(game, defensive_elf, castle):
             active_portals.append(port)
 
     minimum_distance = game.castle_size + game.portal_size + 50
-    defense_positions = [port for port in active_portals, castle.towards((port), minimum_distance)]
-
+    defense_positions = [castle.get_location().towards(port, minimum_distance) for port in active_portals]
+    
+    print "active_portals", active_portals
     for pos in defense_positions:
         for portal in game.get_my_portals():
             if portal.distance(pos) < game.portal_size * 2:
@@ -172,9 +177,21 @@ def create_defensive_portal(game, defensive_elf, castle):
             if pos == pos2:
                 continue
             if pos.distance(pos2) < game.portal_size * 2:
-                defense_positions.append(pos.towards(pos2), pos.distance(pos2)/2)
+                defense_positions.append(pos.towards(pos2, pos.distance(pos2)/2))
                 defense_positions.remove(pos)
                 defense_positions.remove(pos2)
+
+    if not defense_positions:
+        return False
+
+    defense_positions.sort(key = lambda pos: pos.distance(defensive_elf))
+    if defensive_elf.location.equals(defense_positions[0]):
+        if defensive_elf.can_build_portal():
+            defensive_elf.build_portal()
+    else:
+        defensive_elf.move_to(defense_positions[0])
+
+        
 
 
 
@@ -189,7 +206,7 @@ def update_portal_activeness(game):
 
     enemy_portals = game.get_enemy_portals()
     for port in enemy_portals:
-        if port.currently_summoning or port.id not in Globals.portal_activeness:
+        if port.currently_summoning == "LavaGiant" or port.id not in Globals.portal_activeness:
             Globals.portal_activeness[port.id] = 0
         else:
             Globals.portal_activeness[port.id] += 1
@@ -211,6 +228,10 @@ def attack(game, elf, map_object):
         elf.attack(map_object)
     else:
         elf.move_to(map_object)
+
+
+def handle_defensive_elf(game, elf):
+    pass
 
 
 def summon(game, portal, creature_type_str):
@@ -238,4 +259,23 @@ def summon(game, portal, creature_type_str):
         else:
             return False
 
+def handle_portals(game):
+    ports = game.get_my_portals()
+    if len(ports) == 0:
+        return
+    port_def = closest(game, game.get_my_castle(), ports)
+    ports.remove(port_def)
+    port_atk = None
+    if len(ports) != 0:
+        port_atk = ports[0]
 
+    if port_def.distance(game.get_my_castle()) > 2000:
+        port_atk = port_def
+        port_def = None
+    if port_def != None:
+        if in_object_range(game, game.get_my_castle(), game.get_enemy_creatures() + game.get_enemy_living_elves(), 3000):
+            print("in if in handle_portals")
+            if (game.get_my_ice_trolls() is None or len(game.get_my_ice_trolls()) < 3) or game.get_my_mana() > 200:
+                summon(game, port_def, ICE)
+    if port_atk != None:
+        summon(game, port_atk, LAVA)
