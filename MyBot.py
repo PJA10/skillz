@@ -45,13 +45,13 @@ def do_turn(game):
     # tests(game)
     old_do_turn(game)
 
-    # MUST STAY IN THE END OF do_turn()
+    # MUST STAY IN THE END OF do_turn():
     Globals.prev_game = game
 
 
 def tests(game):
     """
-    print is_targeted_by_icetroll(game, game.get_my_living_elves()[0])
+    print is_targeted_by icetroll(game, game.get_my_living_elves()[0])
     print get_locations(game, game.get_all_elves())
     print get_closest_enemy_elf(game, game.get_my_living_elves()[0])
     print get_closest_enemy_portal(game, game.get_my_living_elves()[0])
