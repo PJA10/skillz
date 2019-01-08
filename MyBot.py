@@ -97,14 +97,14 @@ def old_do_turn(game):
 
     mana = game.default_mana_per_turn + game.get_my_mana()
 
-    handle_elves(game)
+    # handle_elves(game)
     handle_portals(game)
 
     if Globals.defensive_elf.is_alive():
         create_defensive_portal(game, Globals.defensive_elf, game.get_my_castle())
 
     live_attacking_elfs = [elf for elf in Globals.attacking_elfs if elf.is_alive()]
-    print "live_attacking_elfs", live_attacking_elfs ,
+    print "live_attacking_elfs", live_attacking_elfs
     for elf in live_attacking_elfs:
         func = call(game, elf, game.get_enemy_castle(), {
             "attack_closest_creature": (1, attack_closest_creature),
@@ -120,7 +120,6 @@ def old_do_turn(game):
                 func(game, elf, elf.get_location())
             else:
                 func(game, elf, 10000)
-    """
 
 
 def normalize(game, elf, destination, func):
@@ -172,7 +171,7 @@ def get_portals_in_range(game, map_object, rng):
 
 
 def handle_elves(game):
-    if len(game.get_my_living_elves()) == 0:
+    if not game.get_my_living_elves():
         return
     elfs = game.get_my_living_elves()
     elf_def = closest(game, game.get_my_castle(), elfs)
