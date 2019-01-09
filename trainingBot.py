@@ -159,9 +159,9 @@ def create_defensive_portal(game, defensive_elf, castle):
 
 
     :param defensive_elf: the elf that is meant to create the defensive portal
-    :type Elf:
+    :type defensive_elf: Elf
     :param castle: the castle that the given portal is meant to defend
-    :type Castle:
+    :type castle: Castle
     :return: returns False if no portals need to be created
     :type: Boolean
     """
@@ -195,15 +195,15 @@ def create_defensive_portal(game, defensive_elf, castle):
     if not defense_positions:
         return False
 
-    defense_positions.sort(key = lambda pos: pos.distance(defensive_elf))
+    defense_positions.sort(key=lambda pos: pos.distance(defensive_elf))
     if defensive_elf.location.equals(defense_positions[0]):
         if defensive_elf.can_build_portal():
             defensive_elf.build_portal()
+        else:
+            return False
     else:
         defensive_elf.move_to(defense_positions[0])
-
-
-
+    return True
 
 
 def update_portal_activeness(game):
@@ -240,7 +240,7 @@ def attack(game, elf, map_object):
     if elf.in_attack_range(map_object):
         elf.attack(map_object)
     else:
-        elf.move_to(map_object)
+        smart_movement(game, elf, map_object)
 
 
 def handle_defensive_elf(game, elf):
@@ -272,6 +272,7 @@ def summon(game, portal, creature_type_str):
             return True
         else:
             return False
+
 
 def handle_portals(game):
     ports = game.get_my_portals()
@@ -317,6 +318,7 @@ def make_portal(game, elf, loc):
             return True
         else:
             print ("Elf " + str(elf) + " Can't build portal at " + str(loc))
+            check_why_cant_build(game, elf)
             return False
     else:
         smart_movement(game, elf, loc)
@@ -374,10 +376,11 @@ def smart_movement(game, elf, destination):
 
     possible_movement_points = get_possible_movement_points(game, elf, destination, next_turn_enemy_icetrolls_list)
 
-    my_other_elves = copy.deepcopy(game.get_my_living_elves())
+    my_other_elves = game.get_my_living_elves()
     my_other_elves.remove(elf)
 
     next_turn_my_creatures = next_turn_my_lava_giant_list + next_turn_my_icetrolls_list
+    next_turn_enemy_elves_list = predict_next_turn_enemy_elves(game)
 
     for point in possible_movement_points:
         curr_next_turn_elf = copy.deepcopy(elf)
@@ -385,10 +388,14 @@ def smart_movement(game, elf, destination):
 
         for enemy_elf in game.get_enemy_living_elves():
             if enemy_elf != destination:
+                for next_turn_elf in next_turn_enemy_elves_list:
+                    if next_turn_elf.id == enemy_elf.id:
+                        curr_next_turn_enemy_elf = next_turn_elf
+                        break
                 if enemy_elf.distance(elf.get_location()) < game.elf_attack_range:
                     if enemy_elf.distance(point[0]) <= game.elf_attack_range + 10:
                         point[1] += RISK_AMOUNT * game.elf_attack_multiplier * 2
-                elif enemy_elf.distance(point[0]) <= game.elf_attack_range + game.elf_max_speed + 10:
+                elif curr_next_turn_enemy_elf.distance(point[0]) <= game.elf_attack_range + 10:  # + game.elf_max_speed
                     point[1] += RISK_AMOUNT * game.elf_attack_multiplier * 2
 
         for next_turn_enemy_ice_troll in next_turn_enemy_icetrolls_list:
@@ -402,7 +409,7 @@ def smart_movement(game, elf, destination):
     possible_movement_points.sort(key=lambda possible_point:
                                   possible_point[0].distance(destination) + 1000000 * possible_point[1])
 
-    print "possible_movment_points:", possible_movement_points
+    print "possible_movment_points: %s\n destination: %s" % (possible_movement_points, destination)
     elf_movement(game, elf, possible_movement_points[0][0])
 
 
@@ -649,3 +656,145 @@ def predict_next_turn_lava_giant(game):
                 next_turn_enemy_lava_giant_list.append(new_lava_giant)
 
     return next_turn_my_lava_giant_list, next_turn_enemy_lava_giant_list
+
+
+def predict_next_turn_enemy_elves(game):
+    """
+
+    This function predict the locations of the enemy's elves for next turn
+
+    :param game:
+    :return: a list of next turn enemy's elves with the guessed locations
+    :type: [Elf]
+    """
+
+    prev_game = Globals.prev_game
+    next_turn_enemy_elves_list = []
+
+    for elf in game.get_enemy_living_elves():
+        next_turn_elf = copy.deepcopy(elf)
+        curr_loc = elf.get_location()
+        for prev_elf in prev_game.get_enemy_living_elves():
+            if prev_elf.id == elf.id:
+                prev_loc = prev_elf.get_location()
+                break
+        else:
+            prev_loc = curr_loc
+
+        nexr_turn_loc = curr_loc.towards(prev_loc, -elf.max_speed)
+        next_turn_elf.location = nexr_turn_loc
+
+        next_turn_enemy_elves_list.append(next_turn_elf)
+
+    print "next_turn_enemy_elves_list: %s" % next_turn_enemy_elves_list
+    print "actual enemy's elves: %s" % game.get_enemy_living_elves()
+    return next_turn_enemy_elves_list
+
+
+def attack_closest_unit(game, elf, max_distance):
+    """
+
+    This function attack with an elf the closest unit to it
+
+    :param elf:
+    :param max_distance: the max distance that the closest unit can be
+    :return: if an action has been made with the elf
+    """
+
+    target = get_closest_enemy_unit(game, elf)
+    if not target:
+        return False
+
+    if target.distance(elf) < max_distance:
+        attack(game, elf, target)
+        return True
+    else:
+        return False
+
+
+def attack_closest_portal(game, elf, max_distance):
+    """
+
+    This function attack with an elf the closest portal to it
+
+    :param elf:
+    :param max_distance: the max distance that the closest portal can be
+    :return: if an action has been made with the elf
+    """
+
+    target = get_closest_enemy_portal(game, elf)
+    if not target:
+        return False
+
+    if target.distance(elf) < max_distance:
+        attack(game, elf, target)
+        return True
+    else:
+        return False
+
+
+def attack_closest_elf(game, elf, max_distance):
+    """
+
+    This function attack with an elf the closest elf to it
+
+    :param elf:
+    :param max_distance: the max distance that the closest elf can be
+    :return: if an action has been made with the elf
+    """
+
+    target = get_closest_enemy_elf(game, elf)
+    if not target:
+        return False
+
+    if target.distance(elf) < max_distance:
+        attack(game, elf, target)
+        return True
+    else:
+        return False
+
+
+def attack_closest_creature(game, elf, max_distance):
+    """
+
+    This function attack with an elf the closest creature to it
+
+    :param elf:
+    :param max_distance: the max distance that the closest creature can be
+    :return: if an action has been made with the elf
+    """
+
+    target = get_closest_enemy_creature(game, elf)
+    if not target:
+        return False
+
+    if target.distance(elf) < max_distance:
+        attack(game, elf, target)
+        return True
+    else:
+        return False
+
+
+def check_why_cant_build(game, elf):
+    """
+
+    This function check why an elf cant build a portal in his position
+
+    :param game:
+    :param elf:
+    :return:
+    """
+
+    targets = []
+    has_mana = False
+
+    for enemy_unit in game.get_enemy_creatures() + game.get_enemy_living_elves():
+        if elf.distance(enemy_unit) <= game.portal_size:
+            targets.append(enemy_unit)
+
+    for portal in game.get_all_portals():
+
+
+    if game.get_my_mana() >= game.portal_cost:
+        has_mana = True
+    print 'can"t build portal - has enough mana: ', has_mana, ', enemies that are disturbing: ', targets
