@@ -159,5 +159,3 @@ def summon(game, portal, creature_type_str):
             return True
         else:
             return False
-
-
