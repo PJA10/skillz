@@ -32,6 +32,7 @@ def do_turn(game):
     if game.turn == 1:
         Globals.init()
         Globals.prev_game = game
+        Globals.is_enemy_elf_attacking_elves = False
         if game.get_all_my_elves:
             Globals.defensive_elf = game.get_all_my_elves()[0]
             Globals.attacking_elfs = game.get_all_my_elves()
@@ -41,7 +42,7 @@ def do_turn(game):
 
     update_portal_activeness(game)
 
-    tests(game)
+    # tests(game)
     old_do_turn(game)
 
     # MUST STAY IN THE END OF do_turn():
@@ -159,11 +160,6 @@ def normalize(game, elf, destination, func):
 def call(game, elf, destination, sliders):
     normal = max(sliders.items(), key=lambda slider: slider[1][0] * normalize(game, elf, destination, slider[1][1]))
     return normal[1][1]
-
-
-def is_elf_attacking_portal():
-    enemy_elfs = game.get_enemy_living_elves()
-    enemy_locs = get_locations(game, enemy_elfs)
 
 
 def get_portals_in_range(game, map_object, rng):

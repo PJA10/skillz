@@ -122,19 +122,8 @@ def get_closest_enemy_unit(game, map_object):
     :type: Creature/Elf
     """
 
-    closest_creature = get_closest_enemy_creature(game, map_object)
-    closest_elf = get_closest_enemy_elf(game, map_object)
-
-    if not closest_creature and not closest_elf:
-        return None
-
-    if not closest_creature:
-        return closest_elf
-
-    if not closest_elf:
-        return closest_creature
-
-    return min([closest_elf,closest_creature], key = lambda unit: unit.distance(map_object))
+    enemy_units = get_player_units(game, game.get_enemy())
+    return closest(game, map_object, enemy_units)
 
 
 def in_object_range(game, target_map_object, map_objects_list, max_range):
@@ -455,19 +444,8 @@ def get_closest_friendly_unit(game, map_object):
     :type: Creature/Elf
     """
 
-    closest_creature = get_closest_friendly_creature(game, map_object)
-    closest_elf = get_closest_friendly_elf(game, map_object)
-
-    if not closest_creature and not closest_elf:
-        return None
-
-    if not closest_creature:
-        return closest_elf
-
-    if not closest_elf:
-        return closest_creature
-
-    return min([closest_elf,closest_creature], key=lambda unit: unit.distance(map_object))
+    my_units = get_player_units(game, game.get_myself())
+    return closest(game, map_object, my_units)
 
 
 def get_closest_friendly_elf(game, map_object):
@@ -569,6 +547,8 @@ def predict_next_turn_ice_trolls(game):
     next_turn_my_icetroll_list = []
 
     for my_icetroll in game.get_my_ice_trolls():
+        if my_icetroll.‎current_health == my_icetroll.‎suffocation_per_turn: # if the troll is going to die
+            continue
         next_turn_my_icetroll = copy.deepcopy(my_icetroll)
         target = get_closest_enemy_unit(game, my_icetroll)
         if target and my_icetroll.distance(target) > my_icetroll.attack_range:
@@ -578,6 +558,8 @@ def predict_next_turn_ice_trolls(game):
     next_turn_enemy_icetroll_list = []
 
     for enemy_icetroll in game.get_enemy_ice_trolls():
+        if enemy_icetroll.‎current_health == enemy_icetroll.‎suffocation_per_turn: # if the troll is going to die
+            continue
         next_turn_enemy_icetroll = copy.deepcopy(enemy_icetroll)
         target = get_closest_friendly_unit(game, enemy_icetroll)
         if target and enemy_icetroll.distance(target) > enemy_icetroll.attack_range:
@@ -621,6 +603,8 @@ def predict_next_turn_lava_giant(game):
     target = game.get_enemy_castle()
 
     for my_lava_giant in game.get_my_lava_giants():
+        if my_lava_giant.‎current_health == my_lava_giant.‎suffocation_per_turn: # if the giant is going to die
+            continue
         next_turn_my_lava_giant = copy.deepcopy(my_lava_giant)
         if my_lava_giant.distance(target) > my_lava_giant.attack_range:
             next_turn_my_lava_giant.location = my_lava_giant.get_location().towards(target, game.lava_giant_max_speed)
@@ -630,6 +614,8 @@ def predict_next_turn_lava_giant(game):
     target = game.get_my_castle()
 
     for enemy_lava_giant in game.get_enemy_lava_giants():
+        if enemy_lava_giant.‎current_health == enemy_lava_giant.‎suffocation_per_turn: # if the giant is going to die
+            continue
         next_turn_enemy_lava_gian = copy.deepcopy(enemy_lava_giant)
         if enemy_lava_giant.distance(target) > enemy_lava_giant.attack_range:
             next_turn_enemy_lava_gian.location = enemy_lava_giant.get_location().towards(target, game.lava_giant_max_speed)
@@ -788,13 +774,142 @@ def check_why_cant_build(game, elf):
     targets = []
     has_mana = False
 
-    for enemy_unit in game.get_enemy_creatures() + game.get_enemy_living_elves():
+    for enemy_unit in get_player_units(game, game.get_enemy()):
         if elf.distance(enemy_unit) <= game.portal_size:
             targets.append(enemy_unit)
-
-    for portal in game.get_all_portals():
-
-
     if game.get_my_mana() >= game.portal_cost:
         has_mana = True
     print 'can"t build portal - has enough mana: ', has_mana, ', enemies that are disturbing: ', targets
+
+
+def get_dangerous_enemy_lava_giant(game):
+    """
+
+    This function get all dangerous enemy lava giant which mean they are close enough to do significant to my castle
+    The function will include the damage that the lava_giant will get this turn
+
+    :param game:
+    :return: a list of all the dangerous enemy's lava giants
+    :type: [LavaGiant]
+    """
+
+    close_enough_enemy_lava_giant = []
+
+    for lava_giant in game.get_enemy_lava_giants():
+        turns_to_travel(game, lava_giant, game.get_my_castle().get_location().towards(lava_giant, game.castle_size),
+                        game.lava_giant_max_speed)
+
+        curr_health = lava_giant.current_health
+        for my_ice_troll in game.get_my_ice_trolls():
+            closest_enemy_unit = get_closest_enemy_unit(game, my_ice_troll)
+            if closest_enemy_unit == lava_giant and my_ice_troll.distance(lava_giant) < game.ice_troll_attack_range:
+                curr_health -= game.ice_troll_attack_multiplier
+
+        hp_left = curr_health - (turns_to_travel * lava_giant.suffocation_per_turn)
+        if hp_left > 2:
+            close_enough_enemy_lava_giant.append(lava_giant)
+
+    return close_enough_enemy_lava_giant
+
+
+def is_enemy_elf_attacking_elves(game):
+    """
+
+    This function check if enemy's elves have to ability of attacking out elves
+    If the enemy elves had attack our even once the function will return True
+
+    :param game:
+    :return: if enemy elves have the ability of attacking our elves
+    """
+
+    last_turn_gmae = Globals.prev_game
+
+    if Globals.is_enemy_elf_attacking:
+        return True
+    else:
+        for curr_turn_enemy_elf in game.get_enemy_living_elves():
+            if not has_moved(game, curr_turn_enemy_elf):
+                if not curr_turn_enemy_elf.is_building:
+                    for last_turn_my_elf in last_turn_gmae.get_my_living_elves():
+                        if last_turn_my_elf.distance(curr_turn_enemy_elf) <= game.elf_attack_range:
+                            curr_turn_expected_hp = last_turn_my_elf.current_health
+                            last_turn_ice_trolls_that_target_my_elf = is_targeted_by_icetroll(last_turn_gmae, last_turn_my_elf)
+                            for close_ice_troll in last_turn_ice_trolls_that_target_my_elf:
+                                if close_ice_troll.distance(last_turn_my_elf) < game.ice_troll_attack_range:
+                                    curr_turn_expected_hp -= game.ice_troll_attack_multiplier
+
+                            curr_turn_my_elf = get_by_unique_id(game, last_turn_my_elf.unique_id)
+                            if curr_turn_my_elf.current_health < curr_turn_expected_hp:
+                                Globals.is_enemy_elf_attacking = True
+                                return True
+    return False
+
+
+def get_by_unique_id(game, need_to_find_unique_id):
+    """
+
+    This function gets a game object by a given unique id from game
+
+    :param game:
+    :param need_to_find_unique_id:
+    :type need_to_find_unique_id: Int
+    :return: The game object from game with the given unique id
+    :type: GameObject
+    """
+
+    my_game_objects = get_player_units(game, game.get_myself()) + game.get_my_portals()
+    enemy_game_objects = get_player_units(game, game.get_enemy()) + game.get_enemy_portals()
+    all_game_objects = my_game_objects + enemy_game_objects
+
+    for game_object in all_game_objects:
+        if game_object.unique_id == need_to_find_unique_id:
+            return game_object
+
+    return None
+
+
+def get_player_units(game, need_to_find_player):
+    """
+
+    This function gets all units of a giving player
+
+    :param game:
+    :param need_to_find_player: the player which units to return
+    :return: a list of all units which belong to the given player
+    :type: [Creature/Elf]
+    """
+
+    for player in game.get_all_players():
+        if player == need_to_find_player:
+            return player.living_elves + player.creatures
+
+
+def has_moved(game, unit_to_check):
+    """
+
+    This function check if a given unit has moved in the last turn
+
+    :param game:
+    :param unit_to_check:
+    :type unit_to_check: Elf/Creature
+    :return: if the given unit had moved in the last turn
+    :type: Boolean
+    """
+
+    last_turn_game = Globals.prev_game
+    last_turn_my_units = get_player_units(last_turn_game, game.get_myself())
+    last_turn_enemy_units = get_player_units(last_turn_game, game.get_enemy())
+    last_turn_all_units = last_turn_enemy_units + last_turn_my_units
+
+    for last_turn_unit in last_turn_all_units:
+        if last_turn_unit.unique_id == unit_to_check.unique_id:
+            if last_turn_unit.get_location() != unit_to_check.get_location():
+                return True
+            else:
+                return False
+
+    return True # the unit has just spawn
+
+
+
+
