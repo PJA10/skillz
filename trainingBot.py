@@ -330,20 +330,36 @@ def elf_movement(game, elf, map_object):
     return True
 
 
-def turns_to_travel(game, map_object, destination, max_speed):
+def turns_to_travel(game, map_object, destination, max_speed, smart = False):
     """
 
     This function calculate the amount of turns a given path will take with an object with a given speed
 
+    :param game:
+    :type game: Game
     :param map_object: the start point of the travel
     :param destination: the destination of the travel
     :param max_speed: the speed of the object traveling
+    :param smart: if the travel is smart movement
+    :type smart: Boolean
     :return: the amount of turns needed to complete the travel
     :type: int
     """
 
-    distance = map_object.distance(destination)
-    number_of_turns = math.ceil(distance/max_speed)
+    distance_to_destination = map_object.distance(destination)
+    number_of_turns = math.ceil(distance_to_destination/max_speed)
+
+    if smart:
+        number_of_dangerous_enemy_unit = 0
+
+        for dangerous_enemy_unit in game.get_enemy_ice_trolls() + game.get_enemy_living_elves():
+            sum_distances = dangerous_enemy_unit.distance(map_object) + \
+                            dangerous_enemy_unit.distance(destination)
+            if math.abs(sum_distances - distance_to_destination) < distance_to_destination * 0.25:
+                number_of_dangerous_enemy_unit += 1
+
+        number_of_turns += 3 * number_of_dangerous_enemy_unit
+
     return number_of_turns
 
 
@@ -366,32 +382,42 @@ def smart_movement(game, elf, destination):
     possible_movement_points = get_possible_movement_points(game, elf, destination, next_turn_enemy_icetrolls_list)
 
     my_other_elves = game.get_my_living_elves()
-    my_other_elves.remove(elf)
+    my_other_elves.remove(elf)  # all my elves beside the given one
 
     next_turn_my_creatures = next_turn_my_lava_giant_list + next_turn_my_icetrolls_list
     next_turn_enemy_elves_list = predict_next_turn_enemy_elves(game)
 
-    for point in possible_movement_points:
+    for point in possible_movement_points:  # point is (loc, risk)
         curr_next_turn_elf = copy.deepcopy(elf)
-        curr_next_turn_elf.location = point[0]
+        curr_next_turn_elf.location = point[0]  # the location of point
 
         for enemy_elf in game.get_enemy_living_elves():
-            if enemy_elf != destination:
-                for next_turn_elf in next_turn_enemy_elves_list:
-                    if next_turn_elf.id == enemy_elf.id:
-                        curr_next_turn_enemy_elf = next_turn_elf
-                        break
-                if enemy_elf.distance(elf.get_location()) < game.elf_attack_range:
-                    if enemy_elf.distance(point[0]) <= game.elf_attack_range + 10:
-                        point[1] += RISK_AMOUNT * game.elf_attack_multiplier * 2
-                elif curr_next_turn_enemy_elf.distance(point[0]) <= game.elf_attack_range + 10:  # + game.elf_max_speed
+            if enemy_elf == destination:  # if the given elf am trying to get to this elf
+                continue  # don't avoid it
+
+            # get curr_next_turn_enemy_elf from next_turn_enemy_elves_list
+            for next_turn_elf in next_turn_enemy_elves_list: 
+                if next_turn_elf.id == enemy_elf.id:
+                    curr_next_turn_enemy_elf = next_turn_elf
+                    break
+            
+            if enemy_elf.distance(elf.get_location()) < game.elf_attack_range:  # if enemy elf in range to attack me
+                # then the if the enemy elf attack me he wont move and if he didn't then probably he doesnt want to
+                if enemy_elf.distance(point[0]) <= game.elf_attack_range + 10: 
                     point[1] += RISK_AMOUNT * game.elf_attack_multiplier * 2
+            # else we need to inclde the expected enemy elf next turn location, curr_next_turn_enemy_elf
+            elif curr_next_turn_enemy_elf.distance(point[0]) <= game.elf_attack_range + 10:
+                point[1] += RISK_AMOUNT * game.elf_attack_multiplier * 2
 
         for next_turn_enemy_ice_troll in next_turn_enemy_icetrolls_list:
-            if next_turn_enemy_ice_troll != destination and closest(game, next_turn_enemy_ice_troll,
-                                                                    next_turn_my_creatures + my_other_elves +
-                                                                    [curr_next_turn_elf]) == curr_next_turn_elf:
+            if next_turn_enemy_ice_troll == destination:
+                continue
+            # if point location will be the closest to next_turn_enemy_ice_troll from our units
+            if closest(game, next_turn_enemy_ice_troll,
+                       next_turn_my_creatures + my_other_elves + [curr_next_turn_elf]) == curr_next_turn_elf:
+                # then the ice troll will target us so add risk
                 point[1] += RISK_AMOUNT
+                # if he will also hit us
                 if next_turn_enemy_ice_troll.distance(curr_next_turn_elf.location) <= game.ice_troll_attack_range + 10:
                     point[1] += RISK_AMOUNT * game.ice_troll_attack_multiplier * 2
 
@@ -547,7 +573,7 @@ def predict_next_turn_ice_trolls(game):
     next_turn_my_icetroll_list = []
 
     for my_icetroll in game.get_my_ice_trolls():
-        if my_icetroll.‎current_health == my_icetroll.‎suffocation_per_turn: # if the troll is going to die
+        if my_icetroll.current_health == my_icetroll.suffocation_per_turn: # if the troll is going to die
             continue
         next_turn_my_icetroll = copy.deepcopy(my_icetroll)
         target = get_closest_enemy_unit(game, my_icetroll)
@@ -558,7 +584,7 @@ def predict_next_turn_ice_trolls(game):
     next_turn_enemy_icetroll_list = []
 
     for enemy_icetroll in game.get_enemy_ice_trolls():
-        if enemy_icetroll.‎current_health == enemy_icetroll.‎suffocation_per_turn: # if the troll is going to die
+        if enemy_icetroll.current_health == enemy_icetroll.suffocation_per_turn: # if the troll is going to die
             continue
         next_turn_enemy_icetroll = copy.deepcopy(enemy_icetroll)
         target = get_closest_friendly_unit(game, enemy_icetroll)
@@ -603,7 +629,7 @@ def predict_next_turn_lava_giant(game):
     target = game.get_enemy_castle()
 
     for my_lava_giant in game.get_my_lava_giants():
-        if my_lava_giant.‎current_health == my_lava_giant.‎suffocation_per_turn: # if the giant is going to die
+        if my_lava_giant.current_health == my_lava_giant.suffocation_per_turn: # if the giant is going to die
             continue
         next_turn_my_lava_giant = copy.deepcopy(my_lava_giant)
         if my_lava_giant.distance(target) > my_lava_giant.attack_range:
@@ -614,7 +640,7 @@ def predict_next_turn_lava_giant(game):
     target = game.get_my_castle()
 
     for enemy_lava_giant in game.get_enemy_lava_giants():
-        if enemy_lava_giant.‎current_health == enemy_lava_giant.‎suffocation_per_turn: # if the giant is going to die
+        if enemy_lava_giant.current_health == enemy_lava_giant.suffocation_per_turn: # if the giant is going to die
             continue
         next_turn_enemy_lava_gian = copy.deepcopy(enemy_lava_giant)
         if enemy_lava_giant.distance(target) > enemy_lava_giant.attack_range:
