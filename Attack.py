@@ -52,11 +52,48 @@ def attack(game, elf, attack_dest, **kwargs):
 def attack_wave(game):
     """
 
+    This function attack the enemy with a wave of lava giants.
+    The attacking portals will include portals that will do enough damage to the enemy castle.
+    If we have enough mana the attack will include distraction(ice trolls) from some of global distraction_portals.
+
     :param game:
+    :type game: Game
     :return:
     """
 
-    pass
+    #  available portals sorted by distance to enemy castle
+    attacking_portals = [portal for portal in game.get_my_portals() if not portal.is_summoning]
+    attacking_portals = sorted(attacking_portals, key=lambda portal: portal.distance(game.get_enemy_castle()))
+
+    for portal in attacking_portals[:]:  # a copy of attacking_portals
+        lava_giant_damage = game.lava_giant_max_health - (game.lava_giant_suffocation_per_turn *
+                                                          turns_to_travel(game, portal, game.lava_giant_max_speed))
+
+        if lava_giant_damage < 0.1 * game.get_enemy_castle().current_helath:
+            attacking_portals.remove(portal)  # remove portals which wont do even 10% of the enemy castle hp
+
+    mana_left = game.get_my_mana() > len(attacking_portals) * game.lava_giant_cost
+    if mana_left < 0:  # if we don't have a lot of mana, just make lava as mush as we can
+        for portal in attacking_portals:
+            if portal.can_summon_lava_giant():
+                portal.summon_lava_giant()
+    else:
+        if mana_left > game.ice_troll_cost:  # if we have a lot of mana
+            if Globals.distraction_portals:
+                #  check how many distractions we can make
+                this_wave_distraction_portals = []
+                for distraction_portal in Globals.distraction_portals:
+                    mana_left = mana_left + game.lava_giant_cost - game.ice_troll_cost
+                    if mana_left < 0:
+                        break
+                    this_wave_distraction_portals.append(distraction_portal)
+                    attacking_portals.remove(distraction_portal)
+
+                # summon
+                for attack_portal in attacking_portals:
+                    summon(game, attack_portal, LAVA)
+                for distraction_portal in this_wave_distraction_portals:
+                    summon(game, distraction_portal, ICE)
 
 
 def determine_wave_strength(game):
@@ -122,7 +159,8 @@ def determine_enemy_defense_strength(game, attack_portals):
 
     # elves
     strength += len([elf for elf in game.get_enemy_living_elves() if
-                     elf.distance(game.enemy_castle) < farthest_my_portal_to_enemy_castle.distance(game.enemy_castle)])
+                     elf.distance(game.enemy_castle) < farthest_my_portal_to_enemy_castle.distance(game.enemy_castle)
+                     and elf.turns_to_build <= 3])
 
     return strength
 

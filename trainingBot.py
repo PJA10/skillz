@@ -382,32 +382,42 @@ def smart_movement(game, elf, destination):
     possible_movement_points = get_possible_movement_points(game, elf, destination, next_turn_enemy_icetrolls_list)
 
     my_other_elves = game.get_my_living_elves()
-    my_other_elves.remove(elf)
+    my_other_elves.remove(elf)  # all my elves beside the given one
 
     next_turn_my_creatures = next_turn_my_lava_giant_list + next_turn_my_icetrolls_list
     next_turn_enemy_elves_list = predict_next_turn_enemy_elves(game)
 
-    for point in possible_movement_points:
+    for point in possible_movement_points:  # point is (loc, risk)
         curr_next_turn_elf = copy.deepcopy(elf)
-        curr_next_turn_elf.location = point[0]
+        curr_next_turn_elf.location = point[0]  # the location of point
 
         for enemy_elf in game.get_enemy_living_elves():
-            if enemy_elf != destination:
-                for next_turn_elf in next_turn_enemy_elves_list:
-                    if next_turn_elf.id == enemy_elf.id:
-                        curr_next_turn_enemy_elf = next_turn_elf
-                        break
-                if enemy_elf.distance(elf.get_location()) < game.elf_attack_range:
-                    if enemy_elf.distance(point[0]) <= game.elf_attack_range + 10:
-                        point[1] += RISK_AMOUNT * game.elf_attack_multiplier * 2
-                elif curr_next_turn_enemy_elf.distance(point[0]) <= game.elf_attack_range + 10:  # + game.elf_max_speed
+            if enemy_elf == destination:  # if the given elf am trying to get to this elf
+                continue  # don't avoid it
+
+            # get curr_next_turn_enemy_elf from next_turn_enemy_elves_list
+            for next_turn_elf in next_turn_enemy_elves_list: 
+                if next_turn_elf.id == enemy_elf.id:
+                    curr_next_turn_enemy_elf = next_turn_elf
+                    break
+            
+            if enemy_elf.distance(elf.get_location()) < game.elf_attack_range:  # if enemy elf in range to attack me
+                # then the if the enemy elf attack me he wont move and if he didn't then probably he doesnt want to
+                if enemy_elf.distance(point[0]) <= game.elf_attack_range + 10: 
                     point[1] += RISK_AMOUNT * game.elf_attack_multiplier * 2
+            # else we need to inclde the expected enemy elf next turn location, curr_next_turn_enemy_elf
+            elif curr_next_turn_enemy_elf.distance(point[0]) <= game.elf_attack_range + 10:
+                point[1] += RISK_AMOUNT * game.elf_attack_multiplier * 2
 
         for next_turn_enemy_ice_troll in next_turn_enemy_icetrolls_list:
-            if next_turn_enemy_ice_troll != destination and closest(game, next_turn_enemy_ice_troll,
-                                                                    next_turn_my_creatures + my_other_elves +
-                                                                    [curr_next_turn_elf]) == curr_next_turn_elf:
+            if next_turn_enemy_ice_troll == destination:
+                continue
+            # if point location will be the closest to next_turn_enemy_ice_troll from our units
+            if closest(game, next_turn_enemy_ice_troll,
+                       next_turn_my_creatures + my_other_elves + [curr_next_turn_elf]) == curr_next_turn_elf:
+                # then the ice troll will target us so add risk
                 point[1] += RISK_AMOUNT
+                # if he will also hit us
                 if next_turn_enemy_ice_troll.distance(curr_next_turn_elf.location) <= game.ice_troll_attack_range + 10:
                     point[1] += RISK_AMOUNT * game.ice_troll_attack_multiplier * 2
 
