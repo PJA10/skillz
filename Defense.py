@@ -15,5 +15,5 @@ def enemy_elf_nearby(game,portal):
     :return: if one of the enemy elves is a threat to the given portal
     :type: bool
     """
-        pass #if the closest enemy elf can get to the given po
+        pass #if the closest enemy elf can get to the given 
 
