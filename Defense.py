@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 from elf_kingdom import *
 from trainingBot import *
@@ -16,6 +15,5 @@ def enemy_elf_nearby(game,portal):
     :return: if one of the enemy elves is a threat to the given portal
     :type: bool
     """
-    pass #if the closest enemy elf can get to the given
-
+        pass #if the closest enemy elf can get to the given 
 
