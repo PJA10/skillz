@@ -36,7 +36,7 @@ def Enemy_elf_nearby(game, portal):
     return False
 
 
-def enemy_attacking_portal(game):
+#def enemy_attacking_portal(game):
     """
 
     This function checks if enemy elf is attacking one of our portals
@@ -45,9 +45,9 @@ def enemy_attacking_portal(game):
     :return: if one of the enemy elves is a attacking one of our portals
     :type: [portal]
     """
-    prev_game = Globals.prev_game
-    for portal in game.get_my_portals():
-        if(prev_game.portal.current_health > portal.current_health):
+#   prev_game = Globals.prev_game
+#    for portal in game.get_my_portals():
+#        if(prev_game.portal.current_health > portal.current_health):
 
 
 
