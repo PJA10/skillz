@@ -8,6 +8,7 @@ Attack
 
 from trainingBot import *
 import Globals
+from collections import *
 
 
 def attack(game, elf, attack_dest, **kwargs):
@@ -36,8 +37,10 @@ def attack(game, elf, attack_dest, **kwargs):
 
     if turns_to_travel(game, elf.get_location(), attacking_portal_destination, elf.max_speed,
                        smart=True) > turn_limit_for_dest + offset:
-        handle_obstacle(game, elf, attacking_portal_destination)
-    elif not elf.get_location().in_range(attacking_portal_destination, safe_range) or not elf.can_build_portal():
+        handle_obstacle(game, elf, attacking_portal_destination, safe_range)
+
+    # maybe add if the elf is in attacking_portal_destination and not elf.can_build_portal() then handle_obstacle()
+    elif not elf.in_range(attacking_portal_destination, safe_range) or not elf.can_build_portal():
         if game.get_my_mana() < game.portal_cost:
             mana_state = "save mana"
         smart_movement(game, elf, attacking_portal_destination)
@@ -57,6 +60,7 @@ def attack(game, elf, attack_dest, **kwargs):
     if game.get_my_mana() > min_amount_of_mana_for_pulse:
         mana_state == "wave"
 
+    Globals.maana_state = mana_state
     return (attacking_portal_destination, safe_range), turn_limit_for_dest - 1
 
 
@@ -177,7 +181,7 @@ def determine_enemy_defense_strength(game, attack_portals):
     return strength
 
 
-def handle_obstacle(game, elf, attacking_portal_destination):
+def handle_obstacle(game, elf, attacking_portal_destination, safe_range):
     """
 
 
@@ -188,9 +192,41 @@ def handle_obstacle(game, elf, attacking_portal_destination):
     :type elf: Elf
     :param attacking_portal_destination:
     :type attacking_portal_destination: Location
+    :param safe_range:
+    :type safe_range: Int
     :return:
     """
-    pass  # should identafy obstacles and call a function to handle this spesific obsticale.
+    pass
+    """if elf.in_range(attacking_portal_destination, safe_range):
+        if not elf.can_build_portal():
+            has_mana, units_in_range, portals_in_range = check_why_cant_build_portal(game, elf)
+            if units_in_range:
+                enemy_units_in_range = [unit for unit in units_in_range if unit.owner == game.get_enemy()]
+                if enemy_units_in_range:
+                    enemy_ice_trolls_in_range = [enemy_unit for enemy_unit in enemy_units_in_range
+                                                 if enemy_unit.type == "IceTroll"]
+                    if enemy_ice_trolls_in_range:
+                        fight(game, elf)
+                        return True
+                    else:
+                        # all enemy units are lava giants
+                        return False
+                else:
+                    # all units are my and they will move, do nothing
+                    return False
+            elif portals_in_range:
+                return attack_closest_portal(game, elf)
+            elif not has_mana:
+                Globals.mana_state = "save mana"
+                return False
+
+        else:  # false alarm
+            elf.build_portal()
+            return True
+    else: #cant get to attacking_portal_destination
+        # probobly elf or ice trolls are in the way"""
+
+
     '''
     new_attacking_portal_destination, new_safe_range = pick_attacking_portal_destinaion(game, attack_dest)
     new_turn_limit_for_dest = turns_to_travel(game, elf.get_location(), new_attacking_portal_destination, elf.max_speed, smart=True)
@@ -210,3 +246,14 @@ def best_attacking_portal_location(game, attack_dest):
     :type: (x, y)
     """
     pass  # eyal's
+
+
+def fight(game, elf, attack_target):
+    """
+
+    :param game:
+    :param attack_target:
+    :return:
+    """
+
+    pass

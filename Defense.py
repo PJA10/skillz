@@ -19,7 +19,7 @@ def enemy_elf_nearby(game,portal):
 
     if not game.get_enemy_living_elves()[0]:
         if turns_to_travel(game, game.get_enemy_living_elves(), portal, game.elf_max_speed()) <= 5:
-        # if the closest enemy elf can get to the given portal
+            # if the closest enemy elf can get to the given portal
             for ice_troll in game.get_enemy_ice_trolls():
                     if game.get_enemy_living_elves()[0].location().distance(ice_troll) >= 600:
                         return True
@@ -27,7 +27,7 @@ def enemy_elf_nearby(game,portal):
     if not game.get_enemy_living_elves():
         if not game.get_enemy_living_elves()[1]:
             if turns_to_travel(game, game.get_enemy_living_elves(), portal, game.elf_max_speed()) <= 5:
-             # if the closest enemy elf can get to the given portal
+                # if the closest enemy elf can get to the given portal
                 for ice_troll in game.get_enemy_ice_trolls():
                     if game.get_enemy_living_elves()[1].location().distance(ice_troll) >= 600:
                         return True

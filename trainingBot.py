@@ -15,6 +15,7 @@ from elf_kingdom import *
 import Globals
 import math
 import copy
+from collections import *
 
 RISK_AMOUNT = 1
 ICE = "ice"
@@ -307,7 +308,7 @@ def make_portal(game, elf, loc):
             return True
         else:
             print ("Elf " + str(elf) + " Can't build portal at " + str(loc))
-            check_why_cant_build(game, elf)
+            print check_why_cant_build_portal(game, elf)
             return False
     else:
         smart_movement(game, elf, loc)
@@ -703,7 +704,7 @@ def predict_next_turn_enemy_elves(game):
     return next_turn_enemy_elves_list
 
 
-def attack_closest_unit(game, elf, max_distance):
+def attack_closest_unit(game, elf, max_distance=float("inf")):
     """
 
     This function attack with an elf the closest unit to it
@@ -724,7 +725,7 @@ def attack_closest_unit(game, elf, max_distance):
         return False
 
 
-def attack_closest_portal(game, elf, max_distance):
+def attack_closest_portal(game, elf, max_distance=float("inf")):
     """
 
     This function attack with an elf the closest portal to it
@@ -745,7 +746,7 @@ def attack_closest_portal(game, elf, max_distance):
         return False
 
 
-def attack_closest_elf(game, elf, max_distance):
+def attack_closest_elf(game, elf, max_distance=float("inf")):
     """
 
     This function attack with an elf the closest elf to it
@@ -766,7 +767,7 @@ def attack_closest_elf(game, elf, max_distance):
         return False
 
 
-def attack_closest_creature(game, elf, max_distance):
+def attack_closest_creature(game, elf, max_distance=float("inf")):
     """
 
     This function attack with an elf the closest creature to it
@@ -787,25 +788,37 @@ def attack_closest_creature(game, elf, max_distance):
         return False
 
 
-def check_why_cant_build(game, elf):
+def check_why_cant_build_portal(game, elf):
     """
 
-    This function check why an elf cant build a portal in his position
+    This function check why an elf cant build a portal in his position.
+    The options are amount of mane, units are in building site and portals in building site
 
     :param game:
     :param elf:
-    :return:
+    :return: if we have enough mana, all units in building site and all portals in building site
+    :type: (Bollean,
     """
 
-    targets = []
+    units_in_range = []
+    portals_in_range = []
     has_mana = False
 
-    for enemy_unit in get_player_units(game, game.get_enemy()):
-        if elf.distance(enemy_unit) <= game.portal_size:
-            targets.append(enemy_unit)
+    for unit in get_player_units(game, game.get_enemy()) + get_player_units(game, game.get_myself()):
+        if unit != elf and elf.in_range(unit, game.portal_size):
+            units_in_range.append(unit)
+
+    for portal in game.get_all_portals():
+        if portal.in_range(elf, 2 * game.portal_size):
+            portals_in_range.append(portal)
+
     if game.get_my_mana() >= game.portal_cost:
         has_mana = True
-    print 'can"t build portal - has enough mana: ', has_mana, ', enemies that are disturbing: ', targets
+    else:
+        has_mana = False
+
+    why_cant_build_portal = namedtuple("why_cant_build_portal", ["has_mana", "units_in_range", "portals_in_range"])
+    return why_cant_build_portal(has_mana, units_in_range, portals_in_range)
 
 
 def get_dangerous_enemy_lava_giant(game):
