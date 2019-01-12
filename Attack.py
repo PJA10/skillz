@@ -11,17 +11,6 @@ import Globals
 
 
 def attack(game, elf, attack_dest, **kwargs):
-    """
-
-    :param game:
-    :type game: Game
-    :param elf:
-    :type elf: ELf
-    :param attack_dest:
-    :type attack_dest: MapObject
-    :param kwargs:
-    :return:
-    """
     mana_state, distraction_portals, attacking_portals = Globals.mana_state, \
                                                         Globals.distraction_portals,\
                                                         Globals.attacking_portals
@@ -36,7 +25,7 @@ def attack(game, elf, attack_dest, **kwargs):
 
     if turns_to_travel(game, elf.get_location(), attacking_portal_destination, elf.max_speed,
                        smart=True) > turn_limit_for_dest + offset:
-        handle_obstacle(game, elf, attacking_portal_destination)
+        handle_obstacle(game, elf)
     elif not elf.get_location().in_range(attacking_portal_destination, safe_range) or not elf.can_build_portal():
         if game.get_my_mana() < game.portal_cost:
             mana_state = "save mana"
@@ -72,7 +61,7 @@ def attack_wave(game):
     :return:
     """
 
-    # available portals sorted by distance to enemy castle
+    #  available portals sorted by distance to enemy castle
     attacking_portals = [portal for portal in game.get_my_portals() if not portal.is_summoning]
     attacking_portals = sorted(attacking_portals, key=lambda portal: portal.distance(game.get_enemy_castle()))
 
@@ -126,9 +115,8 @@ def determine_wave_strength(game):
     total_lava_giant_damage = 0
     attack_portals = my_available_portals[slice(number_of_possible_ice_trolls)]
     for portal in attack_portals:
-        lava_giant_damage = game.lava_giant_max_health -\
-                            (game.lava_giant_suffocation_per_turn *
-                             turns_to_travel(game, portal, game.get_enemy_castle(), game.lava_giant_max_speed))
+        lava_giant_damage = game.lava_giant_max_health - (game.lava_giant_suffocation_per_turn *
+                                                          turns_to_travel(game, portal, game.lava_giant_max_speed))
 
         total_lava_giant_damage += lava_giant_damage
 
@@ -177,17 +165,9 @@ def determine_enemy_defense_strength(game, attack_portals):
     return strength
 
 
-def handle_obstacle(game, elf, attacking_portal_destination):
+def handle_obstacle(game):
     """
 
-
-
-    :param game:
-    :type game: Game
-    :param elf:
-    :type elf: Elf
-    :param attacking_portal_destination:
-    :type attacking_portal_destination: Location
     :return:
     """
     pass  # should identafy obstacles and call a function to handle this spesific obsticale.
