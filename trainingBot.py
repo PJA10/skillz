@@ -912,7 +912,7 @@ def get_player_units(game, need_to_find_player):
 
 def has_moved(game, unit_to_check):
     """
-
+    qq
     This function check if a given unit has moved in the last turn
 
     :param game:
