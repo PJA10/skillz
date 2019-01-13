@@ -1027,18 +1027,3 @@ def attack_creature(game, elf, creature):
     else:
         elf.attack(creature)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
