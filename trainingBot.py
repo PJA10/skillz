@@ -907,6 +907,7 @@ def get_by_unique_id(game, need_to_find_unique_id):
     return None
 
 
+
 def get_player_units(game, need_to_find_player):
     """
 
@@ -921,6 +922,7 @@ def get_player_units(game, need_to_find_player):
     for player in game.get_all_players():
         if player == need_to_find_player:
             return player.living_elves + player.creatures
+
 
 
 def has_moved(game, unit_to_check):
@@ -948,3 +950,95 @@ def has_moved(game, unit_to_check):
                 return False
 
     return True # the unit has just spawn
+
+
+
+def attack_portal(elf, portal):
+    """
+    qq
+    This function order the given elf to go and attack the given portal if not in range the elf will move towards it
+
+    :param: elf, this elf will be ordered to attack the given portal
+    :param: portal, this portal will be attacked by the elf (if it's in range)
+    :return: noting
+    """
+    if elf.attack_range <= elf.get_location().distance(portal.get_location()):
+        elf.attack(portal)
+    else:
+        elf.move_to(portal)
+
+
+
+
+def attack_elf(elf, enemy_elf):
+    """
+    qq
+    This function order the given elf to go and attack the given portal if not in range the elf will move towards it
+
+    :param: elf, this elf will be ordered to attack the given enemy elf
+    :param: enemy_elf, this elf will be attacked by our elf (if it's in range)
+    :return: noting
+    """
+    if elf.attack_range <= elf.get_location().distance(enemy_elf.get_location()):
+        elf.attack(enemy_elf)
+    else:
+        elf.move_to(enemy_elf)
+
+
+
+
+def build_portal(elf):
+    """
+    qq
+    This function will order the given elf to build portal in it's location
+
+    :param: elf, this elf will be ordered to build a portal
+    :return: noting
+    """
+    elf.build_portal()
+
+
+
+def build_portal(elf, location):
+    """
+    qq
+    This function will order the given elf to build portal in it's location
+
+    :param: elf, this elf will be ordered to build a portal in the given location
+    :return: noting
+    """
+    if elf.location != location:
+        elf.move_to(location)
+    else:
+        elf.build_portal()
+
+
+
+def attack_creature(game, elf, creature):
+    """
+    qq
+    This function will order the given elf to build portal in it's location
+    :param: elf, this elf will be ordered to attack the given creature
+    :param: creature, the elf will be ordered to attack it
+    :return: noting
+    """
+    if elf.location != creature.location:
+        elf.move_to(creature)
+    else:
+        elf.attack(creature)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
