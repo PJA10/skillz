@@ -15,6 +15,7 @@ from elf_kingdom import *
 import Globals
 import math
 import copy
+from Defense import *
 from collections import *
 
 RISK_AMOUNT = 1
