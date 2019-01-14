@@ -15,7 +15,6 @@ from elf_kingdom import *
 import Globals
 import math
 import copy
-from Defense import *
 from collections import *
 
 RISK_AMOUNT = 1
@@ -988,7 +987,7 @@ def attack_elf(elf, enemy_elf):
 
 
 
-def build_portal(elf):
+def build_portal_in_place(elf):
     """
     qq
     This function will order the given elf to build portal in it's location

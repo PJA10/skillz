@@ -1,6 +1,5 @@
 from elf_kingdom import *
 from trainingBot import *
-from MyBot import *
 import Globals
 from Slider import *
 
@@ -24,7 +23,7 @@ def enemy_elf_threatening_portal(game,portal):
 
     return False
 
-
+'''
 def attacked_portals(game):
     """
     This function checks if enemy elf is attacking one of our portals
@@ -38,7 +37,7 @@ def attacked_portals(game):
         if(prev_game.portal.current_health >= portal.current_health):
             attacked_portals.append(portal)
     return attacked_portals
-
+'''
 
 
 '''

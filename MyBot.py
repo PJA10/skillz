@@ -13,6 +13,7 @@ MyBot
 from elf_kingdom import *
 from trainingBot import *
 from Slider import *
+from Defense import *
 import Globals
 
 ICE = "ice"
