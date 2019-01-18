@@ -4,7 +4,7 @@ import Globals
 from Slider import *
 
 
-def enemy_elf_threatening_portal(game,portal):
+def enemy_elf_threatening_portal(game, portal):
     """
     This function checks if one of the enemy elves threatening the given portal. It checks if one of the enemy elves can
     get to the given portal in 5 turns or less + that he is not targeted by close(to the elf) ally ice trolls
@@ -16,12 +16,34 @@ def enemy_elf_threatening_portal(game,portal):
     if not game.get_enemy_living_elves()[0]:
         for elf in game.get_enemy_living_elves:
             if turns_to_travel(game, elf, portal, game.elf_max_speed()) <= 5:
-            # if the closest enemy elf can get to the given portal
+            # if the closest enemy elf can get to the given portal in 5 turns or less
                 for ice_troll in game.get_enemy_ice_trolls():
-                    if elf.location().distance(ice_troll) >= 600:
+                    if elf.location().distance(ice_troll) >= 800:
                         return True
 
     return False
+
+
+def should_summon_ice_troll(game):
+    """
+    This function checks if we should summon ice trolls in order to defend our portals/castle and return true if we
+    should
+    :return: if we should summon ice trolls to defend
+    :type: bool
+    """
+
+    for portal in game.get_my_portals():
+        if enemy_elf_threatening_portal(game, portal):
+            return True
+
+    for lava_giant in game.get_enemy_lava_giants():
+        if lava_giant.current_health >= lava_giant.max_health/2 and game.get_my_castle().distance(lava_giant) <= 1800:
+            #values of lava_giant.max_health/2 and .... 1300 should be adjusted after tests
+            return True
+
+    return False
+
+
 
 '''
 def attacked_portals(game):
