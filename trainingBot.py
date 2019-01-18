@@ -467,7 +467,7 @@ def get_closest_friendly_unit(game, map_object):
     This function return the closest friendly unit(creature + elf) to a given map object
 
     :param map_object: an object on the map in order to find the closest unit to it
-    :return: the closest enemy's unit to map_object
+    :return: the closest friendly unit to map_object
     :type: Creature/Elf
     """
 
@@ -482,7 +482,7 @@ def get_closest_friendly_elf(game, map_object):
 
     :param map_object: an object on the map in order to find the closest elf to it
     :type map_object: MapObject
-    :return: the closest enemy's elf to map_object
+    :return: the closest friendly elf to map_object
     :type: Elf
     """
 
@@ -495,11 +495,24 @@ def get_closest_friendly_creature(game, map_object):
     This function return the closest friendly creature to a given map object
 
     :param map_object: an object on the map in order to find the closest creature to it
-    :return: the closest enemy's creature to map_object
+    :return: the closest friendly creature to map_object
     :type: Creature
     """
 
     return closest(game, map_object, game.get_my_creatures())
+
+def get_closest_friendly_ice_troll(game, map_object):
+    """
+
+    This function return the closest friendly creature to a given map object
+
+    :param map_object: an object on the map in order to find the closest creature to it
+    :return: the closest friendly ice troll to map_object
+    :type: creature
+    """
+
+    return closest(game, map_object, game.get_my_ice_trolls())
+
 
 
 def get_circle(game, circle_location, radius):
