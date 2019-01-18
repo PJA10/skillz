@@ -1022,7 +1022,7 @@ def attack_creature(game, elf, creature):
     :param: creature, the elf will be ordered to attack it
     :return: noting
     """
-    if elf.location != creature.location:
+    if not elf.in_attack_range(creature):
         elf.move_to(creature)
     else:
         elf.attack(creature)
