@@ -248,7 +248,7 @@ def best_attacking_portal_location(game, attack_dest):
     pass  # eyal's
 
 
-def fight(game, elf, attack_target):
+def does_win_fight(game, elf, attack_target):
     """
 
     :param game:
@@ -256,4 +256,46 @@ def fight(game, elf, attack_target):
     :return:
     """
 
-    pass
+    curr_elf = copy.deepcopy(elf)
+    curr_attack_target = copy.deepcopy(attack_target)
+    curr_game = copy.deepcopy(game)
+    max_depth = 5
+
+    # print "elf: %s, attack_target %s" % (elf, attack_target)
+
+    # loop over the next turns until elf or attack_target will die
+    while curr_attack_target.current_health and curr_elf.current_health  and max_depth:
+        curr_swapped_game = copy.deepcopy(curr_game)
+        curr_swapped_game._hx___me, curr_swapped_game._hx___enemies = curr_game.get_enemy(), [curr_game.get_myself()]
+        # print "----------%s---------" % (5 - max_depth)
+        
+        # print "enemy_ice_trolls: %s" % curr_game.get_enemy_ice_trolls()
+        # print ",".join(str((portal, portal.turns_to_summon)) for portal in curr_game.get_enemy_portals())
+        
+        elf_next_turn_hp = get_next_turn_health(curr_game, curr_elf, include_elves=True)
+        attack_target_next_turn_hp = get_next_turn_health(curr_swapped_game, curr_attack_target, include_elves=True)
+        # print "curr_elf hp: %s, elf_next_turn_hp %s" % (curr_elf.current_health, elf_next_turn_hp)
+        # print "curr_attack_target hp: %s, curr_attack_target %s" % (curr_attack_target.current_health, attack_target_next_turn_hp)
+
+        if not curr_elf.in_attack_range(attack_target):
+            curr_elf.location = curr_elf.get_location().towards(attack_target, game.elf_max_speed)
+
+        next_turn_my_ice_trolls, next_turn_enemy_ice_trolls = predict_next_turn_ice_trolls(curr_game)
+        curr_game.get_myself().ice_trolls = next_turn_my_ice_trolls
+        # print "next_turn_enemy_ice_trolls", next_turn_enemy_ice_trolls
+        curr_game.get_enemy().ice_trolls = next_turn_enemy_ice_trolls
+        curr_elf.current_health = elf_next_turn_hp
+        curr_attack_target.current_health = attack_target_next_turn_hp
+        for portal in curr_game.get_all_portals():
+            if portal.is_summoning:
+                portal.turns_to_summon -= 1
+            if portal.turns_to_summon == 0:
+                portal.is_summoning = False
+        max_depth -= 1
+
+    if curr_elf.current_health > curr_attack_target.current_health:  # if we will  won
+        # print "will win"
+        return True
+    else:  # if we lost or draw
+        # print "will lose"
+        return False
