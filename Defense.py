@@ -15,14 +15,12 @@ def enemy_elf_threatening_portal(game, portal):
 
     if not game.get_enemy_living_elves()[0]:
         for elf in game.get_enemy_living_elves:
-            if turns_to_travel(game, elf, portal, game.elf_max_speed()) <= 5:
+            if elf_range_turns_to_distance(game, elf, portal, game.elf_max_speed()) <= 5:
             # if the closest enemy elf can get to the given portal in 5 turns or less
                 for ice_troll in game.get_my_ice_trolls():
-                   if(get_closest_enemy_unit(game, ice_troll) == elf and elf.distance(ice_troll)<= 400):
+                   if (get_closest_enemy_unit(game, ice_troll) == elf and elf.distance(ice_troll)<= 400):
                         return False
                 return True
-
-
     return False
 
 
