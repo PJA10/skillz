@@ -22,7 +22,7 @@ ICE = "ice"
 LAVA = "lava"
 
 
-def is_targeted_by_icetroll(game, map_object):
+def is_targeted_by_enemy_icetroll(game, map_object):
     """
 
     This function returns a list of all the enemy's icetroll who target a given map object.
@@ -31,11 +31,11 @@ def is_targeted_by_icetroll(game, map_object):
     :param map_object: the map object which to check if is targeted bt ice trolls
     :type map_object: MapObject
     :return: return a list of the ice trolls which target obj
-    :type: [Creature]
+    :type: [IceTroll]
     """
 
     icetrolls_that_target_me = [icetroll for icetroll in game.get_enemy_ice_trolls()
-                                if get_closest_friendly_unit(game, icetroll) == map_object]
+                                if get_closest_my_unit(game, icetroll) == map_object]
     return icetrolls_that_target_me
 
 
@@ -70,20 +70,6 @@ def get_locations(game, map_objects_list):
     """
 
     return [map_object.get_location() for map_object in map_objects_list]
-
-
-def get_closest_enemy_portal(game, map_object):
-    """
-
-    This function return the closest enemy portal to a given map object
-
-    :param map_object: an object on the map in order to find the closest portal to it
-    :type map_object: MapObject
-    :return: the closest enemy's portal to map_object
-    :type: Portal
-    """
-
-    return closest(game, map_object,game.get_enemy_portals())
 
 
 def get_closest_enemy_elf(game, map_object):
@@ -125,6 +111,19 @@ def get_closest_enemy_unit(game, map_object):
 
     enemy_units = get_player_units(game, game.get_enemy())
     return closest(game, map_object, enemy_units)
+
+
+def get_closest_enemy_portal(game, map_object):
+    """
+
+    This function return the closest enemy portal to a given map object
+
+    :param map_object: an object on the map in order to find the closest portal to it
+    :return: the closest enemy's portal to map_object
+    :type: Portal
+    """
+
+    return closest(game, map_object, game.get_enemy_portals())
 
 
 def in_object_range(game, target_map_object, map_objects_list, max_range):
@@ -485,60 +484,6 @@ def get_possible_movement_points(game, elf, destination, next_turn_enemy_icetrol
     return possible_movement_points
 
 
-def get_closest_friendly_unit(game, map_object):
-    """
-
-    This function return the closest friendly unit(creature + elf) to a given map object
-
-    :param map_object: an object on the map in order to find the closest unit to it
-    :return: the closest friendly unit to map_object
-    :type: Creature/Elf
-    """
-
-    my_units = get_player_units(game, game.get_myself())
-    return closest(game, map_object, my_units)
-
-
-def get_closest_friendly_elf(game, map_object):
-    """
-
-    This function return the closest friendly elf to a given map object
-
-    :param map_object: an object on the map in order to find the closest elf to it
-    :type map_object: MapObject
-    :return: the closest friendly elf to map_object
-    :type: Elf
-    """
-
-    return closest(game, map_object, game.get_my_living_elves())
-
-
-def get_closest_friendly_creature(game, map_object):
-    """
-
-    This function return the closest friendly creature to a given map object
-
-    :param map_object: an object on the map in order to find the closest creature to it
-    :return: the closest friendly creature to map_object
-    :type: Creature
-    """
-
-    return closest(game, map_object, game.get_my_creatures())
-
-
-def get_closest_friendly_ice_troll(game, map_object):
-    """
-
-    This function return the closest friendly creature to a given map object
-
-    :param map_object: an object on the map in order to find the closest creature to it
-    :return: the closest friendly ice troll to map_object
-    :type: creature
-    """
-
-    return closest(game, map_object, game.get_my_ice_trolls())
-
-
 def get_circle(game, circle_location, radius):
     """
 
@@ -627,7 +572,7 @@ def predict_next_turn_ice_trolls(game):
             continue
         next_turn_enemy_icetroll = copy.deepcopy(enemy_icetroll)
         next_turn_enemy_icetroll.current_health -= game.ice_troll_suffocation_per_turn
-        target = get_closest_friendly_unit(game, enemy_icetroll)
+        target = get_closest_my_unit(game, enemy_icetroll)
         if target and not can_attack(game, enemy_icetroll, target):
             next_turn_enemy_icetroll.location = enemy_icetroll.get_location().towards(target, game.ice_troll_max_speed)
         next_turn_enemy_icetroll_list.append(next_turn_enemy_icetroll)
@@ -910,8 +855,8 @@ def is_enemy_elf_attacking_elves(game):
             if not curr_turn_my_elf:
                 continue
             # get curr turn hp if only ice trolls have attacked last_turn_my_elf
-            curr_turn_expected_hp = get_next_turn_health(last_turn_game, last_turn_my_elf,
-                                                         include_elves=False)
+            curr_turn_expected_hp = get_my_unit_next_turn_health(last_turn_game, last_turn_my_elf,
+                                                                 include_elves=False)
 
             if curr_turn_my_elf.current_health < curr_turn_expected_hp:  # if the actual hp is lower
                 for curr_turn_enemy_elf in game.get_enemy_living_elves():
@@ -923,21 +868,24 @@ def is_enemy_elf_attacking_elves(game):
     return False
 
 
-def get_next_turn_health(game, my_unit, include_elves=False):
+def get_my_unit_next_turn_health(game, my_unit, include_elves=False):
     """
 
-    This function predict a given unit next turn health
+    This function predict a given enemy unit next turn health
     The function can include possible enemy elves attack depend on the *include_elves* parameter
 
     :param game:
-    :param my_unit: the unit to predict it's next turn hp
+    :param my_unit: the enemy unit to predict it's next turn hp
     :param include_elves: a flag to represent if to include enemy elves possible attacks
     :type include_elves: Boolean
     :return: the predicted next turn *my_unit* hp
     """
 
     next_turn_hp = my_unit.current_health
-    ice_trolls_that_target_me = is_targeted_by_icetroll(game, my_unit)
+    ice_trolls_that_target_me = is_targeted_by_enemy_icetroll(game, my_unit)
+
+    if isinstance(my_unit, Creature):
+        next_turn_hp -= my_unit.suffocation_per_turn
 
     for close_ice_troll in ice_trolls_that_target_me:
             if can_attack(game, close_ice_troll, my_unit):
@@ -1032,54 +980,6 @@ def has_moved(game, unit_to_check):
     return True  # the unit has just spawn
 
 
-def attack_portal(elf, portal):
-    """
-    qq
-    This function order the given elf to go and attack the given portal if not in range the elf will move towards it
-
-    :param: elf, this elf will be ordered to attack the given portal
-    :param: portal, this portal will be attacked by the elf (if it's in range)
-    :return: if an action has been made with the elf
-    """
-    if elf.in_attack_range(portal):
-        elf.attack(portal)
-    else:
-        elf.move_to(portal)
-    return True
-
-
-def attack_elf(elf, enemy_elf):
-    """
-    qq
-    This function order the given elf to go and attack the given portal if not in range the elf will move towards it
-
-    :param: elf, this elf will be ordered to attack the given enemy elf
-    :param: enemy_elf, this elf will be attacked by our elf (if it's in range)
-    :return: if an action has been made with the elf
-    """
-    if elf.in_attack_range(enemy_elf):
-        elf.attack(enemy_elf)
-    else:
-        elf.move_to(enemy_elf)
-    return True
-
-
-def attack_creature(game, elf, creature):
-    """
-    qq
-    This function will order the given elf to build portal in it's location
-    :param: elf, this elf will be ordered to attack the given creature
-    :param: creature, the elf will be ordered to attack it
-    :return: if an action has been made with the elf
-    """
-
-    if elf.in_attack_range(creature):
-        elf.attack(creature)
-    else:
-        elf.move_to(creature)
-    return True
-
-
 def get_objects_in_path(game, first_path_edge, second_path_edge, possible_map_objects_in_path, offset=100):
     """
 
@@ -1105,3 +1005,82 @@ def get_objects_in_path(game, first_path_edge, second_path_edge, possible_map_ob
             map_objects_in_way.append(map_object)
 
     return map_objects_in_way
+
+
+def swap_players(func):  # this is a decorators for doubling a function with swaped players
+    def swaped_func(game, *args):
+        swaped_game = copy.deepcopy(game)
+        swaped_game._hx___me, swaped_game._hx___enemies = game.get_enemy(), [game.get_myself()]
+        return func(swaped_game, *args)
+    return swaped_func
+
+
+get_closest_my_portal = swap_players(get_closest_enemy_portal)
+get_closest_my_portal.__doc__ = \
+    """
+    
+    This function return the closest portal of my portals to a given map object
+    
+    :param map_object: an object on the map in order to find the closest portal to it
+    :return: the closest my portal to map_object
+    :type: Portal
+    """
+get_closest_my_unit = swap_players(get_closest_enemy_unit)
+get_closest_my_unit.__doc__ = \
+    """
+
+    This function return the closest unit(creature + elf) of my units to a given map object
+
+    :param map_object: an object on the map in order to find the closest unit to it
+    :return: the closest my unit to map_object
+    :type: Creature/Elf
+    """
+
+get_closest_my_elf = swap_players(get_closest_enemy_elf)
+get_closest_my_elf.__doc__ = \
+    """
+    
+    This function return the closest elf of my elves to a given map object
+    
+    :param map_object: an object on the map in order to find the closest elf to it
+    :return: the closest my elf to map_object
+    :type: Elf
+    """
+
+get_closest_my_creature = swap_players(get_closest_enemy_creature)
+get_closest_my_creature.__doc__ = \
+    """
+
+    This function return the closest creature of my creatures to a given map object
+
+    :param map_object: an object on the map in order to find the closest creature to it
+    :return: the closest my creature to map_object
+    :type: Creature
+    """
+
+is_targeted_by_my_icetroll = swap_players(is_targeted_by_enemy_icetroll)
+is_targeted_by_my_icetroll.__doc__ = \
+    """
+
+    This function returns a list of all the my ice trolls who target a given map object.
+    if the returned list is empty then the given map object is safe
+
+    :param map_object: the map object which to check if is targeted bt ice trolls
+    :type map_object: MapObject
+    :return: return a list of the ice trolls which target obj
+    :type: [IceTroll]
+    """
+
+get_enemy_unit_next_turn_health = swap_players(get_my_unit_next_turn_health)
+get_enemy_unit_next_turn_health.__doc__ = \
+    """
+
+    This function predict a given enemy unit next turn health
+    The function can include possible elves attack depend on the *include_elves* parameter
+
+    :param game:
+    :param my_unit: the enemy unit to predict it's next turn hp
+    :param include_elves: a flag to represent if to include elves possible attacks
+    :type include_elves: Boolean
+    :return: the predicted next turn *my_unit* hp
+    """

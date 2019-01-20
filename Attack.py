@@ -291,15 +291,13 @@ def does_win_fight(game, elf, attack_target, max_depth=5):
 
     # loop over the next turns until elf or attack_target will die
     while curr_attack_target.current_health and curr_elf.current_health  and max_depth:
-        curr_swapped_game = copy.deepcopy(curr_game)
-        curr_swapped_game._hx___me, curr_swapped_game._hx___enemies = curr_game.get_enemy(), [curr_game.get_myself()]
         # print "----------%s---------" % (5 - max_depth)
         
         # print "enemy_ice_trolls: %s" % curr_game.get_enemy_ice_trolls()
         # print ",".join(str((portal, portal.turns_to_summon)) for portal in curr_game.get_enemy_portals())
         
-        elf_next_turn_hp = get_next_turn_health(curr_game, curr_elf, include_elves=True)
-        attack_target_next_turn_hp = get_next_turn_health(curr_swapped_game, curr_attack_target, include_elves=True)
+        elf_next_turn_hp = get_my_unit_next_turn_health(curr_game, curr_elf, include_elves=True)
+        attack_target_next_turn_hp = get_enemy_unit_next_turn_health(curr_game, curr_attack_target, include_elves=True)
         # print "curr_elf hp: %s, elf_next_turn_hp %s" % (curr_elf.current_health, elf_next_turn_hp)
         # print "curr_attack_target hp: %s, curr_attack_target %s" % (curr_attack_target.current_health, attack_target_next_turn_hp)
 
