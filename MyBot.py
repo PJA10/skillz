@@ -51,6 +51,9 @@ def do_turn(game):
     # MUST STAY IN THE END OF do_turn():
     Globals.prev_game = copy.deepcopy(game)
 
+    print "threatened portals: ", get_threatened_portals(game)
+    print "threatening elves: ", get_threatening_elves(game)
+
 
 def tests(game):
     """

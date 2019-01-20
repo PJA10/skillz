@@ -366,26 +366,6 @@ def turns_to_travel(game, map_object, destination, max_speed, smart = False):
     return number_of_turns
 
 
-def elf_range_turns_to_distance(game, elf, destination, max_speed, distance):
-    """
-
-    This function calculate the amount of turns if will take to get to the elf's attack range from the game object in
-    the least turns
-    :param game:
-    :type game: Game
-    :param elf: the start point of the travel
-    :param destination: the destination of the travel
-    :param max_speed: the speed of the object traveling
-    :param distance: the distance from the game object
-    :type distance: int
-    :return: the amount of turns needed to get to the given distance from the game object
-    :type: int
-    """
-
-    distance_to_destination = elf.distance(destination) - elf.attack_range
-    number_of_turns = math.ceil(distance_to_destination/max_speed)
-    return number_of_turns
-
 
 def smart_movement(game, elf, destination):
     """

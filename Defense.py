@@ -62,6 +62,26 @@ def ice_troll_defense(game):
             game.get_my_castle().get_closest_my_portal(game).summon_ice_troll()
 
 
+def attacks_close_to_our_castle_portals(game):
+    """
+
+
+    This function checks if an enemy elf starts creating a portal close to us,
+    if he is elf and ice troll will be send to attack him and the portal
+    :return: nothing
+    """
+    if not game.get_enemy_living_elves():
+        for elf in game.get_enemy_living_elves():
+            if elf.is_building() and game.get_my_castle().distance(elf) <= 2000:
+                get_closest_my_portal(game, elf).summon_ice_troll()
+                if not game.get_my_living_elves():
+                    get_closest_my_elf(game, elf).attack(elf)
+
+
+
+
+
+
 
 '''
 def attacked_portals(game):
@@ -86,7 +106,7 @@ def which_enemy_elves_attacking_our_portals():
     """
     #This function return a list of the elves that attacking one of our portals
     #:param : none
-    #:return: a list of the elves that attacking our portals 
+    #:return: a list of the elves that attacking our portals
     #:type: [elf]
     """
     attacking_elves = []
