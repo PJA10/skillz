@@ -28,22 +28,39 @@ def attack(game, elf, attack_dest, **kwargs):
                                                         Globals.attacking_portals
     offset = 5  # turns
     if not kwargs.get("attacking_portal_destination"):
-        attacking_portal_destination, safe_range = best_attacking_portal_location(game, attack_dest)
-        turn_limit_for_dest = turns_to_travel(game, elf.get_location(), attacking_portal_destination, elf.max_speed,
-                                              smart=True)
-    else:
-        attacking_portal_destination, safe_range = kwargs["attacking_portal_destination"]
-        turn_limit_for_dest = kwargs["turn_limit_for_dest"]
+        kwargs["attacking_portal_destination"] = best_attacking_portal_location(game, attack_dest)
+        kwargs["turn_limit_for_dest"] = turns_to_travel(game, elf, kwargs["attacking_portal_destination"][0],
+                                                        elf.max_speed, smart=True)
 
-    if turns_to_travel(game, elf.get_location(), attacking_portal_destination, elf.max_speed,
+    attacking_portal_destination, safe_range = kwargs["attacking_portal_destination"]
+    turn_limit_for_dest = kwargs["turn_limit_for_dest"]
+
+    if turns_to_travel(game, elf, attacking_portal_destination, elf.max_speed,
                        smart=True) > turn_limit_for_dest + offset:
-        handle_obstacle(game, elf, attacking_portal_destination, safe_range)
+        already_acted, change_att_portal_dest = handle_obstacle(game, elf, attacking_portal_destination, safe_range)
+        if not already_acted and change_att_portal_dest:
+            return attack(game, elf, attack_dest, {})
 
     # maybe add if the elf is in attacking_portal_destination and not elf.can_build_portal() then handle_obstacle()
     elif not elf.in_range(attacking_portal_destination, safe_range) or not elf.can_build_portal():
         if game.get_my_mana() < game.portal_cost:
             mana_state = "save mana"
-        smart_movement(game, elf, attacking_portal_destination)
+
+        closest_enemy_portal = get_closest_enemy_portal(game, elf)
+        closest_enemy_elf = get_closest_enemy_elf(game, elf)
+
+        if get_objects_in_path(game, elf, attacking_portal_destination, [closest_enemy_portal],
+                               game.portal_size + game.elf_max_speed + game.elf_attack_range) and \
+                does_win_fight(game, elf, closest_enemy_portal):
+
+            attack_object(game, elf, closest_enemy_portal)
+
+        elif get_objects_in_path(game, elf, attacking_portal_destination, [closest_enemy_elf],
+                               game.elf_max_speed + game.elf_attack_range) and \
+                does_win_fight(game, elf, closest_enemy_elf):
+            attack_object(game, elf, closest_enemy_elf)
+        else:
+            smart_movement(game, elf, attacking_portal_destination)
     elif elf.can_build_portal():
         elf.build_portal()
         attacking_portal_destination = None
@@ -184,7 +201,8 @@ def determine_enemy_defense_strength(game, attack_portals):
 def handle_obstacle(game, elf, attacking_portal_destination, safe_range):
     """
 
-
+    This function handle obstacles that are disturbing elf to build an attacking portal
+    The function will identify the obstacle and act correctly
 
     :param game:
     :type game: Game
@@ -196,45 +214,47 @@ def handle_obstacle(game, elf, attacking_portal_destination, safe_range):
     :type safe_range: Int
     :return:
     """
-    pass
-    """if elf.in_range(attacking_portal_destination, safe_range):
+
+    already_acted, change_att_portal_dest = False, False
+
+    if elf.in_range(attacking_portal_destination, safe_range):
         if not elf.can_build_portal():
-            has_mana, units_in_range, portals_in_range = check_why_cant_build_portal(game, elf)
-            if units_in_range:
-                enemy_units_in_range = [unit for unit in units_in_range if unit.owner == game.get_enemy()]
-                if enemy_units_in_range:
-                    enemy_ice_trolls_in_range = [enemy_unit for enemy_unit in enemy_units_in_range
-                                                 if enemy_unit.type == "IceTroll"]
-                    if enemy_ice_trolls_in_range:
-                        fight(game, elf)
-                        return True
-                    else:
-                        # all enemy units are lava giants
-                        return False
-                else:
-                    # all units are my and they will move, do nothing
-                    return False
-            elif portals_in_range:
-                return attack_closest_portal(game, elf)
+            has_mana, portals_in_range = check_why_cant_build_portal(game, elf)
+            if portals_in_range:
+                already_acted = attack_closest_enemy_portal(game, elf), False
             elif not has_mana:
                 Globals.mana_state = "save mana"
-                return False
-
+                already_acted = False
         else:  # false alarm
             elf.build_portal()
-            return True
-    else: #cant get to attacking_portal_destination
-        # probobly elf or ice trolls are in the way"""
+            already_acted = True
+    else:  # cant get to attacking_portal_destination
+        # probably elf or ice trolls are in the way
 
+        elves_in_the_path = get_objects_in_path(game, elf, attacking_portal_destination, game.get_enemy_living_elves())
+        ice_trolls_in_the_path = get_objects_in_path(game, elf, attacking_portal_destination, game.get_enemy_ice_trolls())
 
-    '''
-    new_attacking_portal_destination, new_safe_range = pick_attacking_portal_destinaion(game, attack_dest)
-    new_turn_limit_for_dest = turns_to_travel(game, elf.get_location(), new_attacking_portal_destination, elf.max_speed, smart=True)
-    if elf.get_location().distance(new_attacking_portal_destination) < elf.get_location().distance(new_attacking_portal_destination):
-        attacking_portal_destination, safe_range = new_attacking_portal_destination, new_safe_range
-        turn_limit_for_dest = new_turn_limit_for_dest
-    else:
-    '''
+        if not elves_in_the_path and not ice_trolls_in_the_path:
+            # there are no elves and no ice trolls
+            # then just change attack portal dest
+            change_att_portal_dest = True
+
+        # if elf is in the way, fight him if we will win and choose new attacking_portal_destination if will lose
+        elif len(elves_in_the_path) == 1:
+            if does_win_fight(game, elf, elves_in_the_path[0]):
+                attack_object(game, elf, elves_in_the_path[0])
+                already_acted = True
+            else:
+                change_att_portal_dest = True
+
+        elif len(elves_in_the_path) > 1:
+            change_att_portal_dest = True
+
+        # if ice_troll is in the way, if there is only one add time, else choose new attacking_portal_destination
+        elif len(ice_trolls_in_the_path) != 1:
+            change_att_portal_dest = True
+
+    return already_acted, change_att_portal_dest
 
 
 def best_attacking_portal_location(game, attack_dest):
@@ -248,18 +268,24 @@ def best_attacking_portal_location(game, attack_dest):
     pass  # eyal's
 
 
-def does_win_fight(game, elf, attack_target):
+def does_win_fight(game, elf, attack_target, max_depth=5):
     """
 
+    The function calculate who will win if *elf* and *attack_target* will start a fight this turn
+    The function thinks to the next *max_depth* turns what will happen with close ice trolls
+
     :param game:
-    :param attack_target:
-    :return:
+    :param elf: the elf to start a fight with
+    :param attack_target: the elf's target
+    :type attack_target: MapObject
+    :param max_depth: the max number of turns to calculate. take care of running time!!
+    :return: if elf is going to win or not
+    :type: Boolean
     """
 
     curr_elf = copy.deepcopy(elf)
     curr_attack_target = copy.deepcopy(attack_target)
     curr_game = copy.deepcopy(game)
-    max_depth = 5
 
     # print "elf: %s, attack_target %s" % (elf, attack_target)
 

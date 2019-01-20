@@ -286,7 +286,7 @@ def handle_portals(game):
         summon(game, port_atk, LAVA)
 
 
-def make_portal(game, elf, loc):
+def make_portal(game, elf, loc=False):
     """
 
     This function make a portal with a given elf at a specific location
@@ -301,6 +301,9 @@ def make_portal(game, elf, loc):
 
     if not elf:
         return None
+
+    if not loc:
+        loc = elf.get_location()
 
     if elf.get_location() == loc:
         if elf.can_build_portal():
@@ -522,6 +525,7 @@ def get_closest_friendly_creature(game, map_object):
 
     return closest(game, map_object, game.get_my_creatures())
 
+
 def get_closest_friendly_ice_troll(game, map_object):
     """
 
@@ -533,7 +537,6 @@ def get_closest_friendly_ice_troll(game, map_object):
     """
 
     return closest(game, map_object, game.get_my_ice_trolls())
-
 
 
 def get_circle(game, circle_location, radius):
@@ -844,10 +847,6 @@ def check_why_cant_build_portal(game, elf):
     portals_in_range = []
     has_mana = False
 
-    for unit in get_player_units(game, game.get_enemy()) + get_player_units(game, game.get_myself()):
-        if unit != elf and elf.in_range(unit, game.portal_size):
-            units_in_range.append(unit)
-
     for portal in game.get_all_portals():
         if portal.in_range(elf, 2 * game.portal_size):
             portals_in_range.append(portal)
@@ -857,8 +856,8 @@ def check_why_cant_build_portal(game, elf):
     else:
         has_mana = False
 
-    why_cant_build_portal = namedtuple("why_cant_build_portal", ["has_mana", "units_in_range", "portals_in_range"])
-    return why_cant_build_portal(has_mana, units_in_range, portals_in_range)
+    why_cant_build_portal = namedtuple("why_cant_build_portal", ["has_mana", "portals_in_range"])
+    return why_cant_build_portal(has_mana, portals_in_range)
 
 
 def get_dangerous_enemy_lava_giant(game):
@@ -907,13 +906,14 @@ def is_enemy_elf_attacking_elves(game):
         return True
     else:
         for last_turn_my_elf in last_turn_game.get_my_living_elves():
+            curr_turn_my_elf = get_by_unique_id(game, last_turn_my_elf.unique_id)
+            if not curr_turn_my_elf:
+                continue
             # get curr turn hp if only ice trolls have attacked last_turn_my_elf
             curr_turn_expected_hp = get_next_turn_health(last_turn_game, last_turn_my_elf,
                                                          include_elves=False)
 
-            curr_turn_my_elf = get_by_unique_id(game, last_turn_my_elf.unique_id)
             if curr_turn_my_elf.current_health < curr_turn_expected_hp:  # if the actual hp is lower
-
                 for curr_turn_enemy_elf in game.get_enemy_living_elves():
                     if not has_moved(game, curr_turn_enemy_elf):  # if the enemy elf hasn't move
                         if not curr_turn_enemy_elf.is_building:  # and he doesn't build a portal
@@ -1064,22 +1064,6 @@ def attack_elf(elf, enemy_elf):
     return True
 
 
-def build_portal_in_place(elf):
-    """
-    qq
-    This function will order the given elf to build portal in it's location
-
-    :param: elf, this elf will be ordered to build a portal
-    :return: if an action has been made with the elf
-    """
-
-    if elf.can_build_portal():
-        elf.build_portal()
-        return True
-    else:
-        return False
-
-
 def attack_creature(game, elf, creature):
     """
     qq
@@ -1094,3 +1078,30 @@ def attack_creature(game, elf, creature):
     else:
         elf.move_to(creature)
     return True
+
+
+def get_objects_in_path(game, first_path_edge, second_path_edge, possible_map_objects_in_path, offset=100):
+    """
+
+    This function look for map objects that are on the path from one point to another from a given list of map objects
+
+    :param game:
+    :param first_path_edge: the first edge of the path
+    :param second_path_edge: the second edge of the path
+    :param possible_map_objects_in_path: the list of map object to search in
+    :type possible_map_objects_in_path: [MapObject]
+    :param offset: the amount of flexibility for a map object to be count as on he way
+    :return: the list of all map object that are on the path from *possible_map_objects_in_path*
+    """
+
+    total_distance = first_path_edge.distance(second_path_edge)
+    map_objects_in_way = []
+
+    for map_object in possible_map_objects_in_path:
+        distance_to_first_edge = map_object.distance(first_path_edge)
+        distance_to_second_edge = map_object.distance(second_path_edge)
+
+        if distance_to_first_edge + distance_to_second_edge < total_distance + offset:
+            map_objects_in_way.append(map_object)
+
+    return map_objects_in_way
