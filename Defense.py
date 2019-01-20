@@ -72,7 +72,11 @@ def attacks_close_to_our_castle_portals(game):
     """
     if not game.get_enemy_living_elves():
         for elf in game.get_enemy_living_elves():
-            if elf.
+            if elf.is_building() and game.get_my_castle().distance(elf) <= 2000:
+                get_closest_my_portal(game, elf).summon_ice_troll()
+                if not game.get_my_living_elves():
+                    get_closest_friendly_elf(game, elf).attack(elf)
+
 
 
 

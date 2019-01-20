@@ -15,6 +15,7 @@ from trainingBot import *
 from Slider import *
 from Defense import *
 import Globals
+from Attack import *
 
 ICE = "ice"
 LAVA = "lava"
@@ -44,6 +45,7 @@ def do_turn(game):
     update_portal_activeness(game)
 
     # tests(game)
+    
     old_do_turn(game)
 
     # MUST STAY IN THE END OF do_turn():
@@ -139,19 +141,19 @@ def normalize(game, elf, destination, func):
             normal = 1.0 / (d*num_of_portals)
 
 
-    if func == attack_closest_creature:
+    if func == attack_closest_enemy_creature:
         if len(game.get_enemy_creatures()) == 0:
             normal = 0
         else:
             normal = 1.0 / elf.distance(get_closest_enemy_creature(game, elf))
 
-    if func == attack_closest_portal:
+    if func == attack_closest_enemy_portal:
         if len(game.get_enemy_portals()) == 0:
             normal = 0
         else:
             normal = 1.0 / (elf.distance(get_closest_enemy_portal(game, elf)) + 50)
 
-    if func == attack_closest_elf:
+    if func == attack_closest_enemy_elf:
         if len(game.get_enemy_living_elves()) == 0:
             normal = 0
         else:
@@ -200,13 +202,13 @@ def handle_elves(game):
 
         if not make_portal(game, elf_def, game.get_my_castle().get_location().towards(game.get_enemy_castle(),
                                                                                       game.castle_size * 1.5)):
-            if not attack_closest_portal(game, elf_def, max_distance):
-                if not attack_closest_enemy(game, elf_def, max_distance):
+            if not attack_closest_enemy_portal(game, elf_def, max_distance):
+                if not attack_closest_enemy_unit(game, elf_def, max_distance):
                     smart_movement(game, elf_def, game.get_my_castle().get_location().towards(game.get_enemy_castle(),
                                                                                           game.castle_size*1.25))
     else:
-        if not attack_closest_portal(game, elf_def, max_distance):
-            if not attack_closest_enemy(game, elf_def, max_distance):
+        if not attack_closest_enemy_portal(game, elf_def, max_distance):
+            if not attack_closest_enemy_unit(game, elf_def, max_distance):
                 smart_movement(game, elf_def, game.get_my_castle().get_location().towards(game.get_enemy_castle(),
                                                                                           game.castle_size * 1.25))
 
@@ -214,61 +216,11 @@ def handle_elves(game):
         if not port_atk:
             if not make_portal(game, elf_atk,
                                game.get_enemy_castle().get_location().towards(game.get_my_castle(), 1000)):
-                if not attack_closest_portal(game, elf_atk, max_distance):
-                    if not attack_closest_enemy(game, elf_atk, max_distance):
-                        attack(game, elf_atk, game.get_enemy_castle())
+                if not attack_closest_enemy_portal(game, elf_atk, max_distance):
+                    if not attack_closest_enemy_unit(game, elf_atk, max_distance):
+                        attack_object(game, elf_atk, game.get_enemy_castle())
         else:
-            if not attack_closest_portal(game, elf_atk, max_distance):
-                if not attack_closest_enemy(game, elf_atk, max_distance):
-                    attack(game, elf_atk, game.get_enemy_castle())
+            if not attack_closest_enemy_portal(game, elf_atk, max_distance):
+                if not attack_closest_enemy_unit(game, elf_atk, max_distance):
+                    attack_object(game, elf_atk, game.get_enemy_castle())
 
-
-def attack_closest_enemy(game, elf, max_distance):
-    target = get_closest_enemy_unit(game, elf)
-    if not target:
-        return False
-
-    if target.distance(elf) < max_distance:
-        attack(game, elf, target)
-        return True
-    else:
-        return False
-
-
-def attack_closest_portal(game, elf, max_distance):
-    target = get_closest_enemy_portal(game, elf)
-    if not target:
-        return False
-
-    if target.distance(elf) < max_distance:
-        attack(game, elf, target)
-        return True
-    else:
-        return False
-
-
-def attack_closest_elf(game, elf, max_distance):
-    try:
-        target = closest(game, elf, game.get_enemy_living_elves())
-    except:
-        return False
-    if not target:
-        return False
-
-    if target.distance(elf) < max_distance:
-        attack(game, elf, target)
-        return True
-    else:
-        return False
-
-
-def attack_closest_creature(game, elf, max_distance):
-    target = get_closest_enemy_creature(game, elf)
-    if not target:
-        return False
-
-    if target.distance(elf) < max_distance:
-        attack(game, elf, target)
-        return True
-    else:
-        return False
