@@ -364,26 +364,6 @@ def turns_to_travel(game, map_object, destination, max_speed, smart = False):
     return number_of_turns
 
 
-def elf_range_turns_to_distance(game, elf, destination, max_speed, distance):
-    """
-
-    This function calculate the amount of turns if will take to get to the elf's attack range from the game object in
-    the least turns
-    :param game:
-    :type game: Game
-    :param elf: the start point of the travel
-    :param destination: the destination of the travel
-    :param max_speed: the speed of the object traveling
-    :param distance: the distance from the game object
-    :type distance: int
-    :return: the amount of turns needed to get to the given distance from the game object
-    :type: int
-    """
-
-    distance_to_destination = elf.distance(destination) - elf.attack_range
-    number_of_turns = math.ceil(distance_to_destination/max_speed)
-    return number_of_turns
-
 
 def smart_movement(game, elf, destination):
     """
@@ -522,10 +502,11 @@ def get_closest_friendly_creature(game, map_object):
 
     return closest(game, map_object, game.get_my_creatures())
 
+
 def get_closest_friendly_ice_troll(game, map_object):
     """
 
-    This function return the closest friendly creature to a given map object
+    This function return the closest friendly ice troll to a given map object
 
     :param map_object: an object on the map in order to find the closest creature to it
     :return: the closest friendly ice troll to map_object
@@ -534,6 +515,18 @@ def get_closest_friendly_ice_troll(game, map_object):
 
     return closest(game, map_object, game.get_my_ice_trolls())
 
+
+def get_closest_my_portal(game, map_object):
+    """
+
+    This function return the closest friendly portal to a given map object
+
+    :param map_object: an object on the map in order to find the closest creature to it
+    :return: the closest friendly portal to map_object
+    :type: Portal
+    """
+
+    return closest(game, map_object, game.get_my_portals())
 
 
 def get_circle(game, circle_location, radius):
