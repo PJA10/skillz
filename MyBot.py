@@ -16,6 +16,7 @@ from Slider import *
 from Defense import *
 import Globals
 from Attack import *
+import time
 
 ICE = "ice"
 LAVA = "lava"
@@ -31,6 +32,7 @@ def do_turn(game):
     :type curr_turn_game_status: Game
     :return: None
     """
+    start_time = time.time()
     if game.turn == 1:
         Globals.init()
         Globals.prev_game = game
@@ -45,7 +47,7 @@ def do_turn(game):
     update_portal_activeness(game)
 
     # tests(game)
-    
+
     old_do_turn(game)
 
     # MUST STAY IN THE END OF do_turn():
@@ -53,6 +55,7 @@ def do_turn(game):
 
     print "threatened portals: ", get_threatened_portals(game)
     print "threatening elves: ", get_threatening_elves(game)
+    print "--- %s seconds ---" % (time.time()*1000 - start_time*1000)  # second to ms *1000
 
 
 def tests(game):

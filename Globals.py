@@ -6,6 +6,7 @@ def init():
     global defensive_portals
     global is_enemy_elf_attacking
     global mana_state
+    global arrow_next_portal_loc
     defensive_portals = []
     defensive_elf = None
     attacking_elves = None
@@ -13,3 +14,4 @@ def init():
     portal_activeness = {}  # A global dictionary that stores how many turns ago a portal was active. key - portal id
     is_enemy_elf_attacking = False
     mana_state = "save mana"
+    arrow_next_portal_loc = None

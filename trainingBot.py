@@ -333,7 +333,7 @@ def elf_movement(game, elf, map_object):
     return True
 
 
-def turns_to_travel(game, map_object, destination, max_speed, smart = False):
+def turns_to_travel(game, map_object, destination, max_speed=False, smart=False):
     """
 
     This function calculate the amount of turns a given path will take with an object with a given speed
@@ -348,6 +348,9 @@ def turns_to_travel(game, map_object, destination, max_speed, smart = False):
     :return: the amount of turns needed to complete the travel
     :type: int
     """
+
+    if not max_speed:
+        max_speed = map_object.max_speed
 
     distance_to_destination = map_object.distance(destination)
     number_of_turns = math.ceil(distance_to_destination/max_speed)
@@ -364,7 +367,6 @@ def turns_to_travel(game, map_object, destination, max_speed, smart = False):
         number_of_turns += 3 * number_of_dangerous_enemy_unit
 
     return number_of_turns
-
 
 
 def smart_movement(game, elf, destination):
@@ -450,6 +452,8 @@ def get_possible_movement_points(game, elf, destination, next_turn_enemy_icetrol
 
     circle_points = get_circle(game, elf.get_location(), elf.max_speed)
     possible_movement_points = [[point, 1] for point in circle_points if is_in_game_map(game, point)]
+
+    possible_movement_points.append(elf.get_location())
 
     if elf.distance(destination) <= elf.max_speed:
         possible_movement_points.append([destination, 1])
@@ -799,8 +803,10 @@ def get_dangerous_enemy_lava_giant(game):
     close_enough_enemy_lava_giant = []
 
     for lava_giant in game.get_enemy_lava_giants():
-        turns_to_travel(game, lava_giant, game.get_my_castle().get_location().towards(lava_giant, game.castle_size),
-                        game.lava_giant_max_speed)
+        turns_to_castle = turns_to_travel(game, lava_giant,
+                                          game.get_my_castle().get_location().towards(lava_giant,
+                                                                                      game.lava_giant_attack_range +
+                                                                                      game.castle_size))
 
         curr_health = lava_giant.current_health
         for my_ice_troll in game.get_my_ice_trolls():
@@ -808,7 +814,7 @@ def get_dangerous_enemy_lava_giant(game):
             if closest_enemy_unit == lava_giant and can_attack(game, my_ice_troll, lava_giant):
                 curr_health -= game.ice_troll_attack_multiplier
 
-        hp_left = curr_health - (turns_to_travel * lava_giant.suffocation_per_turn)
+        hp_left = curr_health - (turns_to_castle * lava_giant.suffocation_per_turn)
         if hp_left > 2:
             close_enough_enemy_lava_giant.append(lava_giant)
 
@@ -1064,3 +1070,31 @@ get_enemy_unit_next_turn_health.__doc__ = \
     :type include_elves: Boolean
     :return: the predicted next turn *my_unit* hp
     """
+
+
+def summon_with_closest_portal(game, creature_type_str, target, portal_list=False):
+    """
+
+    This function summon a creature with the closest available portal
+
+    :param game:
+    :type game: Game
+    :param creature_type_str:
+    :type creature_type_str: String
+    :param target:
+    :type target: MapObject
+    :param portal_list:
+    :type portal_list: [Portal]
+    :return:
+    """
+
+    if not portal_list:
+        portal_list = game.get_my_portals()
+
+    sorted_portal_list = sorted(portal_list, key=lambda portal: portal.distance(target))
+
+    for portal in sorted_portal_list:
+        if summon(game, portal, creature_type_str):
+            return True
+
+    return False
