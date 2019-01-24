@@ -41,20 +41,19 @@ def do_turn(game):
             Globals.defensive_elf = game.get_all_my_elves()[0]
             Globals.attacking_elfs = game.get_all_my_elves()
             Globals.attacking_elfs.remove(Globals.defensive_elf)
-            print "Globals.defensive_elf:", Globals.defensive_elf
-            print "Globals.attacking_elfs:", Globals.attacking_elfs
-
-    update_portal_activeness(game)
-
+            # print "Globals.defensive_elf:", Globals.defensive_elf
+            # print "Globals.attacking_elfs:", Globals.attacking_elfs
+    
+    update_dangerous_enemy_portals(game)
     # tests(game)
 
-    old_do_turn(game)
-
+    # old_do_turn(game)
+    arrow_attack(game)
     # MUST STAY IN THE END OF do_turn():
     Globals.prev_game = copy.deepcopy(game)
 
-    print "threatened portals: ", get_threatened_portals(game)
-    print "threatening elves: ", get_threatening_elves(game)
+    # print "threatened portals: ", get_threatened_portals(game)
+    # print "threatening elves: ", get_threatening_elves(game)
     print "--- %s seconds ---" % (time.time()*1000 - start_time*1000)  # second to ms *1000
 
 

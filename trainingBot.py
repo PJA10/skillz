@@ -16,6 +16,7 @@ import Globals
 import math
 import copy
 from collections import *
+import time
 
 RISK_AMOUNT = 1
 ICE = "ice"
@@ -33,10 +34,14 @@ def is_targeted_by_enemy_icetroll(game, map_object):
     :return: return a list of the ice trolls which target obj
     :type: [IceTroll]
     """
-
-    icetrolls_that_target_me = [icetroll for icetroll in game.get_enemy_ice_trolls()
+    
+    if map_object in Globals.icetrolls_that_target_me:
+        return Globals.icetrolls_that_target_me[map_object]
+    
+    icetrolls_that_target_map_object = [icetroll for icetroll in game.get_enemy_ice_trolls()
                                 if get_closest_my_unit(game, icetroll) == map_object]
-    return icetrolls_that_target_me
+    Globals.icetrolls_that_target_me[map_object] = icetrolls_that_target_map_object
+    return icetrolls_that_target_map_object
 
 
 def closest(game, main_map_object, map_objects_list):
@@ -248,7 +253,7 @@ def summon(game, portal, creature_type_str):
     :return: if the summon was succeeded
     :type: Boolean
     """
-
+    
     summon_dic = {
         "ice": (portal.can_summon_ice_troll, portal.summon_ice_troll),
         "lava": (portal.can_summon_lava_giant, portal.summon_lava_giant)
@@ -310,7 +315,6 @@ def make_portal(game, elf, loc=False):
             return True
         else:
             print ("Elf " + str(elf) + " Can't build portal at " + str(loc))
-            print check_why_cant_build_portal(game, elf)
             return False
     else:
         smart_movement(game, elf, loc)
@@ -453,7 +457,7 @@ def get_possible_movement_points(game, elf, destination, next_turn_enemy_icetrol
     circle_points = get_circle(game, elf.get_location(), elf.max_speed)
     possible_movement_points = [[point, 1] for point in circle_points if is_in_game_map(game, point)]
 
-    possible_movement_points.append(elf.get_location())
+    possible_movement_points.append([elf.get_location(), 1])
 
     if elf.distance(destination) <= elf.max_speed:
         possible_movement_points.append([destination, 1])
@@ -867,9 +871,11 @@ def get_my_unit_next_turn_health(game, my_unit, include_elves=False):
     :return: the predicted next turn *my_unit* hp
     """
 
+    start_time = time.time()
+    print "get_my_unit_next_turn_health"
     next_turn_hp = my_unit.current_health
     ice_trolls_that_target_me = is_targeted_by_enemy_icetroll(game, my_unit)
-
+    print "get_my_unit_next_turn_healthtime: %s", (time.time()*1000-start_time*1000)
     if isinstance(my_unit, Creature):
         next_turn_hp -= my_unit.suffocation_per_turn
 
@@ -1088,6 +1094,7 @@ def summon_with_closest_portal(game, creature_type_str, target, portal_list=Fals
     :return:
     """
 
+    print "in summon_with_closest_portal"
     if not portal_list:
         portal_list = game.get_my_portals()
 
@@ -1098,3 +1105,19 @@ def summon_with_closest_portal(game, creature_type_str, target, portal_list=Fals
             return True
 
     return False
+    
+
+def update_dangerous_enemy_portals(game):
+    
+    dangerous_enemy_portals = Globals.dangerous_enemy_portals
+    for portal in game.get_enemy_portals():
+        if portal.currently_summoning == "LavaGiant" and portal.turns_to_summon == 3:
+            portal_queue = dangerous_enemy_portals.get(portal, [])
+            portal_queue.append(game.turn)
+            if len(portal_queue) > 3:
+                portal_queue.remove(portal_queue[0])
+            dangerous_enemy_portals[portal] = portal_queue
+    for portal in copy.deepcopy(Globals.dangerous_enemy_portals):
+        if portal not in game.get_enemy_portals():
+            Globals.dangerous_enemy_portals.pop(portal, None)
+            

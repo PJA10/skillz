@@ -7,6 +7,8 @@ def init():
     global is_enemy_elf_attacking
     global mana_state
     global arrow_next_portal_loc
+    global icetrolls_that_target_me
+    global dangerous_enemy_portals
     defensive_portals = []
     defensive_elf = None
     attacking_elves = None
@@ -15,3 +17,5 @@ def init():
     is_enemy_elf_attacking = False
     mana_state = "save mana"
     arrow_next_portal_loc = None
+    icetrolls_that_target_me = {}
+    dangerous_enemy_portals = {}
