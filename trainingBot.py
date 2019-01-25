@@ -519,7 +519,6 @@ def get_closest_friendly_ice_troll(game, map_object):
     return closest(game, map_object, game.get_my_ice_trolls())
 
 
-
 def get_closest_my_portal(game, map_object):
     """
 
@@ -1101,3 +1100,11 @@ def get_objects_in_path(game, first_path_edge, second_path_edge, possible_map_ob
             map_objects_in_way.append(map_object)
 
     return map_objects_in_way
+
+
+def num_of_our_ice_troll(game):
+    """
+
+    This function will return the number of our ice trolls
+    :return the number of our ice trolls
+    """
