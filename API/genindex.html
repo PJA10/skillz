@@ -56,17 +56,19 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="Attack.html#module-Attack">Attack (module)</a>, <a href="Attack.html#module-Attack">[1]</a>
 </li>
-      <li><a href="trainingBot.html#trainingBot.attack">attack() (in module trainingBot)</a>
+      <li><a href="Attack.html#Attack.attack">attack() (in module Attack)</a>
 </li>
-      <li><a href="trainingBot.html#trainingBot.attack_closest_creature">attack_closest_creature() (in module trainingBot)</a>
+      <li><a href="trainingBot.html#trainingBot.attack_closest_enemy_creature">attack_closest_enemy_creature() (in module trainingBot)</a>
+</li>
+      <li><a href="trainingBot.html#trainingBot.attack_closest_enemy_elf">attack_closest_enemy_elf() (in module trainingBot)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="trainingBot.html#trainingBot.attack_closest_elf">attack_closest_elf() (in module trainingBot)</a>
+      <li><a href="trainingBot.html#trainingBot.attack_closest_enemy_portal">attack_closest_enemy_portal() (in module trainingBot)</a>
 </li>
-      <li><a href="trainingBot.html#trainingBot.attack_closest_portal">attack_closest_portal() (in module trainingBot)</a>
+      <li><a href="trainingBot.html#trainingBot.attack_closest_enemy_unit">attack_closest_enemy_unit() (in module trainingBot)</a>
 </li>
-      <li><a href="trainingBot.html#trainingBot.attack_closest_unit">attack_closest_unit() (in module trainingBot)</a>
+      <li><a href="trainingBot.html#trainingBot.attack_object">attack_object() (in module trainingBot)</a>
 </li>
       <li><a href="Attack.html#Attack.attack_wave">attack_wave() (in module Attack)</a>
 </li>
@@ -84,7 +86,9 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="trainingBot.html#trainingBot.check_why_cant_build">check_why_cant_build() (in module trainingBot)</a>
+      <li><a href="trainingBot.html#trainingBot.can_attack">can_attack() (in module trainingBot)</a>
+</li>
+      <li><a href="trainingBot.html#trainingBot.check_why_cant_build_portal">check_why_cant_build_portal() (in module trainingBot)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -100,11 +104,13 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="Attack.html#Attack.determine_enemy_defense_strength">determine_enemy_defense_strength() (in module Attack)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="Attack.html#Attack.determine_wave_strength">determine_wave_strength() (in module Attack)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="MyBot.html#MyBot.do_turn">do_turn() (in module MyBot)</a>
+</li>
+      <li><a href="Attack.html#Attack.does_win_fight">does_win_fight() (in module Attack)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -113,6 +119,10 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="trainingBot.html#trainingBot.elf_movement">elf_movement() (in module trainingBot)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="trainingBot.html#trainingBot.elf_range_turns_to_distance">elf_range_turns_to_distance() (in module trainingBot)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -132,17 +142,25 @@
 </li>
       <li><a href="trainingBot.html#trainingBot.get_closest_enemy_unit">get_closest_enemy_unit() (in module trainingBot)</a>
 </li>
+      <li><a href="trainingBot.html#trainingBot.get_closest_my_creature">get_closest_my_creature() (in module trainingBot)</a>
+</li>
+      <li><a href="trainingBot.html#trainingBot.get_closest_my_elf">get_closest_my_elf() (in module trainingBot)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="trainingBot.html#trainingBot.get_closest_friendly_creature">get_closest_friendly_creature() (in module trainingBot)</a>
+      <li><a href="trainingBot.html#trainingBot.get_closest_my_portal">get_closest_my_portal() (in module trainingBot)</a>
 </li>
-      <li><a href="trainingBot.html#trainingBot.get_closest_friendly_elf">get_closest_friendly_elf() (in module trainingBot)</a>
-</li>
-      <li><a href="trainingBot.html#trainingBot.get_closest_friendly_unit">get_closest_friendly_unit() (in module trainingBot)</a>
+      <li><a href="trainingBot.html#trainingBot.get_closest_my_unit">get_closest_my_unit() (in module trainingBot)</a>
 </li>
       <li><a href="trainingBot.html#trainingBot.get_dangerous_enemy_lava_giant">get_dangerous_enemy_lava_giant() (in module trainingBot)</a>
 </li>
+      <li><a href="trainingBot.html#trainingBot.get_enemy_unit_next_turn_health">get_enemy_unit_next_turn_health() (in module trainingBot)</a>
+</li>
       <li><a href="trainingBot.html#trainingBot.get_locations">get_locations() (in module trainingBot)</a>
+</li>
+      <li><a href="trainingBot.html#trainingBot.get_my_unit_next_turn_health">get_my_unit_next_turn_health() (in module trainingBot)</a>
+</li>
+      <li><a href="trainingBot.html#trainingBot.get_objects_in_path">get_objects_in_path() (in module trainingBot)</a>
 </li>
       <li><a href="trainingBot.html#trainingBot.get_player_units">get_player_units() (in module trainingBot)</a>
 </li>
@@ -174,7 +192,9 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="trainingBot.html#trainingBot.is_in_game_map">is_in_game_map() (in module trainingBot)</a>
 </li>
-      <li><a href="trainingBot.html#trainingBot.is_targeted_by_icetroll">is_targeted_by_icetroll() (in module trainingBot)</a>
+      <li><a href="trainingBot.html#trainingBot.is_targeted_by_enemy_icetroll">is_targeted_by_enemy_icetroll() (in module trainingBot)</a>
+</li>
+      <li><a href="trainingBot.html#trainingBot.is_targeted_by_my_icetroll">is_targeted_by_my_icetroll() (in module trainingBot)</a>
 </li>
   </ul></td>
 </tr></table>

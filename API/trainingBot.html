@@ -38,28 +38,8 @@
 <div class="section" id="id1">
 <h2>trainingBot<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <span class="target" id="module-trainingBot"></span><dl class="function">
-<dt id="trainingBot.attack">
-<code class="descclassname">trainingBot.</code><code class="descname">attack</code><span class="sig-paren">(</span><em>game</em>, <em>elf</em>, <em>map_object</em><span class="sig-paren">)</span><a class="headerlink" href="#trainingBot.attack" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function attack with an elf a map object
-if the map object is too far the elf will move towards the map object
-WILL CRASH IF GET NONE</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>elf</strong> – the elf to attck with</li>
-<li><strong>map_object</strong> – the map_object to attack</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="trainingBot.attack_closest_creature">
-<code class="descclassname">trainingBot.</code><code class="descname">attack_closest_creature</code><span class="sig-paren">(</span><em>game</em>, <em>elf</em>, <em>max_distance</em><span class="sig-paren">)</span><a class="headerlink" href="#trainingBot.attack_closest_creature" title="Permalink to this definition">¶</a></dt>
+<dt id="trainingBot.attack_closest_enemy_creature">
+<code class="descclassname">trainingBot.</code><code class="descname">attack_closest_enemy_creature</code><span class="sig-paren">(</span><em>game</em>, <em>elf</em>, <em>max_distance=inf</em><span class="sig-paren">)</span><a class="headerlink" href="#trainingBot.attack_closest_enemy_creature" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function attack with an elf the closest creature to it</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -79,8 +59,8 @@ WILL CRASH IF GET NONE</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="trainingBot.attack_closest_elf">
-<code class="descclassname">trainingBot.</code><code class="descname">attack_closest_elf</code><span class="sig-paren">(</span><em>game</em>, <em>elf</em>, <em>max_distance</em><span class="sig-paren">)</span><a class="headerlink" href="#trainingBot.attack_closest_elf" title="Permalink to this definition">¶</a></dt>
+<dt id="trainingBot.attack_closest_enemy_elf">
+<code class="descclassname">trainingBot.</code><code class="descname">attack_closest_enemy_elf</code><span class="sig-paren">(</span><em>game</em>, <em>elf</em>, <em>max_distance=inf</em><span class="sig-paren">)</span><a class="headerlink" href="#trainingBot.attack_closest_enemy_elf" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function attack with an elf the closest elf to it</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -100,8 +80,8 @@ WILL CRASH IF GET NONE</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="trainingBot.attack_closest_portal">
-<code class="descclassname">trainingBot.</code><code class="descname">attack_closest_portal</code><span class="sig-paren">(</span><em>game</em>, <em>elf</em>, <em>max_distance</em><span class="sig-paren">)</span><a class="headerlink" href="#trainingBot.attack_closest_portal" title="Permalink to this definition">¶</a></dt>
+<dt id="trainingBot.attack_closest_enemy_portal">
+<code class="descclassname">trainingBot.</code><code class="descname">attack_closest_enemy_portal</code><span class="sig-paren">(</span><em>game</em>, <em>elf</em>, <em>max_distance=inf</em><span class="sig-paren">)</span><a class="headerlink" href="#trainingBot.attack_closest_enemy_portal" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function attack with an elf the closest portal to it</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -121,8 +101,8 @@ WILL CRASH IF GET NONE</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="trainingBot.attack_closest_unit">
-<code class="descclassname">trainingBot.</code><code class="descname">attack_closest_unit</code><span class="sig-paren">(</span><em>game</em>, <em>elf</em>, <em>max_distance</em><span class="sig-paren">)</span><a class="headerlink" href="#trainingBot.attack_closest_unit" title="Permalink to this definition">¶</a></dt>
+<dt id="trainingBot.attack_closest_enemy_unit">
+<code class="descclassname">trainingBot.</code><code class="descname">attack_closest_enemy_unit</code><span class="sig-paren">(</span><em>game</em>, <em>elf</em>, <em>max_distance=inf</em><span class="sig-paren">)</span><a class="headerlink" href="#trainingBot.attack_closest_enemy_unit" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function attack with an elf the closest unit to it</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -142,9 +122,52 @@ WILL CRASH IF GET NONE</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="trainingBot.check_why_cant_build">
-<code class="descclassname">trainingBot.</code><code class="descname">check_why_cant_build</code><span class="sig-paren">(</span><em>game</em>, <em>elf</em><span class="sig-paren">)</span><a class="headerlink" href="#trainingBot.check_why_cant_build" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function check why an elf cant build a portal in his position</p>
+<dt id="trainingBot.attack_object">
+<code class="descclassname">trainingBot.</code><code class="descname">attack_object</code><span class="sig-paren">(</span><em>game</em>, <em>elf</em>, <em>map_object</em><span class="sig-paren">)</span><a class="headerlink" href="#trainingBot.attack_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function attack with an elf a map object
+if the map object is too far the elf will move towards the map object
+WILL CRASH IF GET NONE</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>elf</strong> – the elf to attck with</li>
+<li><strong>map_object</strong> – the map_object to attack</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="trainingBot.can_attack">
+<code class="descclassname">trainingBot.</code><code class="descname">can_attack</code><span class="sig-paren">(</span><em>game</em>, <em>attacking_unit</em>, <em>target</em><span class="sig-paren">)</span><a class="headerlink" href="#trainingBot.can_attack" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function check if an given unit can attack another given unit</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>game</strong> – </li>
+<li><strong>attacking_unit</strong> – the unit to check if can attack</li>
+<li><strong>target</strong> (<em>MapObject</em>) – the map object to check if can get hit</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">if attacking_unit in range to attack defending_unit</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="trainingBot.check_why_cant_build_portal">
+<code class="descclassname">trainingBot.</code><code class="descname">check_why_cant_build_portal</code><span class="sig-paren">(</span><em>game</em>, <em>elf</em><span class="sig-paren">)</span><a class="headerlink" href="#trainingBot.check_why_cant_build_portal" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function check why an elf cant build a portal in his position.
+The options are amount of mane, units are in building site and portals in building site</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -155,7 +178,10 @@ WILL CRASH IF GET NONE</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">if we have enough mana, all units in building site and all portals in building site</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><p class="first last">(Bollean,</p>
 </td>
 </tr>
 </tbody>
@@ -233,6 +259,22 @@ to the main map object</p>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="function">
+<dt id="trainingBot.elf_range_turns_to_distance">
+<code class="descclassname">trainingBot.</code><code class="descname">elf_range_turns_to_distance</code><span class="sig-paren">(</span><em>game</em>, <em>elf</em>, <em>destination</em>, <em>max_speed</em>, <em>distance</em><span class="sig-paren">)</span><a class="headerlink" href="#trainingBot.elf_range_turns_to_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function calculate the amount of turns if will take to get to the elf’s attack range from the game object in
+the least turns
+:param game:
+:type game: Game
+:param elf: the start point of the travel
+:param destination: the destination of the travel
+:param max_speed: the speed of the object traveling
+:param distance: the distance from the game object
+:type distance: int
+:return: the amount of turns needed to get to the given distance from the game object
+:type: int</p>
 </dd></dl>
 
 <dl class="function">
@@ -328,7 +370,7 @@ to the main map object</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>map_object</strong> (<em>MapObject</em>) – an object on the map in order to find the closest portal to it</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>map_object</strong> – an object on the map in order to find the closest portal to it</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the closest enemy’s portal to map_object</td>
 </tr>
@@ -357,16 +399,16 @@ to the main map object</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="trainingBot.get_closest_friendly_creature">
-<code class="descclassname">trainingBot.</code><code class="descname">get_closest_friendly_creature</code><span class="sig-paren">(</span><em>game</em>, <em>map_object</em><span class="sig-paren">)</span><a class="headerlink" href="#trainingBot.get_closest_friendly_creature" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function return the closest friendly creature to a given map object</p>
+<dt id="trainingBot.get_closest_my_creature">
+<code class="descclassname">trainingBot.</code><code class="descname">get_closest_my_creature</code><span class="sig-paren">(</span><em>game</em>, <em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#trainingBot.get_closest_my_creature" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function return the closest creature of my creatures to a given map object</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>map_object</strong> – an object on the map in order to find the closest creature to it</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the closest enemy’s creature to map_object</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the closest my creature to map_object</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">Creature</td>
 </tr>
@@ -375,16 +417,16 @@ to the main map object</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="trainingBot.get_closest_friendly_elf">
-<code class="descclassname">trainingBot.</code><code class="descname">get_closest_friendly_elf</code><span class="sig-paren">(</span><em>game</em>, <em>map_object</em><span class="sig-paren">)</span><a class="headerlink" href="#trainingBot.get_closest_friendly_elf" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function return the closest friendly elf to a given map object</p>
+<dt id="trainingBot.get_closest_my_elf">
+<code class="descclassname">trainingBot.</code><code class="descname">get_closest_my_elf</code><span class="sig-paren">(</span><em>game</em>, <em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#trainingBot.get_closest_my_elf" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function return the closest elf of my elves to a given map object</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>map_object</strong> (<em>MapObject</em>) – an object on the map in order to find the closest elf to it</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>map_object</strong> – an object on the map in order to find the closest elf to it</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the closest enemy’s elf to map_object</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the closest my elf to map_object</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">Elf</td>
 </tr>
@@ -393,16 +435,34 @@ to the main map object</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="trainingBot.get_closest_friendly_unit">
-<code class="descclassname">trainingBot.</code><code class="descname">get_closest_friendly_unit</code><span class="sig-paren">(</span><em>game</em>, <em>map_object</em><span class="sig-paren">)</span><a class="headerlink" href="#trainingBot.get_closest_friendly_unit" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function return the closest friendly unit(creature + elf) to a given map object</p>
+<dt id="trainingBot.get_closest_my_portal">
+<code class="descclassname">trainingBot.</code><code class="descname">get_closest_my_portal</code><span class="sig-paren">(</span><em>game</em>, <em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#trainingBot.get_closest_my_portal" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function return the closest portal of my portals to a given map object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>map_object</strong> – an object on the map in order to find the closest portal to it</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the closest my portal to map_object</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">Portal</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="trainingBot.get_closest_my_unit">
+<code class="descclassname">trainingBot.</code><code class="descname">get_closest_my_unit</code><span class="sig-paren">(</span><em>game</em>, <em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#trainingBot.get_closest_my_unit" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function return the closest unit(creature + elf) of my units to a given map object</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>map_object</strong> – an object on the map in order to find the closest unit to it</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the closest enemy’s unit to map_object</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the closest my unit to map_object</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">Creature/Elf</td>
 </tr>
@@ -430,6 +490,29 @@ The function will include the damage that the lava_giant will get this turn</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="trainingBot.get_enemy_unit_next_turn_health">
+<code class="descclassname">trainingBot.</code><code class="descname">get_enemy_unit_next_turn_health</code><span class="sig-paren">(</span><em>game</em>, <em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#trainingBot.get_enemy_unit_next_turn_health" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function predict a given enemy unit next turn health
+The function can include possible elves attack depend on the <em>include_elves</em> parameter</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>game</strong> – </li>
+<li><strong>my_unit</strong> – the enemy unit to predict it’s next turn hp</li>
+<li><strong>include_elves</strong> (<em>Boolean</em>) – a flag to represent if to include elves possible attacks</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the predicted next turn <em>my_unit</em> hp</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="trainingBot.get_locations">
 <code class="descclassname">trainingBot.</code><code class="descname">get_locations</code><span class="sig-paren">(</span><em>game</em>, <em>map_objects_list</em><span class="sig-paren">)</span><a class="headerlink" href="#trainingBot.get_locations" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function get a list of map objects and return a list of the map object locations</p>
@@ -442,6 +525,53 @@ The function will include the damage that the lava_giant will get this turn</p>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a list the given list locations</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">[Location]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="trainingBot.get_my_unit_next_turn_health">
+<code class="descclassname">trainingBot.</code><code class="descname">get_my_unit_next_turn_health</code><span class="sig-paren">(</span><em>game</em>, <em>my_unit</em>, <em>include_elves=False</em><span class="sig-paren">)</span><a class="headerlink" href="#trainingBot.get_my_unit_next_turn_health" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function predict a given enemy unit next turn health
+The function can include possible enemy elves attack depend on the <em>include_elves</em> parameter</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>game</strong> – </li>
+<li><strong>my_unit</strong> – the enemy unit to predict it’s next turn hp</li>
+<li><strong>include_elves</strong> (<em>Boolean</em>) – a flag to represent if to include enemy elves possible attacks</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the predicted next turn <em>my_unit</em> hp</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="trainingBot.get_objects_in_path">
+<code class="descclassname">trainingBot.</code><code class="descname">get_objects_in_path</code><span class="sig-paren">(</span><em>game</em>, <em>first_path_edge</em>, <em>second_path_edge</em>, <em>possible_map_objects_in_path</em>, <em>offset=100</em><span class="sig-paren">)</span><a class="headerlink" href="#trainingBot.get_objects_in_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function look for map objects that are on the path from one point to another from a given list of map objects</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>game</strong> – </li>
+<li><strong>first_path_edge</strong> – the first edge of the path</li>
+<li><strong>second_path_edge</strong> – the second edge of the path</li>
+<li><strong>possible_map_objects_in_path</strong> (<em>[</em><em>MapObject</em><em>]</em>) – the list of map object to search in</li>
+<li><strong>offset</strong> – the amount of flexibility for a map object to be count as on he way</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the list of all map object that are on the path from <em>possible_map_objects_in_path</em></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -588,8 +718,8 @@ If the enemy elves had attack our even once the function will return True</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="trainingBot.is_targeted_by_icetroll">
-<code class="descclassname">trainingBot.</code><code class="descname">is_targeted_by_icetroll</code><span class="sig-paren">(</span><em>game</em>, <em>map_object</em><span class="sig-paren">)</span><a class="headerlink" href="#trainingBot.is_targeted_by_icetroll" title="Permalink to this definition">¶</a></dt>
+<dt id="trainingBot.is_targeted_by_enemy_icetroll">
+<code class="descclassname">trainingBot.</code><code class="descname">is_targeted_by_enemy_icetroll</code><span class="sig-paren">(</span><em>game</em>, <em>map_object</em><span class="sig-paren">)</span><a class="headerlink" href="#trainingBot.is_targeted_by_enemy_icetroll" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function returns a list of all the enemy’s icetroll who target a given map object.
 if the returned list is empty then the given map object is safe</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -600,7 +730,26 @@ if the returned list is empty then the given map object is safe</p>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">return a list of the ice trolls which target obj</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">[Creature]</td>
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">[IceTroll]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="trainingBot.is_targeted_by_my_icetroll">
+<code class="descclassname">trainingBot.</code><code class="descname">is_targeted_by_my_icetroll</code><span class="sig-paren">(</span><em>game</em>, <em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#trainingBot.is_targeted_by_my_icetroll" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function returns a list of all the my ice trolls who target a given map object.
+if the returned list is empty then the given map object is safe</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>map_object</strong> (<em>MapObject</em>) – the map object which to check if is targeted bt ice trolls</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">return a list of the ice trolls which target obj</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">[IceTroll]</td>
 </tr>
 </tbody>
 </table>
@@ -608,7 +757,7 @@ if the returned list is empty then the given map object is safe</p>
 
 <dl class="function">
 <dt id="trainingBot.make_portal">
-<code class="descclassname">trainingBot.</code><code class="descname">make_portal</code><span class="sig-paren">(</span><em>game</em>, <em>elf</em>, <em>loc</em><span class="sig-paren">)</span><a class="headerlink" href="#trainingBot.make_portal" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">trainingBot.</code><code class="descname">make_portal</code><span class="sig-paren">(</span><em>game</em>, <em>elf</em>, <em>loc=False</em><span class="sig-paren">)</span><a class="headerlink" href="#trainingBot.make_portal" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function make a portal with a given elf at a specific location
 If the elf isn’t at this position the elf will move towards the location</p>
 <table class="docutils field-list" frame="void" rules="none">
