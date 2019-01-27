@@ -438,7 +438,7 @@ def get_possible_movement_points(game, elf, destination, next_turn_enemy_icetrol
     possible_movement_points.append([elf.get_location(), 1])
 
     if elf.distance(destination) <= elf.max_speed:
-        possible_movement_points.append([destination, 1])
+        possible_movement_points.append([destination.get_location(), 1])
 
     optional_danger = next_turn_enemy_icetrolls_list + game.get_enemy_living_elves()
     if optional_danger:
@@ -447,6 +447,7 @@ def get_possible_movement_points(game, elf, destination, next_turn_enemy_icetrol
         if is_in_game_map(game, run_location):
             possible_movement_points.append([run_location, 1])
 
+    print "possible_movement_points:", possible_movement_points
     return possible_movement_points
 
 
@@ -860,10 +861,12 @@ def get_dangerous_enemy_lava_giant(game):
                                                                                       game.lava_giant_attack_range +
                                                                                       game.castle_size))
 
+        max_turns_to_castle = 6
+        if turns_to_castle > max_turns_to_castle:  # if the lava giant is far, ice troll will berle affect him
+            continue
         curr_health = lava_giant.current_health
-        for my_ice_troll in game.get_my_ice_trolls():
-            closest_enemy_unit = get_closest_enemy_unit(game, my_ice_troll)
-            if closest_enemy_unit == lava_giant and can_attack(game, my_ice_troll, lava_giant):
+        for my_ice_troll in is_targeted_by_my_icetroll(game, lava_giant):
+            if can_attack(game, my_ice_troll, lava_giant):
                 curr_health -= game.ice_troll_attack_multiplier
 
         hp_left = curr_health - (turns_to_castle * lava_giant.suffocation_per_turn)
