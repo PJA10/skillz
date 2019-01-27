@@ -340,6 +340,7 @@ def does_win_fight(game, elf, attack_target):
     else:
         return True
 
+
 def arrow_attack(game):
     """
 
@@ -405,7 +406,7 @@ def arrow_attack(game):
         spawn_turn_lava_giant_loc = lava_giant.get_location().towards(game.get_my_castle(), game.lava_giant_max_speed *
                                                                       game.ice_troll_summoning_duration)
         summon_with_closest_portal(game, ICE, spawn_turn_lava_giant_loc)
-        print "summon ice. defande lava"
+        print "summon ice. defend lava"
     # elf handling
     
     dangerous_enemy_portals = []

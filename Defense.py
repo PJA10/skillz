@@ -66,13 +66,40 @@ def ice_troll_defense(game):
     This function will order portals to summon ice trolls based on threatened portals and enemy lava giants
     :return: nothing
     """
-
+    found_portal = False
     threatening_elves = get_threatening_elves(game)
+    defensive_ice_trolls = 0
+    dangerous_lava_giants_count = 0
+    not_summoning_portals = []
+    for portal in game.get_my_portals():
+        if not portal.is_summoning:
+            not_summoning_portals.append(portal)
+
+    for lava_giant in get_dangerous_enemy_lava_giant(game):
+        if turns_to_travel(game, lava_giant, game.get_my_castle(), lava_giant.max_speed) < 8:
+            dangerous_lava_giants_count += 1
+
     if threatening_elves:
         for elf in threatening_elves:
-            if get_closest_my_portal(game, elf).can_summon_ice_troll():
-                get_closest_my_portal(game, elf).summon_ice_troll()
+            get_closest_my_portal(game, elf).summon_ice_troll()
 
+    for lava_giant in get_dangerous_enemy_lava_giant(game):
+        if len(is_targeted_by_my_icetroll(game, lava_giant)) < 1:
+            closest(game, game.get_my_castle(), not_summoning_portals).summon_ice_troll()
+
+'''
+    for ice_troll in game.get_my_ice_trolls():
+        if ice_troll.current_health > ice_troll.max_health / 2.5:
+            defensive_ice_trolls += 1
+    while game.get_my_mana > 50 and defensive_ice_trolls - 1 < dangerous_lava_giants_count:
+        #checkes if has enough mana to summon ice troll
+        for portal in game.get_my_portals():
+            if portal in not_summoning_portals:
+                portal.summon_ice_troll()
+                defensive_ice_trolls += 1
+'''
+
+'''
     for lava_giant in get_dangerous_enemy_lava_giant(game):
         if get_closest_my_portal(game, lava_giant).can_summon_ice_troll():
             get_closest_my_portal(game, lava_giant).summon_ice_troll()
@@ -83,6 +110,7 @@ def ice_troll_defense(game):
                                                                                     game.get_my_castle()) <= 4:
         # values of lava_giant.max_health/2 and .... 1300 should be adjusted after tests
             game.get_my_castle().get_closest_my_portal(game).summon_ice_troll()
+'''
 
 
 def attacks_close_portals_defense(game):
@@ -99,7 +127,7 @@ def attacks_close_portals_defense(game):
                 if get_closest_my_portal(game, elf).can_summon_ice_troll():
                     get_closest_my_portal(game, elf).summon_ice_troll()
             if game.get_my_living_elves():
-                if get_closest_friendly_elf(game, elf).distance(elf) <= 1000:
+                if get_closest_friendly_elf(game, elf).distance(elf) <= 2000:
                     attack_object(game, get_closest_friendly_elf(game, elf), elf)
 
 
