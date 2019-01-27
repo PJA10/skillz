@@ -473,6 +473,76 @@ def get_possible_movement_points(game, elf, destination, next_turn_enemy_icetrol
     return possible_movement_points
 
 
+
+def get_closest_friendly_unit(game, map_object):
+    """
+
+    This function return the closest friendly unit(creature + elf) to a given map object
+
+    :param map_object: an object on the map in order to find the closest unit to it
+    :return: the closest friendly unit to map_object
+    :type: Creature/Elf
+    """
+
+    my_units = get_player_units(game, game.get_myself())
+    return closest(game, map_object, my_units)
+
+
+def get_closest_friendly_elf(game, map_object):
+    """
+
+    This function return the closest friendly elf to a given map object
+
+    :param map_object: an object on the map in order to find the closest elf to it
+    :type map_object: MapObject
+    :return: the closest friendly elf to map_object
+    :type: Elf
+    """
+
+    return closest(game, map_object, game.get_my_living_elves())
+
+
+def get_closest_friendly_creature(game, map_object):
+    """
+
+    This function return the closest friendly creature to a given map object
+
+    :param map_object: an object on the map in order to find the closest creature to it
+    :return: the closest friendly creature to map_object
+    :type: Creature
+    """
+
+    return closest(game, map_object, game.get_my_creatures())
+
+
+def get_closest_friendly_ice_troll(game, map_object):
+    """
+
+    This function return the closest friendly ice troll to a given map object
+
+    :param map_object: an object on the map in order to find the closest creature to it
+    :return: the closest friendly ice troll to map_object
+    :type: creature
+    """
+
+    return closest(game, map_object, game.get_my_ice_trolls())
+
+
+def get_closest_my_portal(game, map_object):
+    """
+
+    This function return the closest friendly portal to a given map object
+
+    :param map_object: an object on the map in order to find the closest creature to it
+    :return: the closest friendly portal to map_object
+    :type: Portal
+    """
+
+    return closest(game, map_object, game.get_my_portals())
+
+
+
+
 def get_circle(game, circle_location, radius):
     """
 
@@ -1002,6 +1072,12 @@ def get_objects_in_path(game, first_path_edge, second_path_edge, possible_map_ob
     return map_objects_in_way
 
 
+def num_of_our_ice_troll(game):
+    """
+
+    This function will return the number of our ice trolls
+    :return the number of our ice trolls
+    """
 def swap_players(func):  # this is a decorators for doubling a function with swaped players
     def swaped_func(game, *args):
         swaped_game = copy.deepcopy(game)
@@ -1123,4 +1199,4 @@ def update_dangerous_enemy_portals(game):
     for portal in copy.deepcopy(Globals.dangerous_enemy_portals):
         if portal not in game.get_enemy_portals():
             Globals.dangerous_enemy_portals.pop(portal, None)
-            
+
