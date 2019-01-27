@@ -346,19 +346,19 @@ def does_win_fight(game, elf, attack_target):
 def arrow_attack(game):
     """
 
-    defence:
-        if there is a close elf to one of our portals, summon ice.
-        if there are dangerous enemy lava giants summon ice from a portal close to the lava giants location three turns from now.
-        if there is a enemy portal who is attacking me send an elf to destroy it
+    defence:\n
+    * if there is a close elf to one of our portals, summon ice.
+    * if there are dangerous enemy lava giants summon ice from a portal close to the lava giants location three turns from now.
+    * if there is a enemy portal who is attacking me send an elf to destroy it
 
 
-    attack close portals/elves if can win easily
+    attack close portals/elves if can win easily\n
 
-    build arrow of portals:
-      if can continue arrow without problems, continue (no enemy portals in the way).
-      elif can easily destroy closest disturbing enemy portals, then do.
-      elif have enough mana, get cover by ice trolls and destroy closest disturbing enemy portals.
-      else mana state = "save mana" and defend current arrow (maybe attack ice trolls).
+    build arrow of portals:\n
+    * if can continue arrow without problems, continue (no enemy portals in the way).
+    * elif can easily destroy closest disturbing enemy portals, then do.
+    * elif have enough mana, get cover by ice trolls and destroy closest disturbing enemy portals.
+    * else mana state = "save mana" and defend current arrow (maybe attack ice trolls).
 
     if mana state = "attack" and have a lot of mana(the amount depends on the distance of first portal in the arrow to enemy castle).
     then make lava giant with the first portal in the arrow.
