@@ -400,23 +400,26 @@ def arrow_attack(game):
                     continue
 
             attacking_pos = portal.get_location().towards(enemy_elf, game.portal_size + game.elf_attack_range)
-            if turns_to_travel(game, enemy_elf, attacking_pos) < 5:
+            if turns_to_travel(game, enemy_elf, attacking_pos) < 5 and not is_targeted_by_my_icetroll(game, enemy_elf):
                 summon_with_closest_portal(game, ICE, portal)
                 print "summon ice, close elf"
-    
-    for lava_giant in get_dangerous_enemy_lava_giant(game):
-        if len(is_targeted_by_my_icetroll(game, lava_giant)) > max_number_of_icetrolls_on_unit:
-            continue
-        max_distance = 3000
-        if game.get_enemy_portals():
-            max_distance = game.get_my_castle().distance(get_closest_enemy_portal(game, game.get_my_castle()))
-        if len(in_object_range(game, game.get_my_castle(), game.get_my_ice_trolls(), max_distance)) > max_number_of_ice_trolls_near_base:
-            continue
-
-        spawn_turn_lava_giant_loc = lava_giant.get_location().towards(game.get_my_castle(), game.lava_giant_max_speed *
-                                                                      game.ice_troll_summoning_duration)
-        summon_with_closest_portal(game, ICE, spawn_turn_lava_giant_loc)
-        print "summon ice. defend from lava"
+    if game.get_my_mana() >= game.ice_troll_cost:
+        for lava_giant in get_dangerous_enemy_lava_giant(game):
+            if game.get_my_mana() < game.ice_troll_cost:
+                break
+            
+            if len(is_targeted_by_my_icetroll(game, lava_giant)) > max_number_of_icetrolls_on_unit:
+                continue
+            max_distance = 3000
+            if game.get_enemy_portals():
+                max_distance = game.get_my_castle().distance(get_closest_enemy_portal(game, game.get_my_castle()))
+            if len(in_object_range(game, game.get_my_castle(), game.get_my_ice_trolls(), max_distance)) > max_number_of_ice_trolls_near_base:
+                continue
+            if turns_to_travel(game, lava_giant, game.get_my_castle(), game.lava_giant_max_speed) <=6 and not is_targeted_by_my_icetroll(game, lava_giant):
+                spawn_turn_lava_giant_loc = lava_giant.get_location().towards(game.get_my_castle(), game.lava_giant_max_speed *
+                                                                          game.ice_troll_summoning_duration)
+                summon_with_closest_portal(game, ICE, spawn_turn_lava_giant_loc)
+                print "summon ice. defend from lava"
     # elf handling
     
     dangerous_enemy_portals = []
@@ -524,24 +527,13 @@ def arrow_attack(game):
                 smart_movement(game, elf, elf.get_location())  # stay in place
 
 
-                
-
     if mana_state == "attack":
         distance_to_castle = first_arrow_portal.distance(game.get_enemy_castle()) - game.portal_size - game.castle_size
         print "distance_to_castle", distance_to_castle
         min_mana_to_attack = game.lava_giant_cost + 20 * (distance_to_castle / (game.castle_size + 2*game.portal_size))
         print "min_mana_to_attack", min_mana_to_attack
         if game.get_my_mana() > min_mana_to_attack:
-            if game.get_enemy_castle().distance(get_closest_my_portal(game, game.get_enemy_castle())) < 1200:
-                summon_with_closest_portal(game, LAVA, game.get_enemy_castle())
-            elif game.get_enemy_ice_trolls():
-                for ice_troll in game.get_enemy_ice_trolls():
-                    if ice_troll.distance(game.get_enemy_castle()) <= 1000:
-                        if turns_to_travel(game, get_closest_my_portal(game, game.get_enemy_castle()),
-                        game.get_enemy_castle(), game.lava_giant_max_speed)+3 >= ice_troll.current_health/game.ice_troll_suffocation_per_turn:
-                            summon_with_closest_portal(game, LAVA, game.get_enemy_castle())
-            else:
-                summon_with_closest_portal(game, LAVA, game.get_enemy_castle())
+            summon_with_closest_portal(game, LAVA, game.get_enemy_castle())
 
 
 def get_next_arrow_portal_loc(game):
@@ -562,5 +554,3 @@ def get_next_arrow_portal_loc(game):
     first_portal = closest(game, game.get_enemy_castle(), portals)
     print "first_portal:", first_portal
     return first_portal.get_location().towards(game.get_enemy_castle(), game.castle_size + game.portal_size)
-
-

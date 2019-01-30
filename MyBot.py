@@ -226,25 +226,3 @@ def handle_elves(game):
                 if not attack_closest_enemy_unit(game, elf_atk, max_distance):
                     attack_object(game, elf_atk, game.get_enemy_castle())
 
-
-def handle_portals(game):
-    ports = game.get_my_portals()
-    if len(ports) == 0:
-        return
-    ice_troll_defense(game)
-    port_def = closest(game, game.get_my_castle(), ports)
-    ports.remove(port_def)
-    port_atk = None
-    if len(ports) != 0:
-        port_atk = ports[0]
-
-    if port_def.distance(game.get_my_castle()) > 2000:
-        port_atk = port_def
-        port_def = None
-    if port_def != None:
-        if in_object_range(game, game.get_my_castle(), game.get_enemy_creatures() + game.get_enemy_living_elves(), 3000):
-            # print("in if in handle_portals")
-            if (game.get_my_ice_trolls() is None or len(game.get_my_ice_trolls()) < 3) or game.get_my_mana() > 200:
-                summon(game, port_def, ICE)
-    if port_atk != None:
-        summon(game, port_atk, LAVA)
