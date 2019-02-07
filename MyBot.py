@@ -48,7 +48,7 @@ def do_turn(game):
     # tests(game)
 
     # old_do_turn(game)
-    arrow_attack(game)
+    arrow_strategy(game)
     # MUST STAY IN THE END OF do_turn():
     Globals.prev_game = copy.deepcopy(game)
 
