@@ -343,41 +343,21 @@ def does_win_fight(game, elf, attack_target):
         return True
 
 
-def arrow_attack(game):
+def defend_from_enemy_elves(game, elves_not_acted, max_number_of_icetrolls_on_unit):
     """
 
-    defence:
-
-
-    build arrow of portals:
-      if can continue arrow without problems, continue (no enemy portals in the way)
-      elif can easily destroy closest disturbing enemy portals, then do
-      elif have enough mana, get cover by ice trolls and destroy closest disturbing enemy portals
-      else mana state = "save mana" and defend current arrow (maybe attack ice trolls)
-
-    attack close portals/elves if can win easily
-
-    if mana state = "attack" and have a lot of mana(the amount depends on the distance of first portal in the arrow to enemy castle)
-    then make lava giant with the first portal in the arrow
+    if there is a close elf to one of our portals, summon ice from a close portal.
 
     :param game:
-    :type game: Game
-    :return:
+    :param elves_not_acted: a list of all the elves who didn't act all ready.
+    :param max_number_of_icetrolls_on_unit: the max number of ice trolls on one unit
+    :return: a list of all the elves who didn't act all ready after the function has ended
     """
 
-    mana_state = "attack"
     prev_game = Globals.prev_game
-    elf_not_acted = copy.deepcopy(game.get_my_living_elves())
-    # defence
 
-    max_number_of_icetrolls_on_unit = 1
-    max_number_of_ice_trolls_near_base = 3
-    
-    if game.get_my_castle().current_health < game.get_enemy_castle().current_health:
-        max_number_of_ice_trolls_near_base += 1
-    
     for portal in game.get_my_portals():
-        """
+        """ # defend from all enemy elves that come towards portal
         for last_turn_enemy_elf in prev_game.get_enemy_living_elves():
             enemy_elf = get_by_unique_id(game, last_turn_enemy_elf.unique_id)
             if not enemy_elf:
@@ -403,6 +383,7 @@ def arrow_attack(game):
             if turns_to_travel(game, enemy_elf, attacking_pos) < 5 and not is_targeted_by_my_icetroll(game, enemy_elf):
                 summon_with_closest_portal(game, ICE, portal)
                 print "summon ice, close elf"
+
         if game.get_my_mana() >= game.ice_troll_cost:
             for lava_giant in get_dangerous_enemy_lava_giant(game):
                 if game.get_my_mana() < game.ice_troll_cost:
@@ -422,53 +403,172 @@ def arrow_attack(game):
                     print "summon ice. defend from lava"
     # elf handling
     
+
+
+    return elves_not_acted
+
+
+def defend_from_enemy_lava_giants(game, elves_not_acted, max_number_of_icetrolls_on_unit,
+                                  max_number_of_ice_trolls_near_base):
+    """
+
+    if there are dangerous enemy lava giants summon ice from a portal close to the lava giants location three turns from now.
+
+    :param game:
+    :param elves_not_acted: a list of all the elves who didn't act all ready.
+    :param max_number_of_icetrolls_on_unit: the max number of ice trolls on one unit
+    :param max_number_of_ice_trolls_near_base: the max number of ice trolls near base
+    :return: a list of all the elves who didn't act all ready after the function has ended
+    """
+
+    arbitrary_number_of_turns = 6
+
+    if game.get_my_mana() >= game.ice_troll_cost:
+        for lava_giant in get_dangerous_enemy_lava_giant(game):
+            if game.get_my_mana() < game.ice_troll_cost:
+                break
+
+            if len(is_targeted_by_my_icetroll(game, lava_giant)) > max_number_of_icetrolls_on_unit:
+                continue
+            max_distance = 3000
+            if game.get_enemy_portals():
+                max_distance = game.get_my_castle().distance(get_closest_enemy_portal(game, game.get_my_castle()))
+            if len(in_object_range(game, game.get_my_castle(), game.get_my_ice_trolls(),
+                                   max_distance)) > max_number_of_ice_trolls_near_base:
+                continue
+            num_of_turnes_to_my_castle = turns_to_travel(game, lava_giant, game.get_my_castle(),
+                                                         game.lava_giant_max_speed)
+
+            if num_of_turnes_to_my_castle <= arbitrary_number_of_turns and \
+                    not is_targeted_by_my_icetroll(game, lava_giant):
+                spawn_turn_lava_giant_loc = lava_giant.get_location().towards(game.get_my_castle(),
+                                                                              game.lava_giant_max_speed *
+                                                                              game.ice_troll_summoning_duration)
+                summon_with_closest_portal(game, ICE, spawn_turn_lava_giant_loc)
+                print "summon ice. defend from lava"
+
+    return elves_not_acted
+
+
+def arrow_def(game, elves_not_acted):
+    """
+
+    defence:\n
+    * if there is a close elf to one of our portals, summon ice.
+    * if there are dangerous enemy lava giants summon ice from a portal close to the lava giants location three turns from now.
+    * if there is a enemy portal who is attacking me send an elf to destroy it
+
+    :param game:
+    :param elves_not_acted: a list of all the elves who didnt act all ready
+    :return: a list of all the elves who didn't act all ready after the function has ended
+    """
+
+    max_number_of_icetrolls_on_unit = 1
+    max_number_of_ice_trolls_near_base = 3
+
+    if game.get_my_castle().current_health < game.get_enemy_castle().current_health:
+        max_number_of_ice_trolls_near_base += 1
+
+    elves_not_acted = defend_from_enemy_elves(game, elves_not_acted, max_number_of_icetrolls_on_unit)
+
+    elves_not_acted = defend_from_enemy_lava_giants(game, elves_not_acted, max_number_of_icetrolls_on_unit,
+                                                    max_number_of_ice_trolls_near_base)
+
+    elves_not_acted = attack_dangerous_enemy_portals(game, elves_not_acted)
+
+    return elves_not_acted
+
+
+def attack_dangerous_enemy_portals(game, elves_not_acted):
+    """
+
+    if there is a enemy portal who is attacking me send an elf to destroy it
+
+    :param game:
+    :param elves_not_acted: a list of all the elves who didn't act all ready
+    :return: a list of all the elves who didn't act all ready after the function has ended
+    """
+
+
     dangerous_enemy_portals = []
-    for portal, last_summoning_turns in Globals.dangerous_enemy_portals.items():
-        if len(last_summoning_turns) == 3:
-            if last_summoning_turns[2] + 15 > game.turn:
+    last_summoning_turns_max_length = 3
+    arbitrary_number_of_turnes = 15
+
+    for portal, last_summoning_turns in Globals.possible_dangerous_enemy_portals.items():
+        if len(last_summoning_turns) == last_summoning_turns_max_length:
+            if last_summoning_turns[-1] + arbitrary_number_of_turnes > game.turn:
                 dangerous_enemy_portals.append(portal)
-    if dangerous_enemy_portals and elf_not_acted:
-        print "elf_not_acted", elf_not_acted
+
+    if dangerous_enemy_portals and elves_not_acted:
+        print "elf_not_acted", elves_not_acted
         for portal in dangerous_enemy_portals:
-            closest_elf_to_portal_loc = closest(game, portal, elf_not_acted)
+            closest_elf_to_portal_loc = closest(game, portal, elves_not_acted)
             if not closest_elf_to_portal_loc:
                 break
             attack_object(game, closest_elf_to_portal_loc, portal)
             print "portal: %s, closest_elf_to_portal_loc: %s" % (portal, closest_elf_to_portal_loc)
-            elf_not_acted.remove(closest_elf_to_portal_loc)
-        
-    arrow_next_portal_loc = Globals.arrow_next_portal_loc
-    if not arrow_next_portal_loc or game.get_my_portals() != prev_game.get_my_portals():
-        arrow_next_portal_loc = get_next_arrow_portal_loc(game)
-        Globals.arrow_next_portal_loc = arrow_next_portal_loc
+            elves_not_acted.remove(closest_elf_to_portal_loc)
 
-    for elf in copy.deepcopy(elf_not_acted):
+    return elves_not_acted
+
+
+def attack_closest_enemy_game_obj(game, elves_not_acted, arrow_next_portal_loc):
+    """
+
+    attack close portals/elves if can win easily
+
+    :param game:
+    :param elves_not_acted: a list of all the elves who didn't act all ready
+    :param arrow_next_portal_loc:
+    :return: a list of all the elves who didn't act all ready after the function has ended
+    """
+
+    for elf in copy.deepcopy(elves_not_acted):
         # attack close enemy objects
         closest_enemy_portal = get_closest_enemy_portal(game, elf)
         closest_enemy_elf = get_closest_enemy_elf(game, elf)
 
-        if closest_enemy_portal and elf.in_range(closest_enemy_portal, game.portal_size + game.elf_max_speed + game.elf_attack_range) and \
-           does_win_fight(game, elf, closest_enemy_portal):  # , 5 + turns_to_travel(game, elf, closest_enemy_portal)
+        if closest_enemy_portal and elf.in_range(closest_enemy_portal,
+                                                 game.portal_size + game.elf_max_speed + game.elf_attack_range) and \
+                does_win_fight(game, elf,
+                               closest_enemy_portal):  # , 5 + turns_to_travel(game, elf, closest_enemy_portal)
 
             attack_object(game, elf, closest_enemy_portal)
             print "elf: %s attacking: %s" % (elf, closest_enemy_portal)
-            elf_not_acted.remove(elf)
+            elves_not_acted.remove(elf)
             continue
 
-        if closest_enemy_elf and elf.in_range(closest_enemy_elf, game.portal_size + game.elf_max_speed + game.elf_attack_range) and \
-           does_win_fight(game, elf, closest_enemy_elf):  # , 5 + turns_to_travel(game, elf, closest_enemy_portal)
+        if closest_enemy_elf and elf.in_range(closest_enemy_elf,
+                                              game.portal_size + game.elf_max_speed + game.elf_attack_range) and \
+                does_win_fight(game, elf, closest_enemy_elf):  # , 5 + turns_to_travel(game, elf, closest_enemy_portal)
 
             attack_object(game, elf, closest_enemy_elf)
             print "elf: %s attacking: %s" % (elf, closest_enemy_elf)
-            elf_not_acted.remove(elf)
+            elves_not_acted.remove(elf)
             continue
 
-    # build arrow
-    first_arrow_portal = closest(game, game.get_enemy_castle(), game.get_my_portals() + [game.get_my_castle()])
+    return elves_not_acted
+
+
+def build_next_arrow_portal(game, elves_not_acted, arrow_next_portal_loc, first_arrow_portal):
+    """
+
+    * if can continue arrow without problems, continue (no enemy portals in the way).
+    * elif can easily destroy closest disturbing enemy portals, then do.
+    * elif have enough mana, get cover by ice trolls and destroy closest disturbing enemy portals.
+    * else mana state = "save mana" and defend current arrow (maybe attack ice trolls).
+
+    :param game:
+    :param elves_not_acted:
+    :param first_arrow_portal:
+    :return: a list of all the elves who didn't act all ready after the function has ended, and mana state
+    :type: ([Elf], str)
+    """
+
     disturbing_enemy_portals = get_objects_in_path(game, arrow_next_portal_loc, first_arrow_portal,
                                                    game.get_enemy_portals(), game.portal_size * 2)
-    closest_elf_to_portal_loc = closest(game, arrow_next_portal_loc, elf_not_acted)
-    
+    closest_elf_to_portal_loc = closest(game, arrow_next_portal_loc, elves_not_acted)
+
     if closest_elf_to_portal_loc:
         if not disturbing_enemy_portals:
             if make_portal(game, closest_elf_to_portal_loc, arrow_next_portal_loc):
@@ -479,11 +579,11 @@ def arrow_attack(game):
                     mana_at_arrival = game.get_my_mana() + turns_to_dis * game.default_mana_per_turn
                     if mana_at_arrival < game.portal_cost:
                         mana_state = "save mana"
-                        
-                elf_not_acted.remove(closest_elf_to_portal_loc)
+
+                elves_not_acted.remove(closest_elf_to_portal_loc)
                 print "elf %s making portal at: %s" % (closest_elf_to_portal_loc, arrow_next_portal_loc)
             else:  # the elf cant build the portal
-                has_mana, portals_in_range = check_why_cant_build_portal(game, elf)
+                has_mana, portals_in_range = check_why_cant_build_portal(game, closest_elf_to_portal_loc)
                 if portals_in_range:
                     disturbing_enemy_portals.extend(portals_in_range)
 
@@ -495,45 +595,126 @@ def arrow_attack(game):
             turns_to_disturbing_portal = turns_to_travel(game, closest_elf_to_portal_loc, closest_disturbing_portal)
             if does_win_fight(game, closest_elf_to_portal_loc, closest_disturbing_portal):
                 attack_object(game, closest_elf_to_portal_loc, closest_disturbing_portal)
-                print "elf: %s attacking closest_disturbing_portal: %s" % (closest_elf_to_portal_loc, closest_disturbing_portal)
-                elf_not_acted.remove(closest_elf_to_portal_loc)
+                print "elf: %s attacking closest_disturbing_portal: %s" % (
+                    closest_elf_to_portal_loc, closest_disturbing_portal)
+                elves_not_acted.remove(closest_elf_to_portal_loc)
 
             elif game.get_my_mana() > game.ice_troll_cost:  # if we don't win the fight, get help
                 summon(game, first_arrow_portal, ICE)
                 attack_object(game, closest_elf_to_portal_loc, closest_disturbing_portal)
-                print "elf: %s attacking closest_disturbing_portal: %s" % (closest_elf_to_portal_loc, closest_disturbing_portal)
-                elf_not_acted.remove(closest_elf_to_portal_loc)
+                print "elf: %s attacking closest_disturbing_portal: %s" % (
+                    closest_elf_to_portal_loc, closest_disturbing_portal)
+                elves_not_acted.remove(closest_elf_to_portal_loc)
 
             else:
                 mana_state = "save mana"
                 smart_movement(game, closest_elf_to_portal_loc, closest_elf_to_portal_loc.get_location())
                 print "elf %s running away" % closest_elf_to_portal_loc
-                elf_not_acted.remove(closest_elf_to_portal_loc)
+                elves_not_acted.remove(closest_elf_to_portal_loc)
                 # need to add: defend current arrow (maybe attack ice trolls)
-        if elf_not_acted:
-            for elf in elf_not_acted:
-                closest_enemy_portal = get_closest_enemy_portal(game, elf)
-                if closest_enemy_portal:
-                    print "elf %s is attacking : %s" % (elf, closest_enemy_portal)
-                    attack_object(game, elf, closest_enemy_portal)
-                    continue
-                
-                closest_enemy_unit = get_closest_enemy_unit(game, elf)
-                if closest_enemy_unit:
-                    print "elf %s is attacking : %s" % (elf, closest_enemy_unit)
-                    attack_object(game, elf, closest_enemy_unit)
-                    continue
-                
-                smart_movement(game, elf, elf.get_location())  # stay in place
 
+    return elves_not_acted, mana_state
+
+
+def arrow_attack(game, elves_not_acted):
+    """
+
+    attack close portals/elves if can win easily\n
+
+    build arrow of portals:\n
+    * if can continue arrow without problems, continue (no enemy portals in the way).
+    * elif can easily destroy closest disturbing enemy portals, then do.
+    * elif have enough mana, get cover by ice trolls and destroy closest disturbing enemy portals.
+    * else mana state = "save mana" and defend current arrow (maybe attack ice trolls).
+
+    if mana state = "attack" and have a lot of mana(the amount depends on the distance of first portal in the arrow to enemy castle).
+    then make lava giant with the first portal in the arrow.
+
+    :param game:
+    :param elves_not_acted:
+    :return:
+    """
+
+    prev_game = Globals.prev_game
+    arrow_next_portal_loc = get_next_arrow_portal_loc(game)
+
+    attack_closest_enemy_game_obj(game, elves_not_acted, arrow_next_portal_loc)
+
+    # build arrow
+    first_arrow_portal = closest(game, game.get_enemy_castle(), game.get_my_portals() + [game.get_my_castle()])
+
+    elves_not_acted, mana_state = build_next_arrow_portal(game, elves_not_acted, first_arrow_portal)
+
+    if elves_not_acted:
+        for elf in elves_not_acted:
+            closest_enemy_portal = get_closest_enemy_portal(game, elf)
+            if closest_enemy_portal:
+                print "elf %s is attacking : %s" % (elf, closest_enemy_portal)
+                attack_object(game, elf, closest_enemy_portal)
+                continue
+
+            closest_enemy_unit = get_closest_enemy_unit(game, elf)
+            if closest_enemy_unit:
+                print "elf %s is attacking : %s" % (elf, closest_enemy_unit)
+                attack_object(game, elf, closest_enemy_unit)
+                continue
+
+            smart_movement(game, elf, elf.get_location())  # stay in place
 
     if mana_state == "attack":
-        distance_to_castle = first_arrow_portal.distance(game.get_enemy_castle()) - game.portal_size - game.castle_size
-        print "distance_to_castle", distance_to_castle
-        min_mana_to_attack = game.lava_giant_cost + 20 * (distance_to_castle / (game.castle_size + 2*game.portal_size))
-        print "min_mana_to_attack", min_mana_to_attack
-        if game.get_my_mana() > min_mana_to_attack:
-            summon_with_closest_portal(game, LAVA, game.get_enemy_castle())
+        summon_lava_attack(game, first_arrow_portal)
+
+
+def summon_lava_attack(game, first_arrow_portal):
+    """
+
+    if have a lot of mana(the amount depends on the distance of first portal in the arrow to enemy castle).
+    then make lava giant with the first portal in the arrow.
+
+    :param game:
+    :param first_arrow_portal:
+    :return:
+    """
+
+    distance_to_castle = first_arrow_portal.distance(game.get_enemy_castle()) - game.portal_size - game.castle_size
+    print "distance_to_castle", distance_to_castle
+    min_mana_to_attack = game.lava_giant_cost + 20 * (distance_to_castle / (game.castle_size + 2 * game.portal_size))
+    print "min_mana_to_attack", min_mana_to_attack
+    if game.get_my_mana() > min_mana_to_attack:
+        summon_with_closest_portal(game, LAVA, game.get_enemy_castle())
+
+
+def arrow_strategy(game):
+    """
+
+    defence:\n
+    * if there is a close elf to one of our portals, summon ice.
+    * if there are dangerous enemy lava giants summon ice from a portal close to the lava giants location three turns from now.
+    * if there is a enemy portal who is attacking me send an elf to destroy it
+
+    attack close portals/elves if can win easily\n
+
+    build arrow of portals:\n
+    * if can continue arrow without problems, continue (no enemy portals in the way).
+    * elif can easily destroy closest disturbing enemy portals, then do.
+    * elif have enough mana, get cover by ice trolls and destroy closest disturbing enemy portals.
+    * else mana state = "save mana" and defend current arrow (maybe attack ice trolls).
+
+    if mana state = "attack" and have a lot of mana(the amount depends on the distance of first portal in the arrow to enemy castle).
+    then make lava giant with the first portal in the arrow.
+
+    :param game:
+    :type game: Game
+    :return:
+    """
+
+    mana_state = "attack"
+    prev_game = Globals.prev_game
+    elf_not_acted = copy.deepcopy(game.get_my_living_elves())
+
+    elf_not_acted = arrow_def(game, elf_not_acted)
+
+    arrow_attack(game, elf_not_acted)
 
 
 def get_next_arrow_portal_loc(game):
@@ -546,6 +727,7 @@ def get_next_arrow_portal_loc(game):
     :return: the location of the next location for a portal in the arrow attack
     :type: Location
     """
+
 
     portals =  get_objects_in_path(game, game.get_my_castle(), game.get_enemy_castle(), game.get_my_portals()) + [game.get_my_castle().get_location().towards(game.get_enemy_castle(), 10)]
     for elf in game.get_my_living_elves():
@@ -634,4 +816,19 @@ def attacks_close_to_our_castle_portals(game):
                             get_closest_my_portal(game, enemy_elf).summon_ice_troll()
                 '''
 
+
+
+    if Globals.arrow_next_portal_loc and game.get_my_portals() == Globals.prev_game.get_my_portals():
+        return Globals.arrow_next_portal_loc
+    else:
+        portals = get_objects_in_path(game, game.get_my_castle(), game.get_enemy_castle(), game.get_my_portals()) + \
+                  [game.get_my_castle().get_location().towards(game.get_enemy_castle(), 10)]
+        for elf in game.get_my_living_elves():
+            if elf.is_building:
+                portals.append(elf.get_location())
+        first_portal = closest(game, game.get_enemy_castle(), portals)
+        print "first_portal:", first_portal
+        Globals.arrow_next_portal_loc = first_portal.get_location().towards(game.get_enemy_castle(),
+                                                                            game.castle_size + game.portal_size)
+        return Globals.arrow_next_portal_loc
 

@@ -1157,7 +1157,7 @@ def farthest(game, main_map_object, map_objects_list):
 
 def update_dangerous_enemy_portals(game):
     
-    dangerous_enemy_portals = Globals.dangerous_enemy_portals
+    dangerous_enemy_portals = Globals.possible_dangerous_enemy_portals
     for portal in game.get_enemy_portals():
         if portal.currently_summoning == "LavaGiant" and portal.turns_to_summon == 3:
             portal_queue = dangerous_enemy_portals.get(portal, [])
@@ -1165,6 +1165,6 @@ def update_dangerous_enemy_portals(game):
             if len(portal_queue) > 3:
                 portal_queue.remove(portal_queue[0])
             dangerous_enemy_portals[portal] = portal_queue
-    for portal in copy.deepcopy(Globals.dangerous_enemy_portals):
+    for portal in copy.deepcopy(Globals.possible_dangerous_enemy_portals):
         if portal not in game.get_enemy_portals():
-            Globals.dangerous_enemy_portals.pop(portal, None)
+            Globals.possible_dangerous_enemy_portals.pop(portal, None)

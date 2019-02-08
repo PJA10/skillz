@@ -15,14 +15,6 @@ def get_threatened_portals(game):
     if game.get_enemy_living_elves():
         for portal in game.get_my_portals():
             for elf in game.get_enemy_living_elves():
-                if (turns_to_travel(game, elf, portal.get_location().towards(elf, game.elf_attack_range),
-                                                game.elf_max_speed) <= 5 + elf.distance(portal)/game.elf_attack_range):
-                    #if the closest enemy elf can get to the given portal in 5 turns or less
-                    for ice_troll in game.get_my_ice_trolls():
-                        if get_closest_enemy_unit(game, ice_troll) == elf and elf.distance(ice_troll) >= 400:
-                            if portal not in threatened_portals:
-                                threatened_portals.append(portal)
-
                 if (turns_to_travel(game, elf, portal.get_location().towards(elf, game.elf_attack_range)) <=
                         5 + elf.distance(portal)/game.elf_attack_range):
                     # if the closest enemy elf can get to the given portal in 5 turns or less
@@ -43,16 +35,6 @@ def get_threatening_elves(game):
     if game.get_enemy_living_elves():
         for portal in game.get_my_portals():
             for elf in game.get_enemy_living_elves():
-
-                if (turns_to_travel(game, elf, portal.get_location().towards(elf, game.elf_attack_range),
-                                                game.elf_max_speed) <= 5 + elf.distance(portal)/game.elf_attack_range):
-                    threatening_elves.append(elf)
-                    for ice_troll in game.get_my_ice_trolls():
-                        if (get_closest_enemy_unit(game, ice_troll).unique_id ==
-                        elf.unique_id and elf.distance(ice_troll)<= 400):
-                            if elf in threatening_elves:
-                                threatening_elves.remove(elf)
-
                 if (turns_to_travel(game, elf, portal.get_location().towards(elf, game.elf_attack_range)) <=
                         5 + elf.distance(portal)/game.elf_attack_range):
                     # if the closest enemy elf can attack the given portal in 5 turns or less
@@ -120,6 +102,25 @@ def ice_troll_defense(game):
 
 
 
+
+
+
+def attacks_close_to_our_castle_portals(game):
+    """
+
+
+    This function checks if an enemy elf starts creating a portal close to us,
+    if he is elf and ice troll will be send to attack him and the portal
+    :return: nothing
+    """
+    if not game.get_enemy_living_elves():
+        for elf in game.get_enemy_living_elves():
+            if elf.is_building and game.get_my_castle().distance(elf) <= 2000:
+                if get_closest_my_portal(game, elf).can_summon_ice_troll():
+                    get_closest_my_portal(game, elf).summon_ice_troll()
+            if game.get_my_living_elves():
+                if get_closest_friendly_elf(game, elf).distance(elf) <= 2000:
+                    attack_object(game, get_closest_friendly_elf(game, elf), elf)
 
 
 
