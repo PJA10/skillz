@@ -776,8 +776,8 @@ def attacks_close_to_our_castle_portals(game, elves_not_acted, first_arrow_porta
                                 print "elf %s is attacking : %s" % (closest_my_elf, closest_ENEMY_elf)
 
                             else:
-                                smart_movement(game, closest_my_elf, closest_ENEMY_elf)
-                                print "elf %s is attacking : %s" % (closest_my_elf, closest_ENEMY_elf.get_location())
+                                smart_movement(game, closest_my_elf, closest_ENEMY_elf.get_location())
+                                print "elf %s is moving to : %s" % (closest_my_elf, closest_ENEMY_elf.get_location())
 
                         else:
                             if turns_to_travel(game, get_closest_my_portal(game, closest_ENEMY_elf), closest_ENEMY_elf,
@@ -787,13 +787,16 @@ def attacks_close_to_our_castle_portals(game, elves_not_acted, first_arrow_porta
                                 # -2 because we want our ice troll will tank if the enemy elf will fight back
                                 if not is_targeted_by_my_icetroll(game, closest_ENEMY_elf):
                                     summon_with_closest_portal(game, ICE, closest_ENEMY_elf)
-                            smart_movement(game, closest_my_elf, enemy_portal)
+                            smart_movement(game, closest_my_elf, enemy_portal.location)
 
                     elif closest_ENEMY_elf.distance(my_castle) < first_arrow_portal.distance(my_castle):
                         if does_win_fight(game, closest_my_elf, closest_ENEMY_elf):
-                            attack_object(game, )
-                                attack_object(game, closest_my_elf, closest_ENEMY_elf)
+                            attack_object(game, closest_my_elf, closest_ENEMY_elf)
+                            print "elf %s is attacking : %s" % (closest_my_elf, closest_ENEMY_elf)
 
+                        else:
+                            smart_movement(game, closest_my_elf, closest_ENEMY_elf.get_location())
+                            print "elf %s is moving to : %s" % (closest_my_elf, closest_ENEMY_elf.get_location()
 
             else:
                 # no enemy portals
