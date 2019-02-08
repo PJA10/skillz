@@ -736,6 +736,19 @@ def get_next_arrow_portal_loc(game):
     first_portal = closest(game, game.get_enemy_castle(), portals)
     print "first_portal:", first_portal
     return first_portal.get_location().towards(game.get_enemy_castle(), game.castle_size + game.portal_size)
+    if Globals.arrow_next_portal_loc and game.get_my_portals() == Globals.prev_game.get_my_portals():
+        return Globals.arrow_next_portal_loc
+    else:
+        portals = get_objects_in_path(game, game.get_my_castle(), game.get_enemy_castle(), game.get_my_portals()) + \
+                  [game.get_my_castle().get_location().towards(game.get_enemy_castle(), 10)]
+        for elf in game.get_my_living_elves():
+            if elf.is_building:
+                portals.append(elf.get_location())
+        first_portal = closest(game, game.get_enemy_castle(), portals)
+        print "first_portal:", first_portal
+        Globals.arrow_next_portal_loc = first_portal.get_location().towards(game.get_enemy_castle(),
+                                                                            game.castle_size + game.portal_size)
+        return Globals.arrow_next_portal_loc
 
 
 def attacks_close_to_our_castle_portals(game):
@@ -816,19 +829,4 @@ def attacks_close_to_our_castle_portals(game):
                             get_closest_my_portal(game, enemy_elf).summon_ice_troll()
                 '''
 
-
-
-    if Globals.arrow_next_portal_loc and game.get_my_portals() == Globals.prev_game.get_my_portals():
-        return Globals.arrow_next_portal_loc
-    else:
-        portals = get_objects_in_path(game, game.get_my_castle(), game.get_enemy_castle(), game.get_my_portals()) + \
-                  [game.get_my_castle().get_location().towards(game.get_enemy_castle(), 10)]
-        for elf in game.get_my_living_elves():
-            if elf.is_building:
-                portals.append(elf.get_location())
-        first_portal = closest(game, game.get_enemy_castle(), portals)
-        print "first_portal:", first_portal
-        Globals.arrow_next_portal_loc = first_portal.get_location().towards(game.get_enemy_castle(),
-                                                                            game.castle_size + game.portal_size)
-        return Globals.arrow_next_portal_loc
 
