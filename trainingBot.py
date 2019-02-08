@@ -933,6 +933,19 @@ def get_by_unique_id(game, need_to_find_unique_id):
     return None
 
 
+def get_farthest_enemy_portal(game, map_object):
+    """
+
+    This function return the farthest enemy portal to a given map object
+
+    :param map_object: an object on the map in order to find the farthest portal to it
+    :return: the closest enemy's portal to map_object
+    :type: Portal
+    """
+
+    return farthest(game, map_object, game.get_enemy_portals())
+
+
 def get_player_units(game, need_to_find_player):
     """
 
@@ -1021,6 +1034,18 @@ get_closest_my_portal.__doc__ = \
     :return: the closest my portal to map_object
     :type: Portal
     """
+
+get_farthest_my_portal = swap_players(get_farthest_enemy_portal)
+get_farthest_my_portal.__doc__ = \
+    """
+
+    This function return the farthest portal of my portals to a given map object
+
+    :param map_object: an object on the map in order to find the farthest portal to it
+    :return: the farthest my portal to map_object
+    :type: Portal
+    """
+
 get_closest_my_unit = swap_players(get_closest_enemy_unit)
 get_closest_my_unit.__doc__ = \
     """
@@ -1109,7 +1134,26 @@ def summon_with_closest_portal(game, creature_type_str, target, portal_list=Fals
             return True
 
     return False
-    
+
+
+def farthest(game, main_map_object, map_objects_list):
+    """
+
+    This function get a main map object and a list of map object and return the farthest map object (from the list)
+    to the main map object
+
+    :param main_map_object: the map object which to find the farthest to
+    :type main_map_object: MapObject
+    :param map_objects_list: the list of map objects from which to find the farthest object to main_map_object
+    :type map_objects_list: [MapObject]
+    :return: a map object from map_objects_list which is the farthest to main_map_object
+    :type: MapObject
+    """
+    if not map_objects_list:
+        return None
+    else:
+        return max(map_objects_list, key=lambda map_object: main_map_object.distance(map_object))
+
 
 def update_dangerous_enemy_portals(game):
     

@@ -87,6 +87,10 @@ def ice_troll_defense(game):
         if len(is_targeted_by_my_icetroll(game, lava_giant)) < 1:
             closest(game, game.get_my_castle(), not_summoning_portals).summon_ice_troll()
 
+
+
+
+
 '''
     for ice_troll in game.get_my_ice_trolls():
         if ice_troll.current_health > ice_troll.max_health / 2.5:
@@ -113,22 +117,10 @@ def ice_troll_defense(game):
 '''
 
 
-def attacks_close_portals_defense(game):
-    """
 
-    This function checks if an enemy elf starts creating a portal close to us,
-    if he is elf and ice troll will be send to attack him and the portal
-    :return: nothing
-    """
-    building_close_elf = []
-    if game.get_enemy_living_elves():
-        for elf in game.get_enemy_living_elves():
-            if elf.is_building and game.get_my_castle().distance(elf) <= 2000:
-                if get_closest_my_portal(game, elf).can_summon_ice_troll():
-                    get_closest_my_portal(game, elf).summon_ice_troll()
-            if game.get_my_living_elves():
-                if get_closest_friendly_elf(game, elf).distance(elf) <= 2000:
-                    attack_object(game, get_closest_friendly_elf(game, elf), elf)
+
+
+
 
 
 
