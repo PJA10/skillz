@@ -751,8 +751,9 @@ def get_next_arrow_portal_loc(game):
         return Globals.arrow_next_portal_loc
 
 
-def attacks_close_to_our_castle_portals(game):
+def attacks_close_to_our_castle_threatens_arrow_strategy(game):
     """
+    ONLY WORKS WITH ARROW STRATEGY
     This function checks if an enemy elf starts creating a portal close to us,
     if he is elf and ice troll will be send to attack him and the portal
     if there is a dangerous enemy portal an elf will be send to destroy it
@@ -766,14 +767,11 @@ def attacks_close_to_our_castle_portals(game):
                     closest_my_elf = get_closest_my_elf(game, enemy_portal)
                     closest_ENEMY_elf = get_closest_enemy_elf(game, enemy_portal)
                     if enemy_portal.distance(my_castle) < first_arrow_portal.distance(my_castle):
-                        if does_win_fight(game, closest_my_elf, enemy_portal):
+                        if does_win_fight(game, closest_my_elf, closest_ENEMY_elf):
                             if closest_my_elf.distance(closest_ENEMY_elf) > game.elf_attack_range:
                                 attack_object(game, closest_my_elf, enemy_portal)
-                            elif does_win_fight(game,closest_my_elf, closest_ENEMY_elf):
+                            elif does_win_fight(game, closest_my_elf, closest_ENEMY_elf):
                                 attack_object(game, closest_my_elf, closest_ENEMY_elf)
-                            else:
-                                smart_movement(game,closest_my_elf, closest_ENEMY_elf)
-
                         else:
                             if turns_to_travel(game, get_closest_my_portal(game, closest_ENEMY_elf), closest_ENEMY_elf,
                                                game.ice_troll_max_speed) \
@@ -783,6 +781,12 @@ def attacks_close_to_our_castle_portals(game):
                                 if not is_targeted_by_my_icetroll(game, closest_ENEMY_elf):
                                     summon_with_closest_portal(game, ICE, closest_ENEMY_elf)
                             smart_movement(game, closest_my_elf, enemy_portal)
+
+                    elif closest_ENEMY_elf.distance(my_castle) < first_arrow_portal.distance(my_castle):
+                        if does_win_fight(game, closest_my_elf, closest_ENEMY_elf):
+                            attack_object(game, )
+                                attack_object(game, closest_my_elf, closest_ENEMY_elf)
+
 
             else:
                 # no enemy portals
