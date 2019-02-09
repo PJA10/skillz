@@ -287,16 +287,16 @@ def does_win_fight_v1(game, elf, attack_target, max_depth=4):
     curr_attack_target = copy.deepcopy(attack_target)
     curr_game = copy.deepcopy(game)
     curr_turn = 0
-    
+
     print "elf: %s, attack_target %s, max_depth: %s" % (elf, attack_target, max_depth)
     start_time = time.time()
     # loop over the next turns until elf or attack_target will die
     while curr_attack_target.current_health and curr_elf.current_health  and curr_turn < max_depth:
         print "----------%s---------%s" % ( curr_turn, time.time()*1000-start_time*1000)
-        
+
         print "enemy_ice_trolls: %s" % curr_game.get_enemy_ice_trolls()
         # print ",".join(str((portal, portal.turns_to_summon)) for portal in curr_game.get_enemy_portals())
-        
+
         elf_next_turn_hp = get_my_unit_next_turn_health(curr_game, curr_elf, include_elves=True)
         print "between players"
         attack_target_next_turn_hp = get_enemy_unit_next_turn_health(curr_game, curr_attack_target, True)
@@ -306,7 +306,7 @@ def does_win_fight_v1(game, elf, attack_target, max_depth=4):
         if not curr_elf.in_attack_range(attack_target):
             curr_elf.location = curr_elf.get_location().towards(attack_target, game.elf_max_speed)
 
-        
+
         next_turn_my_ice_trolls, next_turn_enemy_ice_trolls = predict_next_turn_ice_trolls(curr_game)
         print "does win fight time: %s", (time.time()*1000-start_time*1000)
         curr_game.get_myself().ice_trolls = next_turn_my_ice_trolls
@@ -330,7 +330,7 @@ def does_win_fight_v1(game, elf, attack_target, max_depth=4):
 
 
 def does_win_fight(game, elf, attack_target):
-    
+
     health_dif = 0
     if attack_target.type == "Elf" or attack_target.type == "IceTroll" or attack_target.type == "LavaGiant":
         health_dif = attack_target.current_health - elf.current_health
@@ -389,7 +389,7 @@ def defend_from_enemy_elves(game, elves_not_acted, max_number_of_icetrolls_on_un
             for lava_giant in get_dangerous_enemy_lava_giant(game):
                 if game.get_my_mana() < game.ice_troll_cost:
                     break
-            
+
                 if len(is_targeted_by_my_icetroll(game, lava_giant)) > max_number_of_icetrolls_on_unit:
                     continue
                 max_distance = 3000
@@ -735,6 +735,19 @@ def get_next_arrow_portal_loc(game):
     first_portal = closest(game, game.get_enemy_castle(), portals)
     print "first_portal:", first_portal
     return first_portal.get_location().towards(game.get_enemy_castle(), game.castle_size + game.portal_size)
+    if Globals.arrow_next_portal_loc and game.get_my_portals() == Globals.prev_game.get_my_portals():
+        return Globals.arrow_next_portal_loc
+    else:
+        portals = get_objects_in_path(game, game.get_my_castle(), game.get_enemy_castle(), game.get_my_portals()) + \
+                  [game.get_my_castle().get_location().towards(game.get_enemy_castle(), 10)]
+        for elf in game.get_my_living_elves():
+            if elf.is_building:
+                portals.append(elf.get_location())
+        first_portal = closest(game, game.get_enemy_castle(), portals)
+        print "first_portal:", first_portal
+        Globals.arrow_next_portal_loc = first_portal.get_location().towards(game.get_enemy_castle(),
+                                                                            game.castle_size + game.portal_size)
+        return Globals.arrow_next_portal_loc
 
 
 def attacks_close_to_our_castle_portals(game, elves_not_acted, first_arrow_portal):
@@ -764,8 +777,8 @@ def attacks_close_to_our_castle_portals(game, elves_not_acted, first_arrow_porta
                                 print "elf %s is attacking : %s" % (closest_my_elf, closest_ENEMY_elf)
 
                             else:
-                                smart_movement(game, closest_my_elf, closest_ENEMY_elf)
-                                print "elf %s is attacking : %s" % (closest_my_elf, closest_ENEMY_elf.get_location())
+                                smart_movement(game, closest_my_elf, closest_ENEMY_elf.get_location())
+                                print "elf %s is moving to : %s" % (closest_my_elf, closest_ENEMY_elf.get_location())
 
                         else:
                             if turns_to_travel(game, get_closest_my_portal(game, closest_ENEMY_elf), closest_ENEMY_elf,
@@ -775,7 +788,16 @@ def attacks_close_to_our_castle_portals(game, elves_not_acted, first_arrow_porta
                                 # -2 because we want our ice troll will tank if the enemy elf will fight back
                                 if not is_targeted_by_my_icetroll(game, closest_ENEMY_elf):
                                     summon_with_closest_portal(game, ICE, closest_ENEMY_elf)
-                            smart_movement(game, closest_my_elf, enemy_portal)
+                            smart_movement(game, closest_my_elf, enemy_portal.location)
+
+                    elif closest_ENEMY_elf.distance(my_castle) < first_arrow_portal.distance(my_castle):
+                        if does_win_fight(game, closest_my_elf, closest_ENEMY_elf):
+                            attack_object(game, closest_my_elf, closest_ENEMY_elf)
+                            print "elf %s is attacking : %s" % (closest_my_elf, closest_ENEMY_elf)
+
+                        else:
+                            smart_movement(game, closest_my_elf, closest_ENEMY_elf.get_location())
+                            print "elf %s is moving to : %s" % (closest_my_elf, closest_ENEMY_elf.get_location()
 
             else:
                 # no enemy portals
@@ -845,4 +867,3 @@ def get_next_arrow_portal_loc(game):
         Globals.arrow_next_portal_loc = first_portal.get_location().towards(game.get_enemy_castle(),
                                                                             game.castle_size + game.portal_size)
         return Globals.arrow_next_portal_loc
-
