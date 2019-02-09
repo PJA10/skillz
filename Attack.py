@@ -11,6 +11,7 @@ import Globals
 from collections import *
 import time
 
+
 def attack(game, elf, attack_dest, **kwargs):
     """
 
