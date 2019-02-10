@@ -292,12 +292,12 @@ def does_win_fight_v1(game, elf, attack_target, max_depth=4):
     start_time = time.time()
     # loop over the next turns until elf or attack_target will die
     while curr_attack_target.current_health and curr_elf.current_health  and curr_turn < max_depth:
-        print "----------%s---------%s" % ( curr_turn, time.time()*1000-start_time*1000)
+        print "----------%s---------%s" % ( curr_turn, time.time() * 1000 - start_time * 1000)
 
         print "enemy_ice_trolls: %s" % curr_game.get_enemy_ice_trolls()
         # print ",".join(str((portal, portal.turns_to_summon)) for portal in curr_game.get_enemy_portals())
 
-        elf_next_turn_hp = get_my_unit_next_turn_health(curr_game, curr_elf, include_elves=True)
+        elf_next_turn_hp = get_my_unit_next_turn_health(curr_game, curr_elf, include_elves = True)
         print "between players"
         attack_target_next_turn_hp = get_enemy_unit_next_turn_health(curr_game, curr_attack_target, True)
         print "curr_elf hp: %s, elf_next_turn_hp %s" % (curr_elf.current_health, elf_next_turn_hp)
@@ -308,7 +308,7 @@ def does_win_fight_v1(game, elf, attack_target, max_depth=4):
 
 
         next_turn_my_ice_trolls, next_turn_enemy_ice_trolls = predict_next_turn_ice_trolls(curr_game)
-        print "does win fight time: %s", (time.time()*1000-start_time*1000)
+        print "does win fight time: %s", (time.time() * 1000 - start_time * 1000)
         curr_game.get_myself().ice_trolls = next_turn_my_ice_trolls
         # print "next_turn_enemy_ice_trolls", next_turn_enemy_ice_trolls
         curr_game.get_enemy().ice_trolls = next_turn_enemy_ice_trolls
@@ -342,6 +342,7 @@ def does_win_fight(game, elf, attack_target):
         return False
     else:
         return True
+
 
 
 def defend_from_enemy_elves(game, elves_not_acted, max_number_of_icetrolls_on_unit):

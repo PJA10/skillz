@@ -527,7 +527,7 @@ def predict_next_turn_creatures(game):
     :type: ([LavaGiants], [LavaGiants], [IceTroll], [IceTroll])
     """
 
-    next_turn_my_lava_giant_list, next_turn_enemy_lava_giant_list = predict_next_turn_lava_giant(game)
+    next_turn_my_lava_giant_list, next_turn_enemy_lava_giant_list = predict_next_turn_lava_giants(game)
     next_turn_my_icetrolls_list, next_turn_enemy_icetrolls_list = predict_next_turn_ice_trolls(game)
 
     return next_turn_my_lava_giant_list, next_turn_enemy_lava_giant_list,\
@@ -592,7 +592,7 @@ def predict_next_turn_ice_trolls(game):
     return next_turn_my_icetroll_list, next_turn_enemy_icetroll_list
 
 
-def predict_next_turn_lava_giant(game):
+def predict_next_turn_lava_giants(game):
     """
 
     This function predict the locations of the lava giants for next turn
@@ -620,11 +620,11 @@ def predict_next_turn_lava_giant(game):
     for enemy_lava_giant in game.get_enemy_lava_giants():
         if enemy_lava_giant.current_health == enemy_lava_giant.suffocation_per_turn: # if the giant is going to die
             continue
-        next_turn_enemy_lava_gian = copy.deepcopy(enemy_lava_giant)
-        next_turn_enemy_lava_gian.current_health -= game.lava_giant_suffocation_per_turn
+        next_turn_enemy_lava_giant = copy.deepcopy(enemy_lava_giant)
+        next_turn_enemy_lava_giant.current_health -= game.lava_giant_suffocation_per_turn
         if not can_attack(game, enemy_lava_giant, target):
-            next_turn_enemy_lava_gian.location = enemy_lava_giant.get_location().towards(target, game.lava_giant_max_speed)
-        next_turn_enemy_lava_giant_list.append(next_turn_enemy_lava_gian)
+            next_turn_enemy_lava_giant.location = enemy_lava_giant.get_location().towards(target, game.lava_giant_max_speed)
+        next_turn_enemy_lava_giant_list.append(next_turn_enemy_lava_giant)
 
     # adding new lava_giants
 
@@ -648,6 +648,90 @@ def predict_next_turn_lava_giant(game):
                 next_turn_enemy_lava_giant_list.append(new_lava_giant)
 
     return next_turn_my_lava_giant_list, next_turn_enemy_lava_giant_list
+
+
+def predict_next_turn_enemy_lava_giants(game):
+    """
+
+    This function predict the locations of the lava giants for next turn
+
+    :param game:
+    :return: the list of the enemy's next turn lava giants
+    :type: [LavaGiants]
+    """
+    next_turn_enemy_lava_giant_list = []
+    target = game.get_my_castle()
+    for enemy_lava_giant in game.get_enemy_lava_giants():
+        if enemy_lava_giant.current_health == enemy_lava_giant.suffocation_per_turn:  # if the giant is going to die
+            continue
+        next_turn_enemy_lava_giant = copy.deepcopy(enemy_lava_giant)
+        next_turn_enemy_lava_giant.current_health -= game.lava_giant_suffocation_per_turn
+        if not can_attack(game, enemy_lava_giant, target):
+            next_turn_enemy_lava_giant.location = enemy_lava_giant.get_location().towards(target,
+                                                                                          game.lava_giant_max_speed)
+        next_turn_enemy_lava_giant_list.append(next_turn_enemy_lava_giant)
+
+        # adding new lava_giants
+
+    for portal in game.get_enemy_portals():
+        if portal.currently_summoning == "LavaGiant" and portal.turns_to_summon == 1:
+            new_lava_giant = LavaGiant()
+            new_lava_giant.max_speed = game.lava_giant_max_speed
+            new_lava_giant.attack_range = game.lava_giant_attack_range
+            new_lava_giant.attack_multiplier = game.lava_giant_attack_multiplier
+            new_lava_giant.summoner = portal
+            new_lava_giant.location = portal.get_location()
+            new_lava_giant.owner = portal.owner
+            new_lava_giant.type = "LavaGiant"
+            new_lava_giant.id = -1
+            new_lava_giant.unique_id = -1
+            new_lava_giant.current_health = game.lava_giant_max_health
+
+            next_turn_enemy_lava_giant_list.append(new_lava_giant)
+
+    return next_turn_enemy_lava_giant_list
+
+
+def predict_next_turn_given_lava_giants(game, lava_giant_list):
+    """
+
+    This function predict the locations of the lava giants for next turn
+
+    :param game:
+    :param lava_giant_list: a list of lava giant that the function will return their next turn list
+    :return: the list of the given next turn lava giants
+    :type: [LavaGiants]
+    """
+    next_turn_enemy_lava_giant_list = []
+    target = game.get_my_castle()
+    for enemy_lava_giant in lava_giant_list:
+        if enemy_lava_giant.current_health == enemy_lava_giant.suffocation_per_turn:  # if the giant is going to die
+            continue
+        next_turn_enemy_lava_giant = copy.deepcopy(enemy_lava_giant)
+        next_turn_enemy_lava_giant.current_health -= game.lava_giant_suffocation_per_turn
+        if not can_attack(game, enemy_lava_giant, target):
+            next_turn_enemy_lava_giant.location = enemy_lava_giant.get_location().towards(target,
+                                                                                          game.lava_giant_max_speed)
+        next_turn_enemy_lava_giant_list.append(next_turn_enemy_lava_giant)
+
+        # adding new lava_giants
+        for portal in game.get_enemy_portals():
+            if portal.currently_summoning == "LavaGiant" and portal.turns_to_summon == 1:
+                new_lava_giant = LavaGiant()
+                new_lava_giant.max_speed = game.lava_giant_max_speed
+                new_lava_giant.attack_range = game.lava_giant_attack_range
+                new_lava_giant.attack_multiplier = game.lava_giant_attack_multiplier
+                new_lava_giant.summoner = portal
+                new_lava_giant.location = portal.get_location()
+                new_lava_giant.owner = portal.owner
+                new_lava_giant.type = "LavaGiant"
+                new_lava_giant.id = -1
+                new_lava_giant.unique_id = -1
+                new_lava_giant.current_health = game.lava_giant_max_health
+
+                next_turn_enemy_lava_giant_list.append(new_lava_giant)
+
+    return next_turn_enemy_lava_giant_list
 
 
 def predict_next_turn_enemy_elves(game):
@@ -1171,5 +1255,38 @@ def update_dangerous_enemy_portals(game):
             Globals.possible_dangerous_enemy_portals.pop(portal, None)
 
 
-def how_much_hp(game, game_object, turns = 0):
+
+def how_much_hp_in_x_turns(game, game_object, turns = 1):
+    """
+
+    This function gets a map object calculate the hp he will have in the in the given turns from now
+    (in the current state of the game)(the worst case scenario)
+
+    :param game_object: the game object in order to calculate it's hp in the given turns
+    :type game_object: GameObject
+    :param turns: the number of turns
+    :type turns: int
+    :return: the hp of the given map object
+    :type: int
+    """
+    i = turns
+    health = game_object.current_health
+    if game_object.__str__() == "Castle":
+        while i > 0:
+            if game.get_enemy_lava_giants():
+                lava_giants_list = game.get_enemy_lava_giants()
+                if turns > 1:
+                    for enemy_lava_giant in predict_next_turn_given_lava_giants(game, lava_giants_list):
+                        if enemy_lava_giant.location.distance() == game.lava_giant_attack_range:
+                            health = health - game.lava_giant_attack_multiplier
+                else:
+                    for enemy_lava_giant in lava_giants_list:
+                        if enemy_lava_giant.location.distance() == game.lava_giant_attack_range:
+                            health = health - game.lava_giant_attack_multiplier
+            i = i-1
+    if game.get_enemy_living_elves():
+
+
+
+
 
