@@ -379,6 +379,7 @@ def smart_movement(game, elf, destination):
 
     This function is moving an given elf towards a given destination safely
     The function will go the the next position which will get the lest damage to the elf
+    \n the function wont fear from an enemy unit if that unit is the destination
 
     :param game:
     :param elf: the elf that need to be moved
