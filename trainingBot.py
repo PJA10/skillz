@@ -1168,3 +1168,7 @@ def update_dangerous_enemy_portals(game):
     for portal in copy.deepcopy(Globals.possible_dangerous_enemy_portals):
         if portal not in game.get_enemy_portals():
             Globals.possible_dangerous_enemy_portals.pop(portal, None)
+
+
+def how_much_hp(game, game_object, turns = 0):
+
