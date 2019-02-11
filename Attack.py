@@ -796,7 +796,7 @@ def attacks_close_to_our_castle_portals(game, elves_not_acted, first_arrow_porta
 
                         else:
                             smart_movement(game, closest_my_elf, closest_ENEMY_elf.get_location())
-                            print "elf %s is moving to : %s" % (closest_my_elf, closest_ENEMY_elf.get_location()
+                            print "elf %s is moving to : %s" % (closest_my_elf, closest_ENEMY_elf.get_location())
              else:
                 # no enemy portals
                 for enemy_elf in game.get_enemy_living_elves():

@@ -1066,6 +1066,33 @@ def get_farthest_enemy_portal(game, map_object):
     return farthest(game, map_object, game.get_enemy_portals())
 
 
+def get_enemy_buildings(game):
+    """
+
+    This function return the enemy's buildings list
+    :return: a list of the enemy's buildings
+    :type: [building]
+    """
+    enemy_buildings = game.get_all_buildings()
+    for building in enemy_buildings:
+        if building.owner == game.get_myself():
+            enemy_buildings.remove(building)
+    return enemy_buildings
+
+
+def get_closest_enemy_building(game, map_object):
+    """
+
+    This function return the farthest enemy portal to a given map object
+
+    :param map_object: an object on the map in order to find the farthest portal to it
+    :return: the closest enemy's portal to map_object
+    :type: Portal
+    """
+
+    return closest(game, map_object, game.get_enemy_buildings())
+
+
 def get_player_units(game, need_to_find_player):
     """
 
@@ -1136,12 +1163,35 @@ def get_objects_in_path(game, first_path_edge, second_path_edge, possible_map_ob
     return map_objects_in_way
 
 
+def get_closest_my_building(game, game_object):
+    """
+
+    This function return the closest building of me to the given game object
+
+
+    :param game:
+    :param game_object: in order to check what is the closest building to it
+    :return: Building
+    """
+    return closest(game, game_object, get_my_buildings(game))
+
+
 def swap_players(func):  # this is a decorators for doubling a function with swaped players
     def swaped_func(game, *args):
         swaped_game = copy.deepcopy(game)
         swaped_game._hx___me, swaped_game._hx___enemies = game.get_enemy(), [game.get_myself()]
         return func(swaped_game, *args)
     return swaped_func
+
+
+get_my_buildings = swap_players(get_enemy_buildings)
+get_my_buildings.__doc__ = \
+    """
+
+    This function return the my buildings list
+    :return: a list of the enemy's buildings
+    :type: [building]
+    """
 
 
 get_closest_my_portal = swap_players(get_closest_enemy_portal)
@@ -1290,7 +1340,6 @@ def update_dangerous_enemy_portals(game):
             Globals.possible_dangerous_enemy_portals.pop(portal, None)
 
 
-
 def how_much_hp_in_x_turns(game, game_object, turns = 1):
     """
 
@@ -1306,6 +1355,7 @@ def how_much_hp_in_x_turns(game, game_object, turns = 1):
     """
     i = turns
     health = game_object.current_health
+    next_turn_elves = game.get_enemy_living_elves()
     if game_object.__str__() == "Castle":
         while i > 0:
             if game.get_enemy_lava_giants():
@@ -1318,21 +1368,18 @@ def how_much_hp_in_x_turns(game, game_object, turns = 1):
                     for enemy_lava_giant in lava_giants_list:
                         if enemy_lava_giant.location.distance() == game.lava_giant_attack_range:
                             health = health - game.lava_giant_attack_multiplier
-            i = i-1
+            i = i - 1
     if game.get_enemy_living_elves():
-      enemy_elves_list = game.get_enemy_elves()
-      i = turns
-      while i > 0:
-                if turns > 1:
-                    for enemy_elf in predict_next_turn_given_elves(game, enemy_elves_list, get_closest_my_building(game, enemy_elf)):
-                        if enemy_elf.location.distance() == game.elf_attack_range:
-                            health = health - game.elf_attack_multiplier
-                else:
-                    for enemy_elf in game.get_enemy_elves:
-                        if enemy_elf.location.distance() == game.elf_attack_range:
-                            health = health - game.elf_attack_multiplier
-      
-
+        enemy_elves_list = game.get_enemy_elves()
+        i = turns
+        while i > 0:
+            if turns > 1:
+                for enemy_elf in next_turn_elves:
+                    next_turn_elves = predict_next_turn_enemy_elves_towards(game, enemy_elves_list, get_closest_my_building(game, enemy_elf))
+                    if enemy_elf.location.distance() == game.elf_attack_range:
+                        health = health - game.elf_attack_multiplier
+            i = i - 1
+    return health
 
 
 
