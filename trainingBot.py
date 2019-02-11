@@ -767,6 +767,41 @@ def predict_next_turn_enemy_elves(game):
     return next_turn_enemy_elves_list
 
 
+def predict_next_turn_enemy_elves_towards(game, given_enemy_elves, game_object):
+    """
+
+    This function predict the locations of the given enemy's elves for next turn
+
+    :param game:
+    :param given_enemy_elves
+    :param game_object
+    :return: a list of next turn enemy's elves with the guessed locations
+    :type: [Elf]
+    """
+
+    prev_game = Globals.prev_game
+    next_turn_enemy_elves_list = []
+
+    for elf in given_enemy_elves:
+        next_turn_elf = copy.deepcopy(elf)
+        curr_loc = elf.get_location()
+        for prev_elf in prev_game.get_enemy_living_elves():
+            if prev_elf.id == elf.id:
+                prev_loc = prev_elf.get_location()
+                break
+        else:
+            prev_loc = curr_loc
+
+        nexr_turn_loc = curr_loc.towards(game_object, -elf.max_speed)
+        next_turn_elf.location = nexr_turn_loc
+
+        next_turn_enemy_elves_list.append(next_turn_elf)
+
+    # print "next_turn_enemy_elves_list: %s" % next_turn_enemy_elves_list
+    # print "actual enemy's elves: %s" % game.get_enemy_living_elves()
+    return next_turn_enemy_elves_list
+
+
 def attack_closest_enemy_unit(game, elf, max_distance=float("inf")):
     """
 
@@ -1285,6 +1320,18 @@ def how_much_hp_in_x_turns(game, game_object, turns = 1):
                             health = health - game.lava_giant_attack_multiplier
             i = i-1
     if game.get_enemy_living_elves():
+      enemy_elves_list = game.get_enemy_elves()
+      i = turns
+      while i > 0:
+                if turns > 1:
+                    for enemy_elf in predict_next_turn_given_elves(game, enemy_elves_list, get_closest_my_building(game, enemy_elf)):
+                        if enemy_elf.location.distance() == game.elf_attack_range:
+                            health = health - game.elf_attack_multiplier
+                else:
+                    for enemy_elf in game.get_enemy_elves:
+                        if enemy_elf.location.distance() == game.elf_attack_range:
+                            health = health - game.elf_attack_multiplier
+      
 
 
 
