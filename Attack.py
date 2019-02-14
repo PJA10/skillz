@@ -800,25 +800,25 @@ def attacks_close_to_our_castle_portals(game, elves_not_acted, first_arrow_porta
              else:
                 # no enemy portals
                 for enemy_elf in game.get_enemy_living_elves():
+                    closest_my_elf = get_closest_my_elf(game, enemy_elf)
                     if enemy_elf.distance(my_castle) < first_arrow_portal.distance(my_castle):
-                        closest_my_elf = get_closest_my_elf(game, enemy_elf)
-                    if does_win_fight(game, closest_my_elf, enemy_elf):
-                        attack_object(game, closest_my_elf, enemy_elf)
-                    else:
-                        smart_movement(game, closest_my_elf, enemy_elf)
+                        if does_win_fight(game, closest_my_elf, enemy_elf):
+                            attack_object(game, closest_my_elf, enemy_elf)
+                        else:
+                            smart_movement(game, closest_my_elf, enemy_elf)
                     if turns_to_travel(game, get_closest_my_portal(game, enemy_elf), enemy_elf,game.ice_troll_max_speed) >= turns_to_travel(game, closest_my_elf, enemy_elf, game.elf_max_speed) + game.ice_troll_summoning_duration - 2:
-                            # -2 because we want our ice troll will tank if the enemy elf will fight back
-                    if not is_targeted_by_my_icetroll(game, enemy_elf):
-                        summon_with_closest_portal(game, ICE, enemy_elf)
+                    # -2 because we want our ice troll will tank if the enemy elf will fight back
+                        if not is_targeted_by_my_icetroll(game, enemy_elf):
+                            summon_with_closest_portal(game, ICE, enemy_elf)
         else:
             # no enemy elves
             for enemy_portal in game.get_enemy_portals():
+                closest_my_elf = get_closest_my_elf(game, enemy_portal)
                 if enemy_portal.distance(my_castle) < first_arrow_portal.distance(my_castle):
-                    closest_my_elf = get_closest_my_elf(game, enemy_portal)
-                if does_win_fight(game, closest_my_elf, enemy_portal):
-                    attack_object(game, closest_my_elf, enemy_portal)
-                else:
-                    smart_movement(game, closest_my_elf, enemy_portal)
+                    if does_win_fight(game, closest_my_elf, enemy_portal):
+                        attack_object(game, closest_my_elf, enemy_portal)
+                    else:
+                        smart_movement(game, closest_my_elf, enemy_portal)
             else:
                 # no enemy portals
                 for enemy_elf in game.get_enemy_living_elves():
@@ -835,6 +835,30 @@ def attacks_close_to_our_castle_portals(game, elves_not_acted, first_arrow_porta
                                 # -2 because we want our ice troll will tank if the enemy elf will fight back
                                 if not is_targeted_by_my_icetroll(game, enemy_elf):
                                     summon_with_closest_portal(game, ICE, enemy_elf)
+
+
+def value_of_enemy_elf(game, elf):
+    """
+    this function calculates the value of an elf, has to get an alive elf to calculate properly
+    :param game:
+    :param elf: an elf in order to check it's value
+    :return: a number up to 10000, 10000 being the highest
+    """
+    elf_value = 0
+    for enemy_elf in game.get_all_enemy_elves():
+        elf_value = 60 * enemy_elf.turns_to_revive
+    if game.get_enemy_mana() >= 500:
+        elf_value += 5 * 500
+    else:
+        elf += 5 * game.get_enemy_mana()
+    if game.get_my_castle().current_health > game.get_enemy_castle().current_health:
+        # if we have more hp the only way enemy will be able to win by the end of the game is attacking and therfore attacking is more important for him overall
+        elf_value += game.get_my_castle.distane(game.get_enemy_castle()) - elf.distance(game.get_enemy_castle()) + 463 + game.castle_size
+        #463 is the difference between 10000 and the distance between both castles (5637) in order to get it to 10000 if the distance is almost 0
+    else game.
+
+
+
 
 
 
