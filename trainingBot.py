@@ -21,7 +21,8 @@ import time
 RISK_AMOUNT = 1
 ICE = "ice"
 LAVA = "lava"
-
+MANA_FOUNTAIN = "mana fountain"
+PORTAL = "portal"
 
 
 def is_targeted_by_enemy_icetroll(game, map_object):
@@ -242,6 +243,52 @@ def handle_defensive_elf(game, elf):
     pass
 
 
+def get_closest_enemy_ice_troll(game, map_object):
+    """
+    
+    
+    this function return the closest enemy icetroll to the given map object
+    
+    :param map_object the map object 
+    """
+    return closest(game, map_object, game.get_enemy_ice_trolls())
+
+
+'''
+def smart_attack_object(game, elf, map_object):
+    """
+
+    This function attack with an elf a map object smartly (will run away if gonna take damage)
+    if the map object is too far the elf will move towards the map object
+    WILL CRASH IF GET NONE
+
+    :param elf: the elf to attck with
+    :param map_object: the map_object to attack
+    """
+    will_be_attacked = False
+    if not elf or not map_object:
+        print "attack() got None"
+
+    if elf.in_attack_range(map_object):
+        if game.get_enemy_living_elves():
+            if not get_closest_enemy_elf(game, elf).distance(elf) + game.elf_max_speed > game.elf_attack_range:
+                will_be_attacked == True
+        for enemy_icetroll in game.get_enemy_ice_trolls():
+            if get_closest_my_creature(game, enemy_icetroll).id == elf.id and enemy_icetroll.distance(elf) + game.ice_troll_max_speed > game.ice_troll_attack_range:
+                will_be_attacked = True
+                break
+        if not will_be_attacked:
+            elf.attack(map_object)
+        elif :
+            smart_movement(game, elf, map_object)
+    else:
+        smart_movement(game, elf, map_object)
+'''
+    
+
+    
+
+
 def summon(game, portal, creature_type_str):
     """
 
@@ -262,7 +309,7 @@ def summon(game, portal, creature_type_str):
     if creature_type_str not in summon_dic.keys():
         return False
     else:
-        if summon_dic[creature_type_str][0](): # if portal.can_summon_creature
+        if summon_dic[creature_type_str][0]() and game.get_myself().mana_per_turn != 0: # if portal.can_summon_creature
             summon_dic[creature_type_str][1]() # portal.summon_creature
             return True
         else:
@@ -289,37 +336,6 @@ def handle_portals(game):
                 summon(game, port_def, ICE)
     if port_atk != None:
         summon(game, port_atk, LAVA)
-
-
-def make_portal(game, elf, loc=False):
-    """
-
-    This function make a portal with a given elf at a specific location
-    If the elf isn't at this position the elf will move towards the location
-
-    :param elf: the elf to build a portal with
-    :param loc: the location to build a portal at
-    :type loc: Location
-    :return: if the an action has been made with the elf, can be movement or building portal
-    :type: Boolean
-    """
-
-    if not elf:
-        return None
-
-    if not loc:
-        loc = elf.get_location()
-
-    if elf.get_location() == loc:
-        if elf.can_build_portal():
-            elf.build_portal()
-            return True
-        else:
-            print ("Elf " + str(elf) + " Can't build portal at " + str(loc))
-            return False
-    else:
-        smart_movement(game, elf, loc)
-        return True
 
 
 def elf_movement(game, elf, map_object):
@@ -683,6 +699,28 @@ def predict_next_turn_enemy_elves(game):
     return next_turn_enemy_elves_list
 
 
+def attack_closest_enemy_building(game, elf, max_distance=float("inf")):
+    """
+    
+
+    This function attack with an elf the closest building to it
+
+    :param elf:
+    :param max_distance: the max distance that the closest building can be
+    :return: if an action has been made with the elf
+    """
+    
+    target = get_closest_enemy_building(gamme, elf)
+    if not target:
+        return False
+    
+    if target.distance(elf) < max_distance:
+        attack_object(game, elf, target)
+        return True
+    else:
+        return False
+        
+
 def attack_closest_enemy_unit(game, elf, max_distance=float("inf")):
     """
 
@@ -723,6 +761,69 @@ def attack_closest_enemy_portal(game, elf, max_distance=float("inf")):
         return True
     else:
         return False
+        
+
+def get_closest_enemy_mana_fountain(game, map_object):
+    """
+    
+    This function return the closest enemy mana fountain to a given map object
+
+    :param map_object: an object on the map in order to find the closest mana fountain to it
+    :type map_object: MapObject
+    :return: the closest enemy's fountain to map_object
+    :type: ManaFountain
+    """
+    
+    return closest(game, map_object, game.get_enemy_mana_fountains())
+
+
+def get_closest_enemy_building(game, map_object):
+    """
+    
+    This function return the closest enemy building to a given map object
+
+    :param map_object: an object on the map in order to find the closest building to it
+    :return: the closest enemy's building to map_object
+    :type: Building
+    """
+    
+    enemy_buildings = game.get_enemy_portals() + game.get_enemy_mana_fountains()
+    return closest(game, map_object, enemy_buildings)
+
+
+
+def build(game, elf, building_type_str, loc=False):
+    """
+
+    :param game:
+    :param elf:
+    :param building_type_str:
+    :param loc:
+    :return:
+    """
+
+    build_dic = {
+        "portal": (elf.can_build_portal, elf.build_portal),
+        "mana fountain": (elf.can_build_mana_fountain, elf.build_mana_fountain)
+    }
+    if building_type_str not in build_dic.keys():
+        return False
+    if not elf:
+        return False
+    
+    if not loc:
+        loc = elf.get_location()
+
+    if elf.get_location() == loc:
+        if building_type_str == MANA_FOUNTAIN or game.get_myself().mana_per_turn != 0:
+            if build_dic[building_type_str][0]():  # if elf.can_build_building()
+                build_dic[building_type_str][1]()  # then elf.build_building
+                return True
+        print ("Elf %s can't build %s at %s" % (elf, building_type_str, loc))
+        return False
+    else:
+        smart_movement(game, elf, loc)
+        return True
 
 
 def attack_closest_enemy_elf(game, elf, max_distance=float("inf")):
@@ -767,25 +868,24 @@ def attack_closest_enemy_creature(game, elf, max_distance=float("inf")):
         return False
 
 
-def check_why_cant_build_portal(game, elf):
+def check_why_cant_build_building(game, elf, building_radius):
     """
 
     This function check why an elf cant build a portal in his position.
-    The options are amount of mane, units are in building site and portals in building site
+    The options are amount of mane and buildings in building site
 
     :param game:
     :param elf:
-    :return: if we have enough mana, all units in building site and all portals in building site
-    :type: (Bollean,
+    :return: if we have enough mana and all pbuildings in building site
+    :type: (Bollean, [Portal/ManaFountain]
     """
 
-    units_in_range = []
-    portals_in_range = []
+    buildings_in_range = []
     has_mana = False
 
-    for portal in game.get_all_portals():
-        if portal.in_range(elf, 2 * game.portal_size):
-            portals_in_range.append(portal)
+    for building in get_disturbing_buildings(game, elf.get_location(), building_radius):
+        if building.in_range(elf, 2 * game.portal_size):
+            buildings_in_range.append(building)
 
     if game.get_my_mana() >= game.portal_cost:
         has_mana = True
@@ -793,7 +893,7 @@ def check_why_cant_build_portal(game, elf):
         has_mana = False
 
     why_cant_build_portal = namedtuple("why_cant_build_portal", ["has_mana", "portals_in_range"])
-    return why_cant_build_portal(has_mana, portals_in_range)
+    return why_cant_build_portal(has_mana, buildings_in_range)
 
 
 def get_dangerous_enemy_lava_giant(game):
@@ -1006,7 +1106,7 @@ def get_objects_in_path(game, first_path_edge, second_path_edge, possible_map_ob
 
     total_distance = first_path_edge.distance(second_path_edge)
     map_objects_in_way = []
-
+    
     for map_object in possible_map_objects_in_path:
         distance_to_first_edge = map_object.distance(first_path_edge)
         distance_to_second_edge = map_object.distance(second_path_edge)
@@ -1106,6 +1206,30 @@ get_enemy_unit_next_turn_health.__doc__ = \
     :type include_elves: Boolean
     :return: the predicted next turn *my_unit* hp
     """
+    
+
+get_closest_my_mana_fountain = swap_players(get_closest_enemy_mana_fountain)
+get_closest_my_mana_fountain.__doc__ = \
+    """
+
+    This function return the closest of my mana fountain to a given map object
+
+    :param map_object: an object on the map in order to find the closest mana fountain to it
+    :return: the closest my mana fountain to map_object
+    :type: ManaFountain
+    """
+    
+
+get_closest_my_building = swap_players(get_closest_enemy_building)
+get_closest_my_building.__doc__ = \
+    """
+
+    This function return the closest of my building to a given map object
+
+    :param map_object: an object on the map in order to find the closest building to it
+    :return: the closest my building to map_object
+    :type: Building
+    """
 
 
 def summon_with_closest_portal(game, creature_type_str, target, portal_list=False):
@@ -1169,3 +1293,22 @@ def update_dangerous_enemy_portals(game):
     for portal in copy.deepcopy(Globals.possible_dangerous_enemy_portals):
         if portal not in game.get_enemy_portals():
             Globals.possible_dangerous_enemy_portals.pop(portal, None)
+            
+            
+def get_disturbing_buildings(game, loc, radius=0):
+    """
+
+    This function finds all the disturbing buildings to loc
+
+    :param game:
+    :param loc:
+    :param radius:
+    :return: a list of all the disturbing buildings
+    """
+
+    disturbing_buildings = []
+    for building in [game.get_my_castle(), game.get_enemy_castle()] + game.get_all_portals() + game.get_all_mana_fountains():
+        if building.distance(loc) < radius + building.size:
+            disturbing_buildings.append(building)
+
+    return disturbing_buildings
