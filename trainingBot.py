@@ -1,3 +1,4 @@
+# coding=utf-8
 """
 ############
 trainingBot
@@ -791,9 +792,11 @@ def get_closest_enemy_building(game, map_object):
     return closest(game, map_object, enemy_buildings)
 
 
-
 def build(game, elf, building_type_str, loc=False):
     """
+
+    This function makes a building with a given elf at a specific location \n If the elf isn’t at this position the
+    elf will move towards the location safely
 
     :param game:
     :param elf:
