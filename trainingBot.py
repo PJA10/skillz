@@ -37,10 +37,10 @@ def is_targeted_by_enemy_icetroll(game, map_object):
     :return: return a list of the ice trolls which target obj
     :type: [IceTroll]
     """
-    
+
     if map_object in Globals.icetrolls_that_target_me:
         return Globals.icetrolls_that_target_me[map_object]
-    
+
     icetrolls_that_target_map_object = [icetroll for icetroll in game.get_enemy_ice_trolls()
                                 if get_closest_my_unit(game, icetroll) == map_object]
     Globals.icetrolls_that_target_me[map_object] = icetrolls_that_target_map_object
@@ -246,11 +246,11 @@ def handle_defensive_elf(game, elf):
 
 def get_closest_enemy_ice_troll(game, map_object):
     """
-    
-    
+
+
     this function return the closest enemy icetroll to the given map object
-    
-    :param map_object the map object 
+
+    :param map_object the map object
     """
     return closest(game, map_object, game.get_enemy_ice_trolls())
 
@@ -285,9 +285,9 @@ def smart_attack_object(game, elf, map_object):
     else:
         smart_movement(game, elf, map_object)
 '''
-    
 
-    
+
+
 
 
 def summon(game, portal, creature_type_str):
@@ -302,7 +302,7 @@ def summon(game, portal, creature_type_str):
     :return: if the summon was succeeded
     :type: Boolean
     """
-    
+
     summon_dic = {
         "ice": (portal.can_summon_ice_troll, portal.summon_ice_troll),
         "lava": (portal.can_summon_lava_giant, portal.summon_lava_giant)
@@ -544,7 +544,7 @@ def predict_next_turn_creatures(game):
     :type: ([LavaGiants], [LavaGiants], [IceTroll], [IceTroll])
     """
 
-    next_turn_my_lava_giant_list, next_turn_enemy_lava_giant_list = predict_next_turn_lava_giant(game)
+    next_turn_my_lava_giant_list, next_turn_enemy_lava_giant_list = predict_next_turn_lava_giants(game)
     next_turn_my_icetrolls_list, next_turn_enemy_icetrolls_list = predict_next_turn_ice_trolls(game)
 
     return next_turn_my_lava_giant_list, next_turn_enemy_lava_giant_list,\
@@ -609,7 +609,7 @@ def predict_next_turn_ice_trolls(game):
     return next_turn_my_icetroll_list, next_turn_enemy_icetroll_list
 
 
-def predict_next_turn_lava_giant(game):
+def predict_next_turn_lava_giants(game):
     """
 
     This function predict the locations of the lava giants for next turn
@@ -637,11 +637,11 @@ def predict_next_turn_lava_giant(game):
     for enemy_lava_giant in game.get_enemy_lava_giants():
         if enemy_lava_giant.current_health == enemy_lava_giant.suffocation_per_turn: # if the giant is going to die
             continue
-        next_turn_enemy_lava_gian = copy.deepcopy(enemy_lava_giant)
-        next_turn_enemy_lava_gian.current_health -= game.lava_giant_suffocation_per_turn
+        next_turn_enemy_lava_giant = copy.deepcopy(enemy_lava_giant)
+        next_turn_enemy_lava_giant.current_health -= game.lava_giant_suffocation_per_turn
         if not can_attack(game, enemy_lava_giant, target):
-            next_turn_enemy_lava_gian.location = enemy_lava_giant.get_location().towards(target, game.lava_giant_max_speed)
-        next_turn_enemy_lava_giant_list.append(next_turn_enemy_lava_gian)
+            next_turn_enemy_lava_giant.location = enemy_lava_giant.get_location().towards(target, game.lava_giant_max_speed)
+        next_turn_enemy_lava_giant_list.append(next_turn_enemy_lava_giant)
 
     # adding new lava_giants
 
@@ -665,6 +665,90 @@ def predict_next_turn_lava_giant(game):
                 next_turn_enemy_lava_giant_list.append(new_lava_giant)
 
     return next_turn_my_lava_giant_list, next_turn_enemy_lava_giant_list
+
+
+def predict_next_turn_enemy_lava_giants(game):
+    """
+
+    This function predict the locations of the lava giants for next turn
+
+    :param game:
+    :return: the list of the enemy's next turn lava giants
+    :type: [LavaGiants]
+    """
+    next_turn_enemy_lava_giant_list = []
+    target = game.get_my_castle()
+    for enemy_lava_giant in game.get_enemy_lava_giants():
+        if enemy_lava_giant.current_health == enemy_lava_giant.suffocation_per_turn:  # if the giant is going to die
+            continue
+        next_turn_enemy_lava_giant = copy.deepcopy(enemy_lava_giant)
+        next_turn_enemy_lava_giant.current_health -= game.lava_giant_suffocation_per_turn
+        if not can_attack(game, enemy_lava_giant, target):
+            next_turn_enemy_lava_giant.location = enemy_lava_giant.get_location().towards(target,
+                                                                                          game.lava_giant_max_speed)
+        next_turn_enemy_lava_giant_list.append(next_turn_enemy_lava_giant)
+
+        # adding new lava_giants
+
+    for portal in game.get_enemy_portals():
+        if portal.currently_summoning == "LavaGiant" and portal.turns_to_summon == 1:
+            new_lava_giant = LavaGiant()
+            new_lava_giant.max_speed = game.lava_giant_max_speed
+            new_lava_giant.attack_range = game.lava_giant_attack_range
+            new_lava_giant.attack_multiplier = game.lava_giant_attack_multiplier
+            new_lava_giant.summoner = portal
+            new_lava_giant.location = portal.get_location()
+            new_lava_giant.owner = portal.owner
+            new_lava_giant.type = "LavaGiant"
+            new_lava_giant.id = -1
+            new_lava_giant.unique_id = -1
+            new_lava_giant.current_health = game.lava_giant_max_health
+
+            next_turn_enemy_lava_giant_list.append(new_lava_giant)
+
+    return next_turn_enemy_lava_giant_list
+
+
+def predict_next_turn_given_lava_giants(game, lava_giant_list):
+    """
+
+    This function predict the locations of the lava giants for next turn
+
+    :param game:
+    :param lava_giant_list: a list of lava giant that the function will return their next turn list
+    :return: the list of the given next turn lava giants
+    :type: [LavaGiants]
+    """
+    next_turn_enemy_lava_giant_list = []
+    target = game.get_my_castle()
+    for enemy_lava_giant in lava_giant_list:
+        if enemy_lava_giant.current_health == enemy_lava_giant.suffocation_per_turn:  # if the giant is going to die
+            continue
+        next_turn_enemy_lava_giant = copy.deepcopy(enemy_lava_giant)
+        next_turn_enemy_lava_giant.current_health -= game.lava_giant_suffocation_per_turn
+        if not can_attack(game, enemy_lava_giant, target):
+            next_turn_enemy_lava_giant.location = enemy_lava_giant.get_location().towards(target,
+                                                                                          game.lava_giant_max_speed)
+        next_turn_enemy_lava_giant_list.append(next_turn_enemy_lava_giant)
+
+        # adding new lava_giants
+        for portal in game.get_enemy_portals():
+            if portal.currently_summoning == "LavaGiant" and portal.turns_to_summon == 1:
+                new_lava_giant = LavaGiant()
+                new_lava_giant.max_speed = game.lava_giant_max_speed
+                new_lava_giant.attack_range = game.lava_giant_attack_range
+                new_lava_giant.attack_multiplier = game.lava_giant_attack_multiplier
+                new_lava_giant.summoner = portal
+                new_lava_giant.location = portal.get_location()
+                new_lava_giant.owner = portal.owner
+                new_lava_giant.type = "LavaGiant"
+                new_lava_giant.id = -1
+                new_lava_giant.unique_id = -1
+                new_lava_giant.current_health = game.lava_giant_max_health
+
+                next_turn_enemy_lava_giant_list.append(new_lava_giant)
+
+    return next_turn_enemy_lava_giant_list
 
 
 def predict_next_turn_enemy_elves(game):
@@ -702,7 +786,7 @@ def predict_next_turn_enemy_elves(game):
 
 def attack_closest_enemy_building(game, elf, max_distance=float("inf")):
     """
-    
+
 
     This function attack with an elf the closest building to it
 
@@ -710,19 +794,54 @@ def attack_closest_enemy_building(game, elf, max_distance=float("inf")):
     :param max_distance: the max distance that the closest building can be
     :return: if an action has been made with the elf
     """
-    
+
     target = get_closest_enemy_building(gamme, elf)
     if not target:
         return False
-    
+
     if target.distance(elf) < max_distance:
         attack_object(game, elf, target)
         return True
     else:
         return False
-        
 
-def attack_closest_enemy_unit(game, elf, max_distance=float("inf")):
+
+def predict_next_turn_enemy_elves_towards(game, given_enemy_elves, game_object):
+    """
+
+    This function predict the locations of the given enemy's elves for next turn
+
+    :param game:
+    :param given_enemy_elves
+    :param game_object
+    :return: a list of next turn enemy's elves with the guessed locations
+    :type: [Elf]
+    """
+
+    prev_game = Globals.prev_game
+    next_turn_enemy_elves_list = []
+
+    for elf in given_enemy_elves:
+        next_turn_elf = copy.deepcopy(elf)
+        curr_loc = elf.get_location()
+        for prev_elf in prev_game.get_enemy_living_elves():
+            if prev_elf.id == elf.id:
+                prev_loc = prev_elf.get_location()
+                break
+        else:
+            prev_loc = curr_loc
+
+        nexr_turn_loc = curr_loc.towards(game_object, -elf.max_speed)
+        next_turn_elf.location = nexr_turn_loc
+
+        next_turn_enemy_elves_list.append(next_turn_elf)
+
+    # print "next_turn_enemy_elves_list: %s" % next_turn_enemy_elves_list
+    # print "actual enemy's elves: %s" % game.get_enemy_living_elves()
+    return next_turn_enemy_elves_list
+
+
+def closest_enemy_unit(game, elf, max_distance=float("inf")):
     """
 
     This function attack with an elf the closest unit to it
@@ -762,11 +881,11 @@ def attack_closest_enemy_portal(game, elf, max_distance=float("inf")):
         return True
     else:
         return False
-        
+
 
 def get_closest_enemy_mana_fountain(game, map_object):
     """
-    
+
     This function return the closest enemy mana fountain to a given map object
 
     :param map_object: an object on the map in order to find the closest mana fountain to it
@@ -774,20 +893,20 @@ def get_closest_enemy_mana_fountain(game, map_object):
     :return: the closest enemy's fountain to map_object
     :type: ManaFountain
     """
-    
+
     return closest(game, map_object, game.get_enemy_mana_fountains())
 
 
 def get_closest_enemy_building(game, map_object):
     """
-    
+
     This function return the closest enemy building to a given map object
 
     :param map_object: an object on the map in order to find the closest building to it
     :return: the closest enemy's building to map_object
     :type: Building
     """
-    
+
     enemy_buildings = game.get_enemy_portals() + game.get_enemy_mana_fountains()
     return closest(game, map_object, enemy_buildings)
 
@@ -813,7 +932,7 @@ def build(game, elf, building_type_str, loc=False):
         return False
     if not elf:
         return False
-    
+
     if not loc:
         loc = elf.get_location()
 
@@ -1050,6 +1169,33 @@ def get_farthest_enemy_portal(game, map_object):
     return farthest(game, map_object, game.get_enemy_portals())
 
 
+def get_enemy_buildings(game):
+    """
+
+    This function return the enemy's buildings list
+    :return: a list of the enemy's buildings
+    :type: [building]
+    """
+    enemy_buildings = game.get_all_buildings()
+    for building in enemy_buildings:
+        if building.owner == game.get_myself():
+            enemy_buildings.remove(building)
+    return enemy_buildings
+
+
+def get_closest_enemy_building(game, map_object):
+    """
+
+    This function return the farthest enemy portal to a given map object
+
+    :param map_object: an object on the map in order to find the farthest portal to it
+    :return: the closest enemy's portal to map_object
+    :type: Portal
+    """
+
+    return closest(game, map_object, game.get_enemy_buildings())
+
+
 def get_player_units(game, need_to_find_player):
     """
 
@@ -1109,7 +1255,7 @@ def get_objects_in_path(game, first_path_edge, second_path_edge, possible_map_ob
 
     total_distance = first_path_edge.distance(second_path_edge)
     map_objects_in_way = []
-    
+
     for map_object in possible_map_objects_in_path:
         distance_to_first_edge = map_object.distance(first_path_edge)
         distance_to_second_edge = map_object.distance(second_path_edge)
@@ -1120,6 +1266,19 @@ def get_objects_in_path(game, first_path_edge, second_path_edge, possible_map_ob
     return map_objects_in_way
 
 
+def get_closest_my_building(game, game_object):
+    """
+
+    This function return the closest building of me to the given game object
+
+
+    :param game:
+    :param game_object: in order to check what is the closest building to it
+    :return: Building
+    """
+    return closest(game, game_object, get_my_buildings(game))
+
+
 def swap_players(func):  # this is a decorators for doubling a function with swaped players
     def swaped_func(game, *args):
         swaped_game = copy.deepcopy(game)
@@ -1128,12 +1287,22 @@ def swap_players(func):  # this is a decorators for doubling a function with swa
     return swaped_func
 
 
+get_my_buildings = swap_players(get_enemy_buildings)
+get_my_buildings.__doc__ = \
+    """
+
+    This function return the my buildings list
+    :return: a list of the enemy's buildings
+    :type: [building]
+    """
+
+
 get_closest_my_portal = swap_players(get_closest_enemy_portal)
 get_closest_my_portal.__doc__ = \
     """
-    
+
     This function return the closest portal of my portals to a given map object
-    
+
     :param map_object: an object on the map in order to find the closest portal to it
     :return: the closest my portal to map_object
     :type: Portal
@@ -1164,9 +1333,9 @@ get_closest_my_unit.__doc__ = \
 get_closest_my_elf = swap_players(get_closest_enemy_elf)
 get_closest_my_elf.__doc__ = \
     """
-    
+
     This function return the closest elf of my elves to a given map object
-    
+
     :param map_object: an object on the map in order to find the closest elf to it
     :return: the closest my elf to map_object
     :type: Elf
@@ -1209,7 +1378,7 @@ get_enemy_unit_next_turn_health.__doc__ = \
     :type include_elves: Boolean
     :return: the predicted next turn *my_unit* hp
     """
-    
+
 
 get_closest_my_mana_fountain = swap_players(get_closest_enemy_mana_fountain)
 get_closest_my_mana_fountain.__doc__ = \
@@ -1221,7 +1390,7 @@ get_closest_my_mana_fountain.__doc__ = \
     :return: the closest my mana fountain to map_object
     :type: ManaFountain
     """
-    
+
 
 get_closest_my_building = swap_players(get_closest_enemy_building)
 get_closest_my_building.__doc__ = \
@@ -1284,7 +1453,7 @@ def farthest(game, main_map_object, map_objects_list):
 
 
 def update_dangerous_enemy_portals(game):
-    
+
     dangerous_enemy_portals = Globals.possible_dangerous_enemy_portals
     for portal in game.get_enemy_portals():
         if portal.currently_summoning == "LavaGiant" and portal.turns_to_summon == 3:
@@ -1296,8 +1465,8 @@ def update_dangerous_enemy_portals(game):
     for portal in copy.deepcopy(Globals.possible_dangerous_enemy_portals):
         if portal not in game.get_enemy_portals():
             Globals.possible_dangerous_enemy_portals.pop(portal, None)
-            
-            
+
+
 def get_disturbing_buildings(game, loc, radius=0):
     """
 
@@ -1315,3 +1484,45 @@ def get_disturbing_buildings(game, loc, radius=0):
             disturbing_buildings.append(building)
 
     return disturbing_buildings
+
+
+def how_much_hp_in_x_turns(game, game_object, turns = 1):
+    """
+
+    This function gets a map object calculate the hp he will have in the in the given turns from now
+    (in the current state of the game)(the worst case scenario)
+
+    :param game_object: the game object in order to calculate it's hp in the given turns
+    :type game_object: GameObject
+    :param turns: the number of turns
+    :type turns: int
+    :return: the hp of the given map object
+    :type: int
+    """
+    i = turns
+    health = game_object.current_health
+    next_turn_elves = game.get_enemy_living_elves()
+    if game_object.__str__() == "Castle":
+        while i > 0:
+            if game.get_enemy_lava_giants():
+                lava_giants_list = game.get_enemy_lava_giants()
+                if turns > 1:
+                    for enemy_lava_giant in predict_next_turn_given_lava_giants(game, lava_giants_list):
+                        if enemy_lava_giant.location.distance() == game.lava_giant_attack_range:
+                            health = health - game.lava_giant_attack_multiplier
+                else:
+                    for enemy_lava_giant in lava_giants_list:
+                        if enemy_lava_giant.location.distance() == game.lava_giant_attack_range:
+                            health = health - game.lava_giant_attack_multiplier
+            i = i - 1
+    if game.get_enemy_living_elves():
+        enemy_elves_list = game.get_enemy_elves()
+        i = turns
+        while i > 0:
+            if turns > 1:
+                for enemy_elf in next_turn_elves:
+                    next_turn_elves = predict_next_turn_enemy_elves_towards(game, enemy_elves_list, get_closest_my_building(game, enemy_elf))
+                    if enemy_elf.location.distance() == game.elf_attack_range:
+                        health = health - game.elf_attack_multiplier
+            i = i - 1
+    return health
