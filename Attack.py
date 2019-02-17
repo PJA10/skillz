@@ -836,7 +836,7 @@ def attacks_close_to_our_castle_portals(game, elves_not_acted, first_arrow_porta
                                 if not is_targeted_by_my_icetroll(game, enemy_elf):
                                     summon_with_closest_portal(game, ICE, enemy_elf)
 
-
+'''
 def value_of_enemy_elf(game, elf):
     """
     this function calculates the value of an elf, has to get an alive elf to calculate properly
@@ -856,7 +856,7 @@ def value_of_enemy_elf(game, elf):
         elf_value += game.get_my_castle.distane(game.get_enemy_castle()) - elf.distance(game.get_enemy_castle()) + 463 + game.castle_size
         #463 is the difference between 10000 and the distance between both castles (5637) in order to get it to 10000 if the distance is almost 0
     else game.
-
+'''
 
 
 
@@ -885,3 +885,5 @@ def get_next_arrow_portal_loc(game):
         Globals.arrow_next_portal_loc = first_portal.get_location().towards(game.get_enemy_castle(),
                                                                             game.castle_size + game.portal_size)
         return Globals.arrow_next_portal_loc
+
+
