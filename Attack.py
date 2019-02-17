@@ -219,9 +219,9 @@ def handle_obstacle(game, elf, attacking_portal_destination, safe_range):
 
     if elf.in_range(attacking_portal_destination, safe_range):
         if not elf.can_build_portal():
-            has_mana, portals_in_range = check_why_cant_build_portal(game, elf)
-            if portals_in_range:
-                already_acted = attack_closest_enemy_portal(game, elf), False
+            has_mana, buildings_in_range = check_why_cant_build_building(game, elf, game.portal_size)
+            if buildings_in_range:
+                already_acted = attack_closest_building(game, elf), False
             elif not has_mana:
                 Globals.mana_state = "save mana"
                 already_acted = False
@@ -344,8 +344,7 @@ def does_win_fight(game, elf, attack_target):
         return True
 
 
-
-def defend_from_enemy_elves(game, elves_not_acted, max_number_of_icetrolls_on_unit):
+def defend_from_enemy_elves(game, elves_not_acted, max_number_of_icetrolls_on_unit, max_number_of_ice_trolls_near_base):
     """
 
     if there is a close elf to one of our portals, summon ice from a close portal.
@@ -469,7 +468,7 @@ def arrow_def(game, elves_not_acted):
     if game.get_my_castle().current_health < game.get_enemy_castle().current_health:
         max_number_of_ice_trolls_near_base += 1
 
-    elves_not_acted = defend_from_enemy_elves(game, elves_not_acted, max_number_of_icetrolls_on_unit)
+    elves_not_acted = defend_from_enemy_elves(game, elves_not_acted, max_number_of_icetrolls_on_unit, max_number_of_ice_trolls_near_base)
 
     elves_not_acted = defend_from_enemy_lava_giants(game, elves_not_acted, max_number_of_icetrolls_on_unit,
                                                     max_number_of_ice_trolls_near_base)
@@ -500,7 +499,7 @@ def attack_dangerous_enemy_portals(game, elves_not_acted):
                 dangerous_enemy_portals.append(portal)
 
     if dangerous_enemy_portals and elves_not_acted:
-        print "elf_not_acted", elves_not_acted
+        print "elves_not_acted", elves_not_acted
         for portal in dangerous_enemy_portals:
             closest_elf_to_portal_loc = closest(game, portal, elves_not_acted)
             if not closest_elf_to_portal_loc:
@@ -564,14 +563,17 @@ def build_next_arrow_portal(game, elves_not_acted, arrow_next_portal_loc, first_
     :return: a list of all the elves who didn't act all ready after the function has ended, and mana state
     :type: ([Elf], str)
     """
-
+    closest_building = "none"
     disturbing_enemy_portals = get_objects_in_path(game, arrow_next_portal_loc, first_arrow_portal,
                                                    game.get_enemy_portals(), game.portal_size * 2)
+    disturbing_enemy_mana_fountains = get_objects_in_path(game, arrow_next_portal_loc, first_arrow_portal,
+                                                   game.get_enemy_mana_fountains(), game.portal_size * 2)
     closest_elf_to_portal_loc = closest(game, arrow_next_portal_loc, elves_not_acted)
+    mana_state = "attack"
 
     if closest_elf_to_portal_loc:
-        if not disturbing_enemy_portals:
-            if make_portal(game, closest_elf_to_portal_loc, arrow_next_portal_loc):
+        if not disturbing_enemy_portals and not disturbing_enemy_mana_fountains:
+            if build(game, closest_elf_to_portal_loc, PORTAL, arrow_next_portal_loc):
                 if closest_elf_to_portal_loc.is_building:  # if the elf is building the portal
                     Globals.arrow_next_portal_loc = None
                 else:  # if the elf is going to the portal location
@@ -583,15 +585,26 @@ def build_next_arrow_portal(game, elves_not_acted, arrow_next_portal_loc, first_
                 elves_not_acted.remove(closest_elf_to_portal_loc)
                 print "elf %s making portal at: %s" % (closest_elf_to_portal_loc, arrow_next_portal_loc)
             else:  # the elf cant build the portal
-                has_mana, portals_in_range = check_why_cant_build_portal(game, closest_elf_to_portal_loc)
-                if portals_in_range:
-                    disturbing_enemy_portals.extend(portals_in_range)
+                has_mana, buildings_in_range = check_why_cant_build_building(game, closest_elf_to_portal_loc, game.portal_size)
+                if buildings_in_range:
+                    disturbing_enemy_portals.extend(buildings_in_range)
 
                 if not has_mana:
                     mana_state = "save_mana"
 
         if disturbing_enemy_portals:
             closest_disturbing_portal = closest(game, closest_elf_to_portal_loc, disturbing_enemy_portals)
+            closest_building = "portal"
+        if disturbing_enemy_mana_fountains:
+            closest_disturbing_mana_fountain = closest(game, closest_elf_to_portal_loc, disturbing_enemy_mana_fountains)
+            closest_building = "mana fountain"
+        if disturbing_enemy_mana_fountains and disturbing_enemy_portals:
+            if closest_disturbing_portal.distance(closest_elf_to_portal_loc) < closest_disturbing_mana_fountain.distance(closest_elf_to_portal_loc):
+                closest_building = "portal"
+            else:
+                closest_building = "mana fountain"
+        print "closest_building = ", closest_building
+        if closest_building == "portal":
             turns_to_disturbing_portal = turns_to_travel(game, closest_elf_to_portal_loc, closest_disturbing_portal)
             if does_win_fight(game, closest_elf_to_portal_loc, closest_disturbing_portal):
                 attack_object(game, closest_elf_to_portal_loc, closest_disturbing_portal)
@@ -599,11 +612,35 @@ def build_next_arrow_portal(game, elves_not_acted, arrow_next_portal_loc, first_
                     closest_elf_to_portal_loc, closest_disturbing_portal)
                 elves_not_acted.remove(closest_elf_to_portal_loc)
 
-            elif game.get_my_mana() > game.ice_troll_cost:  # if we don't win the fight, get help
+            elif game.get_my_mana() > game.ice_troll_cost and first_arrow_portal.type == "Portal":  # if we don't win the fight, get help
                 summon(game, first_arrow_portal, ICE)
                 attack_object(game, closest_elf_to_portal_loc, closest_disturbing_portal)
                 print "elf: %s attacking closest_disturbing_portal: %s" % (
                     closest_elf_to_portal_loc, closest_disturbing_portal)
+                elves_not_acted.remove(closest_elf_to_portal_loc)
+
+            else:
+                mana_state = "save mana"
+                smart_movement(game, closest_elf_to_portal_loc, closest_elf_to_portal_loc.get_location())
+                print "elf %s running away" % closest_elf_to_portal_loc
+                elves_not_acted.remove(closest_elf_to_portal_loc)
+                # need to add: defend current arrow (maybe attack ice trolls)
+
+
+        elif closest_building == "mana_fountain":
+            closest_disturbing_mana_fountain = closest(game, closest_elf_to_portal_loc, disturbing_enemy_mana_fountains)
+            turns_to_disturbing_mana_fountain = turns_to_travel(game, closest_elf_to_portal_loc, closest_disturbing_mana_fountain)
+            if does_win_fight(game, closest_elf_to_portal_loc, closest_disturbing_mana_fountain):
+                attack_object(game, closest_elf_to_portal_loc, closest_disturbing_mana_fountain)
+                print "elf: %s attacking closest_disturbing_portal: %s" % (
+                    closest_elf_to_portal_loc, closest_disturbing_mana_fountain)
+                elves_not_acted.remove(closest_elf_to_portal_loc)
+
+            elif game.get_my_mana() > game.ice_troll_cost and first_arrow_portal.type == "Portal":  # if we don't win the fight, get help
+                summon(game, first_arrow_portal, ICE)
+                attack_object(game, closest_elf_to_portal_loc, closest_disturbing_mana_fountain)
+                print "elf: %s attacking closest_disturbing_portal: %s" % (
+                    closest_elf_to_portal_loc, closest_disturbing_mana_fountain)
                 elves_not_acted.remove(closest_elf_to_portal_loc)
 
             else:
@@ -638,12 +675,13 @@ def arrow_attack(game, elves_not_acted):
     prev_game = Globals.prev_game
     arrow_next_portal_loc = get_next_arrow_portal_loc(game)
 
-    attack_closest_enemy_game_obj(game, elves_not_acted, arrow_next_portal_loc)
+    if elves_not_acted:
+        attack_closest_enemy_game_obj(game, elves_not_acted, arrow_next_portal_loc)
 
     # build arrow
     first_arrow_portal = closest(game, game.get_enemy_castle(), game.get_my_portals() + [game.get_my_castle()])
 
-    elves_not_acted, mana_state = build_next_arrow_portal(game, elves_not_acted, first_arrow_portal)
+    elves_not_acted, mana_state = build_next_arrow_portal(game, elves_not_acted, arrow_next_portal_loc, first_arrow_portal)
 
     if elves_not_acted:
         for elf in elves_not_acted:
@@ -684,7 +722,7 @@ def summon_lava_attack(game, first_arrow_portal):
         summon_with_closest_portal(game, LAVA, game.get_enemy_castle())
 
 
-def arrow_strategy(game):
+def arrow_strategy(game, elves):
     """
 
     defence:\n
@@ -710,11 +748,11 @@ def arrow_strategy(game):
 
     mana_state = "attack"
     prev_game = Globals.prev_game
-    elf_not_acted = copy.deepcopy(game.get_my_living_elves())
+    elves_not_acted = copy.deepcopy(elves)
 
-    elf_not_acted = arrow_def(game, elf_not_acted)
+    elves_not_acted = arrow_def(game, elves_not_acted)
 
-    arrow_attack(game, elf_not_acted)
+    arrow_attack(game, elves_not_acted)
 
 '''
 def get_next_arrow_portal_loc(game):
@@ -752,22 +790,23 @@ def get_next_arrow_portal_loc(game):
 '''
 
 
-def attacks_close_to_our_castle_portals(game, elves_not_acted, first_arrow_portal):
-    """
+"""
+def attacks_close_to_our_castle_portals(game, elves_not_acted, first_arrow_portal):"""
+"""
 
     This function checks if an enemy elf starts creating a portal close to us,
     if he is elf and ice troll will be send to attack him and the portal
     if there is a dangerous enemy portal an elf will be send to destroy it
 
     :return: nothing
-    """
+    """"""
     my_castle = game.get_my_castle()
     if elves_not_acted:
         if game.get_enemy_living_elves():
             if game.get_enemy_portals():
                 for enemy_portal in game.get_enemy_portals():
                     closest_my_elf = closest(game, enemy_portal, elves_not_acted)
-                    closest_ENEMY_elf = get_closest_enemy_elf(game, enemy_portal)
+                    closesbuild_next_arrow_portalt_ENEMY_elf = get_closest_enemy_elf(game, enemy_portal)
                     if enemy_portal.distance(my_castle) < first_arrow_portal.distance(my_castle):
                         if does_win_fight(game, closest_my_elf, enemy_portal):
                             if not closest_my_elf.in_attack_range(closest_ENEMY_elf):
@@ -835,6 +874,34 @@ def attacks_close_to_our_castle_portals(game, elves_not_acted, first_arrow_porta
                                 # -2 because we want our ice troll will tank if the enemy elf will fight back
                                 if not is_targeted_by_my_icetroll(game, enemy_elf):
                                     summon_with_closest_portal(game, ICE, enemy_elf)
+        else:
+            # no enemy elves
+            for enemy_portal in game.get_enemy_portals():
+                if enemy_portal.distance(my_castle) < first_arrow_portal.distance(my_castle):
+                    closest_my_elf = get_closest_my_elf(game, enemy_portal)
+                    if does_win_fight(game, closest_my_elf, enemy_portal):
+                        attack_object(game, closest_my_elf, enemy_portal)
+                    else:
+                        smart_movement(game, closest_my_elf, enemy_portal)
+                        if turns_to_travel(game, get_closest_my_portal(game, enemy_portal), enemy_portal,
+                                           game.ice_troll_max_speed) \
+                                >= turns_to_travel(game, closest_my_elf, enemy_elf,
+                                                   game.elf_max_speed) + game.ice_troll_summoning_duration - 2:
+                            # -2 because we want our ice troll will tank if the enemy elf will fight back
+                            if not is_targeted_by_my_icetroll(game, enemy_portal):
+                                summon_with_closest_portal(game, ICE, enemy_portal)"""
+
+
+'''
+if enemy_elf.is_building() and first_arrow_portal.distance(enemy_elf) > enemy_elf.distance(my_castle):
+    if game.get_my_living_elves():
+        closest_my_elf = get_closest_my_elf(game, enemy_elf).attack_object(enemy_elf)
+        if does_win_fight(game, closest_my_elf, enemy_elf):
+            attack_object(game, closest_my_elf, enemy_elf)
+        if turns_to_travel(game, get_closest_my_portal(game, enemy_elf), enemy_elf, game.ice_troll_max_speed)\
+                >= turns_to_travel(game, closest_my_elf, enemy_elf, game.elf_max_speed) + 3:
+            get_closest_my_portal(game, enemy_elf).summon_ice_troll()
+'''
 
 '''
 def value_of_enemy_elf(game, elf):
@@ -857,11 +924,6 @@ def value_of_enemy_elf(game, elf):
         #463 is the difference between 10000 and the distance between both castles (5637) in order to get it to 10000 if the distance is almost 0
     else game.
 '''
-
-
-
-
-
 
 def get_next_arrow_portal_loc(game):
     """
