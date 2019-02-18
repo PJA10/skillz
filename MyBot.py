@@ -65,19 +65,54 @@ def do_turn(game):
         Globals.prev_game = copy.deepcopy(game)
         return
     '''
-    Globals.icetrolls_that_target_me = {}
+    update_enemy_ice_trolls_targets(game)
     update_dangerous_enemy_portals(game)
     # tests(game)
-    print game.mana_fountain_mana_per_turn
-    
+
+    if game.turn < 8 and not game.get_my_mana_fountains():
+        elves = copy.deepcopy(game.get_my_living_elves())
+        if elves and len(elves) > 1:
+            build(game, elves[1], MANA_FOUNTAIN, get_new_mana_fountain_loc(game))
+            print "elf %s building MANA_FOUNTAIN at %s" % (elves[1], get_new_mana_fountain_loc(game))
+            elves.remove(elves[1])
+        arrow_strategy(game, elves)
+    else:
+        arrow_strategy(game, game.get_my_living_elves())
+
     # old_do_turn(game)
-    arrow_strategy(game)
     # MUST STAY IN THE END OF do_turn():
     Globals.prev_game = copy.deepcopy(game)
 
     # print "threatened portals: ", get_threatened_portals(game)
     # print "threatening elves: ", get_threatening_elves(game)
-    print "--- %s seconds ---" % (time.time()*1000 - start_time*1000)  # second to ms *1000
+    print "--- %s mseconds ---" % (time.time()*1000 - start_time*1000)  # second to ms *1000
+    print "--- %s mseconds get_time_remaining ---" % (game.get_time_remaining())  # second to ms *1000
+
+
+def update_enemy_ice_trolls_targets(game):
+    """
+    """
+
+    Globals.who_target_me_dic = {}
+    Globals.who_do_i_target = {}
+
+    for enemy_ice_troll in game.get_enemy_ice_trolls():
+        target = closest(game, enemy_ice_troll, game.get_my_creatures() + game.get_my_living_elves())
+        if target:
+            if not Globals.who_target_me_dic.get(target):
+                Globals.who_target_me_dic[target] = [enemy_ice_troll]
+            else:
+                Globals.who_target_me_dic[target].append(enemy_ice_troll)
+            Globals.who_do_i_target[enemy_ice_troll] = target
+
+    for my_ice_troll in game.get_my_ice_trolls():
+        target = closest(game, my_ice_troll, game.get_enemy_creatures() + game.get_enemy_living_elves())
+        if target:
+            if not Globals.who_target_me_dic.get(target):
+                Globals.who_target_me_dic[target] = [my_ice_troll]
+            else:
+                Globals.who_target_me_dic[target].append(my_ice_troll)
+            Globals.who_do_i_target[my_ice_troll] = target
 
 
 def tests(game):
