@@ -1,7 +1,6 @@
 from elf_kingdom import *
 from trainingBot import *
 import Globals
-from Slider import *
 
 
 def get_threatened_portals(game):

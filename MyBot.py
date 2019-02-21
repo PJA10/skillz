@@ -12,11 +12,11 @@ MyBot
 """
 from elf_kingdom import *
 from trainingBot import *
-from Slider import *
 from Defense import *
 import Globals
 from Attack import *
 import time
+from rush_v1 import *
 
 ICE = "ice"
 LAVA = "lava"
@@ -43,33 +43,12 @@ def do_turn(game):
             Globals.attacking_elfs.remove(Globals.defensive_elf)
             # print "Globals.defensive_elf:", Globals.defensive_elf
             # print "Globals.attacking_elfs:", Globals.attacking_elfs
-    '''
-    if game.turn < 9:
-        elf = game.get_my_living_elves()[0]
-        elf2 = game.get_my_living_elves()[1]
-        if elf.distance(Location(0,0)) < elf2.distance(Location(0,0)):
-            target = Location(0,0)
-            target2 = Location(3500, 5800)
-        else:
-            target = Location(3500, 5800)
-            target2 = Location(0,0)
-            
-        if game.turn == 8:
-            if elf.can_build_mana_fountain():
-                elf.build_mana_fountain()
-            if elf2.can_build_mana_fountain():
-                elf2.build_mana_fountain()
-        else:
-            elf.move_to(elf.get_location().towards(target, game.elf_max_speed))
-            elf2.move_to(elf2.get_location().towards(target2, game.elf_max_speed))
-        Globals.prev_game = copy.deepcopy(game)
-        return
-    '''
+    
     update_enemy_ice_trolls_targets(game)
     update_dangerous_enemy_portals(game)
     # tests(game)
 
-    if game.turn < 8 and not game.get_my_mana_fountains():
+    """if game.turn < 8 and not game.get_my_mana_fountains():
         elves = copy.deepcopy(game.get_my_living_elves())
         if elves and len(elves) > 1:
             build(game, elves[1], MANA_FOUNTAIN, get_new_mana_fountain_loc(game))
@@ -77,7 +56,9 @@ def do_turn(game):
             elves.remove(elves[1])
         arrow_strategy(game, elves)
     else:
-        arrow_strategy(game, game.get_my_living_elves())
+        arrow_strategy(game, game.get_my_living_elves())"""
+    
+    rush_strat(game, game.get_my_living_elves())
 
     # old_do_turn(game)
     # MUST STAY IN THE END OF do_turn():
@@ -92,10 +73,10 @@ def do_turn(game):
 def update_enemy_ice_trolls_targets(game):
     """
     """
-
+    
     Globals.who_target_me_dic = {}
     Globals.who_do_i_target = {}
-
+    
     for enemy_ice_troll in game.get_enemy_ice_trolls():
         target = closest(game, enemy_ice_troll, game.get_my_creatures() + game.get_my_living_elves())
         if target:
@@ -104,7 +85,7 @@ def update_enemy_ice_trolls_targets(game):
             else:
                 Globals.who_target_me_dic[target].append(enemy_ice_troll)
             Globals.who_do_i_target[enemy_ice_troll] = target
-
+                
     for my_ice_troll in game.get_my_ice_trolls():
         target = closest(game, my_ice_troll, game.get_enemy_creatures() + game.get_enemy_living_elves())
         if target:
