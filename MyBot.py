@@ -48,7 +48,7 @@ def do_turn(game):
     update_dangerous_enemy_portals(game)
     # tests(game)
 
-    """if game.turn < 8 and not game.get_my_mana_fountains():
+    if game.turn < 8 and not game.get_my_mana_fountains():
         elves = copy.deepcopy(game.get_my_living_elves())
         if elves and len(elves) > 1:
             build(game, elves[1], MANA_FOUNTAIN, get_new_mana_fountain_loc(game))
@@ -56,9 +56,9 @@ def do_turn(game):
             elves.remove(elves[1])
         arrow_strategy(game, elves)
     else:
-        arrow_strategy(game, game.get_my_living_elves())"""
+        arrow_strategy(game, game.get_my_living_elves())
     
-    rush_strat(game, game.get_my_living_elves())
+    # rush_strat(game, game.get_my_living_elves())
 
     # old_do_turn(game)
     # MUST STAY IN THE END OF do_turn():
