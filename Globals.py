@@ -10,6 +10,7 @@ def init():
     global who_target_me_dic
     global possible_dangerous_enemy_portals
     global who_do_i_target
+    global rush_attack_loc
     defensive_portals = []
     defensive_elf = None
     attacking_elves = None
@@ -21,3 +22,4 @@ def init():
     who_target_me_dic = {}
     who_do_i_target = {}
     possible_dangerous_enemy_portals = {}
+    rush_attack_loc = None

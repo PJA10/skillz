@@ -366,7 +366,7 @@ def does_win_fight_v1(game, elf, attack_target, max_depth=3):
         return False
 
 
-def defend_from_enemy_elves(game, elves_not_acted, max_number_of_icetrolls_on_unit, max_number_of_ice_trolls_near_base):
+def defend_from_enemy_elves(game, max_number_of_icetrolls_on_unit, max_number_of_ice_trolls_near_base):
     """
 
     if there is a close elf to one of our portals, summon ice from a close portal.
@@ -406,9 +406,6 @@ def defend_from_enemy_elves(game, elves_not_acted, max_number_of_icetrolls_on_un
             if turns_to_travel(game, enemy_elf, attacking_pos) < 5 and not is_targeted_by_my_icetroll(game, enemy_elf):
                 summon_with_closest_portal(game, ICE, portal)
                 print "summon ice, close elf"
-
-
-    return elves_not_acted
 
 
 def defend_from_enemy_lava_giants(game, elves_not_acted, max_number_of_icetrolls_on_unit,
@@ -474,7 +471,7 @@ def arrow_def(game, elves_not_acted):
     if game.get_my_castle().current_health < game.get_enemy_castle().current_health:
         max_number_of_ice_trolls_near_base += 1
 
-    elves_not_acted = defend_from_enemy_elves(game, elves_not_acted, max_number_of_icetrolls_on_unit, max_number_of_ice_trolls_near_base)
+    defend_from_enemy_elves(game, max_number_of_icetrolls_on_unit, max_number_of_ice_trolls_near_base)
     print "**** after defend_from_enemy_elves time: %s" % (time.time()*1000-start_time*1000)
     elves_not_acted = defend_from_enemy_lava_giants(game, elves_not_acted, max_number_of_icetrolls_on_unit,
                                                     max_number_of_ice_trolls_near_base)

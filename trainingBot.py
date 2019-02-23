@@ -8,7 +8,7 @@ trainingBot
    :synopsis: A useful module indeed.
 
 .. moduleauthor:: Andrew Carter <andrew@invalid.com>
-
+b
 
 """
 
@@ -843,7 +843,7 @@ def predict_next_turn_enemy_elves(game):
         if closest_my_elf.distance(enemy_elf) < game.elf_max_speed:
             next_turn_enemy_elf.location = closest_my_elf.get_location()
         else:
-            next_turn_enemy_elf.location = enemy_elf.get_location().towards(closest_my_elf, game.elf_max_speed)
+            next_turn_enemy_elf.location = enemy_elf.get_location().towards(closest_my_elf, enemy_elf.max_speed)
         next_turn_enemy_elves_list.append(next_turn_enemy_elf)
 
     return next_turn_enemy_elves_list
@@ -1010,7 +1010,7 @@ def get_closest_enemy_building(game, map_object):
     return closest(game, map_object, enemy_buildings)
 
 
-def build(game, elf, building_type_str, loc=False):
+def build(game, elf, building_type_str, loc=False, no_mana_fountains=False):
     """
 
     This function makes a building with a given elf at a specific location \n If the elf isnt at this position the
@@ -1036,7 +1036,7 @@ def build(game, elf, building_type_str, loc=False):
         loc = elf.get_location()
     print "middle build %s" % (time.time()*1000-start_time*1000)
     if elf.get_location() == loc:
-        if building_type_str == MANA_FOUNTAIN or game.get_myself().mana_per_turn > game.default_mana_per_turn:
+        if building_type_str == MANA_FOUNTAIN or no_mana_fountains or game.get_myself().mana_per_turn > game.default_mana_per_turn:
             if build_dic[building_type_str][0]():  # if elf.can_build_building()
                 build_dic[building_type_str][1]()  # then elf.build_building
                 print "end build %s" % (time.time()*1000-start_time*1000)
@@ -1666,7 +1666,7 @@ def does_win_fight(game, elf, attack_target):
         if health_dif > elf.current_health-1:
             print "will win building"
             return True
-    if health_dif <= 0:
+    if health_dif < 0:
         return False
     else:
         return True
@@ -1865,7 +1865,7 @@ def summon_lava_attack(game, first_arrow_portal):
     """
 
     distance_to_castle = first_arrow_portal.distance(game.get_enemy_castle()) - game.portal_size - game.castle_size
-    min_mana_to_attack = game.lava_giant_cost * (10/(game.get_myself().mana_per_turn)) + 20 * (distance_to_castle / (game.castle_size + 2 * game.portal_size))
+    min_mana_to_attack = game.lava_giant_cost * (10/max(1,game.get_myself().mana_per_turn)) + 20 * (distance_to_castle / (game.castle_size + 2 * game.portal_size))
     if game.get_my_mana() > min_mana_to_attack:
         summon_with_closest_portal(game, LAVA, game.get_enemy_castle())
 
