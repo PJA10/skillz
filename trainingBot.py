@@ -1550,156 +1550,6 @@ def how_much_hp_in_x_turns(game, game_object, turns = 1):
     return health
 
 
-def hunt_enemy_elf_with_wall(game, enemy_elf, use_casts = False):
-    """
-    This function tries to hunt the given elf with a wall
-
-    :param game:
-    :param enemy_elf: the elf to hunt
-    :param use_casts if the function can use casts in order to kill the enemy elf
-    :return: nothing
-    """
-    if len(game.get_my_living_elves()) == 2:
-        distance_from_col = math.fabs(enemy_elf.location.col - game.cols)
-        distance_from_row = math.fabs(enemy_elf.location.row - game.rows)
-        if distance_from_col < game.cols / 2:
-            closest_col = game.cols
-        else:
-            closest_col = 0
-
-        if distance_from_row < game.rows / 2:
-            closest_row = game.rows
-        else:
-            closest_row = 0
-
-        elf1 = game.get_my_living_elves()[0]
-        elf2 = game.get_my_living_elves()[1]
-
-        if Location(closest_row, enemy_elf.location.col).distance(enemy_elf) < Location(enemy_elf.location.row,
-                                                                                        closest_col).distance(
-                enemy_elf):
-            closest_wall = closest_row
-            if game.get_my_living_elves()[0].distance(Location(closest_wall,
-                                                               game.get_my_living_elves()[0].location.col)) < \
-                    game.get_my_living_elves()[1].distance(
-                        Location(closest_wall, game.get_my_living_elves()[1].location.col)):
-                chasing_elf = elf1
-                reacting_elf = elf2
-                print "chasing_elf: ", chasing_elf
-                print "reacting elf: ", reacting_elf
-            else:
-                chasing_elf = elf2
-                reacting_elf = elf1
-                print "chasing_elf: ", chasing_elf
-                print "reacting elf: ", reacting_elf
-        else:
-            closest_wall = closest_col
-        if game.get_my_living_elves()[0].distance(
-                Location(game.get_my_living_elves()[0].location.row, closest_wall)) < game.get_my_living_elves()[
-            1].distance(Location(game.get_my_living_elves()[1].location.row, closest_wall)):
-            chasing_elf = elf1
-            print "chasing_elf: ", chasing_elf
-            print "reacting elf: ", reacting_elf
-        else:
-            chasing_elf = elf2
-            reacting_elf = elf1
-            print "chasing_elf: ", chasing_elf
-            print "reacting elf: ", reacting_elf
-        print "closest col ", closest_col
-        print "closest_row ", closest_row
-
-        chasing_elf_distance = chasing_elf.distance(enemy_elf)
-        blocking_elf_distance = reacting_elf.distance(enemy_elf)
-        current_distance_between_elves = reacting_elf.distance(chasing_elf)
-
-        if chasing_elf_distance <= blocking_elf_distance + turns_to_travel(game, elf2, elf1,
-                                                                           game.elf_max_speed) * game.speed_up_expiration_turns and use_casts:
-            if game.get_my_mana > game.speed_up_cost and not is_have_speed_up(game, chasing_elf):
-                reacting_elf.cast_speed_up()
-
-        elif blocking_elf_distance <= chasing_elf_distance + turns_to_travel(game, elf1, elf2,
-                                                                             game.elf_max_speed) * game.speed_up_expiration_turns and use_casts:
-            if game.get_my_mana > game.speed_up_cost and not is_have_speed_up(game, chasing_elf):
-                chasing_elf.cast_speed_up()
-
-        prev_enemy_elf_location = get_by_unique_id(Globals.prev_game, enemy_elf.unique_id).location
-        location_differnce = enemy_elf.location.subtract(prev_enemy_elf_location)
-        best_loc = chasing_elf.location
-
-        if closest_wall == closest_col:
-            if chasing_elf_distance <= game.elf_attack_range and math.fabs(
-                    Location(enemy_elf.row, closest_col).distance(chasing_elf) - enemy_elf.location.towards(
-                            chasing_elf_distance)) < 150:
-                if not chasing_elf.already_acted:
-                    print "entered if"
-                    attack_object(game, chasing_elf, enemy_elf)
-
-            elif chasing_elf_distance <= game.elf_attack_range and math.fabs(
-                    Location(closest_row, enemy_elf.col).distance(chasing_elf) - enemy_elf.location.towards(
-                            chasing_elf_distance)) < 150:
-                if not chasing_elf.already_acted:
-                    print "entered elif"
-                    attack_object(game, chasing_elf, enemy_elf)
-
-            else:
-                print "entered else"
-                minimal_distance = 9999
-                for possible_location in get_possible_movement_points(game, chasing_elf, enemy_elf):
-                    if closest_wall == closest_row:
-                        if math.fabs(possible_location[0].distance(Location(closest_wall, chasing_elf.location.col)) -
-                                     possible_location[0].distance(
-                                             enemy_elf.location.towards(chasing_elf, chasing_elf_distance))) < 50:
-                            if possible_location[0].distance(chasing_elf.location.towards(enemy_elf.location,
-                                                                                          chasing_elf.distance(
-                                                                                                  enemy_elf) - game.elf_max_speed)) < minimal_distance:
-                                best_loc = possible_location[0]
-                                minimal_change = chasing_elf.distance(reacting_elf) + chasing_elf.distance(closest_wall,
-                                                                                                           chasing_elf.col)
-
-                    elif math.fabs(possible_location[0].distance(Location(chasing_elf.location.row, closest_wall))):
-                        if possible_location[0].distance(chasing_elf.location.towards(enemy_elf.location,
-                                                                                      chasing_elf.distance(
-                                                                                              enemy_elf) - game.elf_max_speed)) < minimal_distance:
-                            best_loc = possible_location[0]
-                            minimal_change = chasing_elf.distance(reacting_elf) + chasing_elf.distance(closest_wall,
-                                                                                                       chasing_elf.col)
-
-                if best_loc != chasing_elf.location and not chasing_elf.already_acted:
-                    chasing_elf.move_to(best_loc)
-                elif not chasing_elf.already_acted:
-                    chasing_elf.move_to(enemy_elf)
-
-            if blocking_elf_distance < game.elf_attack_range and math.fabs(
-                    closest_wall.distance(reacting_elf) - enemy_elf.location.towards(blocking_elf_distance) < 50) and not reacting_elf.already_acted:
-                attack_object(game, reacting_elf, enemy_elf)
-            elif not reacting_elf.already_acted:
-                minimal_distance = 9999
-                for possible_location in get_possible_movement_points(game, elf2, enemy_elf):
-                    print "minimal_distance: ", minimal_distance
-                    print "possible distance: ", possible_location[0].distance(
-                        reacting_elf.location.towards(enemy_elf.location, elf1.distance(enemy_elf) - game.elf_max_speed))
-                    print "possible_location.distance(elf1): ", possible_location[0].distance(reacting_elf)
-                    if math.fabs(possible_location[0].distance(reacting_elf) - current_distance_between_elves) <= 50:
-                        if possible_location[0].distance(elf1.location.towards(enemy_elf.location, reacting_elf.distance(
-                                enemy_elf) - game.elf_max_speed)) < minimal_distance:
-                            best_loc = possible_location[0]
-                            minimal_distance = possible_location[0].distance(elf1.location.towards(enemy_elf.location,
-                                                                                                   reacting_elf.distance(
-                                                                                                       enemy_elf) - game.elf_max_speed))
-                print "best loc: ", best_loc
-                if best_loc != reacting_elf.location:
-                    reacting_elf.move_to(best_loc)
-                else:
-                    reacting_elf.move_to(enemy_elf)
-
-    else:
-        print "we don't have 2 elves alive"
-    ## check if enemy elf can get farther if he can don't attack him
-
-
-
-
-'''
 def hunt_enemy_elf_with_wall(game, enemy_elf, use_casts=False):
     """
     This function tries to hunt the given elf with a wall
@@ -1722,13 +1572,26 @@ def hunt_enemy_elf_with_wall(game, enemy_elf, use_casts=False):
         else:
             closest_row = 0
 
+        for enemy_elf_next in predict_next_turn_enemy_elves(game):
+            if enemy_elf_next.unique_id == enemy_elf.unique_id:
+                print "predict"
+                next_turn_enemy_elf = enemy_elf_next
+
+        '''        
+        for prev_enemy_elf in Globals.prev_game.get_enemy_living_elves():
+            if prev_enemy_elf.unique_id == enemy_elf.unique_id:
+                if prev_enemy_elf.get_location() == enemy_elf.get_location():
+                    print "prev"
+                    next_turn_enemy_elf = enemy_elf
+        '''
+
         elf1 = game.get_my_living_elves()[0]
         elf2 = game.get_my_living_elves()[1]
         my_elves = [elf1, elf2]
 
         if Location(closest_row, enemy_elf.location.col).distance(enemy_elf) < Location(enemy_elf.location.row,
                                                                                         closest_col).distance(
-            enemy_elf):
+                enemy_elf):
             closest_wall = closest_row
         else:
             closest_wall = closest_col
@@ -1737,16 +1600,11 @@ def hunt_enemy_elf_with_wall(game, enemy_elf, use_casts=False):
         elf2_dis = elf2.distance(enemy_elf)
         current_distance_between_elves = elf1.distance(elf2)
 
-        if game.elf_max_speed * game.speed_up_multiplier * game.speed_up_expiration_turns <= elf1.distance(
-                elf2) and elf1_dis < elf2_dis and use_casts:
-            elf1.cast_speed_up()
-        elif game.elf_max_speed * game.speed_up_multiplier * game.speed_up_expiration_turns <= elf2.distance(
-                elf1) and elf1_dis < elf2_dis and use_casts:
-            elf2.cast_speed_up()
-
-        prev_enemy_elf_location = get_by_unique_id(Globals.prev_game, enemy_elf.unique_id).location
-        location_differnce = enemy_elf.location.subtract(prev_enemy_elf_location)
         best_loc = elf1.get_location()
+        enemy_elf_speed = 0
+
+        if not enemy_elf.is_building:
+            enemy_elf_speed = enemy_elf.max_speed
 
         if closest_wall == closest_col:
             for elf in my_elves:
@@ -1755,46 +1613,69 @@ def hunt_enemy_elf_with_wall(game, enemy_elf, use_casts=False):
                 else:
                     other_elf = elf1
 
-                print "closest_wall = ", closest_wall
-                print "distance between elves - distance from enemy elf: ", math.fabs(
-                    elf.distance(other_elf) - elf.distance(enemy_elf))
+                if elf.max_speed * game.speed_up_multiplier * game.speed_up_expiration_turns <= elf.distance(
+                        other_elf) + other_elf.max_speed * 3 and other_elf.distance(enemy_elf) < elf.distance(
+                    enemy_elf) and use_casts:
+                    if game.get_my_mana > game.speed_up_cost and not is_have_speed_up(game, elf):
+                        elf.cast_speed_up()
+                        continue
 
-                if elf.distance(other_elf) <= game.elf_attack_range:
-                    if math.fabs(elf.distance(other_elf) - elf.distance(enemy_elf)) < 150 or closest(game, enemy_elf,
-                                                                                                     my_elves) == elf:
-                        aggressive_attack_object(game, elf, enemy_elf)
+                print "closest_wall = ", closest_wall
+                print "distance between elves - distance from enemy elf: ", abs(math.sqrt(
+                    elf.distance(enemy_elf) ** 2 + other_elf.distance(enemy_elf) ** 2 - elf.distance(
+                        enemy_elf) - other_elf.distance(enemy_elf)))
+
+                if elf.distance(enemy_elf) <= game.elf_attack_range - elf.max_speed and abs(math.sqrt(
+                        elf.distance(enemy_elf) ** 2 + other_elf.distance(enemy_elf) ** 2 - elf.distance(
+                                enemy_elf) - other_elf.distance(enemy_elf))) < 250:
+                    # if elf.distance(enemy_elf) <= game.elf_attack_range - enemy_elf_speed:
+                    print elf, "attacking"
+                    attack_object(game, elf, enemy_elf)
+                    continue
+
+                if elf.distance(next_turn_enemy_elf) == elf.distance(enemy_elf):
+                    print elf, "attacking"
+                    attack_object(game, elf, enemy_elf)
+                    continue
+
+                abs_location = []
+                closest_to_enemy = 9999
+                smallest_difference = 9999
+                best_loc = elf.location
+
+                circle_points = get_circle(game, elf.get_location(), elf.max_speed)
+                possible_movement_points = [[point, 1] for point in circle_points if is_in_game_map(game, point)]
+
+                possible_movement_points.append([elf.get_location(), 1])
+                print "turns_to_travel ", turns_to_travel(game, elf, enemy_elf, elf.max_speed)
+                if turns_to_travel(game, elf, enemy_elf, elf.max_speed) < 10:
+                    for possible_location in possible_movement_points:
+                        print "abs ( -) ", abs(math.sqrt(
+                            possible_location[0].distance(enemy_elf) ** 2 + other_elf.distance(enemy_elf) ** 2) -
+                                               possible_location[0].distance(other_elf))
+                        if abs(math.sqrt(
+                                possible_location[0].distance(enemy_elf) ** 2 + other_elf.distance(enemy_elf) ** 2) -
+                               possible_location[0].distance(other_elf)) < smallest_difference:
+                            abs_location.append(possible_location[0])
+                            smallest_difference = abs(math.sqrt(
+                                possible_location[0].distance(enemy_elf) ** 2 + other_elf.distance(enemy_elf) ** 2) -
+                                                      possible_location[0].distance(other_elf))
+
+                    if abs_location:
+                        for possible_location in abs_location:
+                            if possible_location.distance(enemy_elf) < closest_to_enemy:
+                                best_loc = possible_location
+                                print "best_loc: ", best_loc
+                                closest_to_enemy = possible_location.distance(enemy_elf)
+
+                    if elf.get_location() != best_loc:
+                        print "moved to best loc"
+                        print elf
+                        elf.move_to(best_loc)
 
 
                 else:
-                    smallest_difference = 9999
-                    best_loc = elf.location
-                    circle_points = get_circle(game, elf.get_location(), elf.max_speed)
-                    possible_movement_points = [[point, 1] for point in circle_points if is_in_game_map(game, point)]
-
-                    possible_movement_points.append([elf.get_location(), 1])
-                    for possible_location in possible_movement_points:
-                        if math.fabs(
-                                possible_location[0].distance(
-                                    Location(enemy_elf.get_location().row, closest_wall).towards(enemy_elf,
-                                                                                                 closest(game,
-                                                                                                         enemy_elf,
-                                                                                                         my_elves).distance(
-                                                                                                     enemy_elf))) +
-                                possible_location[0].distance(other_elf)) < smallest_difference:
-                            best_loc = possible_location[0]
-                            smallest_difference = math.fabs(
-                                possible_location[0].distance(
-                                    Location(enemy_elf.get_location().row, closest_wall).towards(enemy_elf,
-                                                                                                 closest(game,
-                                                                                                         enemy_elf,
-                                                                                                         my_elves).distance(
-                                                                                                     enemy_elf))) +
-                                possible_location[0].distance(other_elf))
-                        else:
-                            best_loc = elf.get_location().towards(enemy_elf.get_location(), game.elf_max_speed)
-                    if elf.location != best_loc:
-                        print "moved to best loc"
-                        elf.move_to(best_loc)
+                    elf.move_to(enemy_elf)
 
 
         else:
@@ -1804,46 +1685,72 @@ def hunt_enemy_elf_with_wall(game, enemy_elf, use_casts=False):
                 else:
                     other_elf = elf1
 
+                if elf.max_speed * game.speed_up_multiplier * game.speed_up_expiration_turns <= elf.distance(
+                        other_elf) + other_elf.max_speed * 3 and other_elf.distance(enemy_elf) < elf.distance(
+                    enemy_elf) and use_casts:
+                    if game.get_my_mana > game.speed_up_cost and not is_have_speed_up(game, elf):
+                        elf.cast_speed_up()
+                        continue
+
                 print "closest_wall = ", closest_wall
-                print "distance between elves - distance from enemy elf: ", math.fabs(
-                    elf.distance(other_elf) - elf.distance(enemy_elf))
-                if math.fabs(elf.distance(other_elf) - elf.distance(enemy_elf)) < 150 or closest(game, enemy_elf,
-                                                                                                 my_elves) == elf:
-                    aggressive_attack_object(game, elf, enemy_elf)
+                print "distance between elves - distance from enemy elf: ", abs(math.sqrt(
+                    elf.distance(enemy_elf) ** 2 + other_elf.distance(enemy_elf) ** 2 - elf.distance(
+                        enemy_elf) - other_elf.distance(enemy_elf)))
 
-                else:
-                    smallest_difference = 9999
-                    best_loc = elf.location
-                    circle_points = get_circle(game, elf.get_location(), elf.max_speed)
-                    possible_movement_points = [[point, 1] for point in circle_points if is_in_game_map(game, point)]
+                if elf.distance(enemy_elf) <= game.elf_attack_range - elf.max_speed and abs(math.sqrt(
+                        elf.distance(enemy_elf) ** 2 + other_elf.distance(enemy_elf) ** 2 - elf.distance(
+                                enemy_elf) - other_elf.distance(enemy_elf))) < 250:
+                    # if elf.distance(enemy_elf) <= game.elf_attack_range - enemy_elf_speed:
+                    if does_win_fight(game, elf, enemy_elf):
+                        aggressive_attack_object(game, elf, enemy_elf)
+                        print elf, "attacking"
+                        continue
 
-                    possible_movement_points.append([elf.get_location(), 1])
+                if elf.distance(next_turn_enemy_elf) == elf.distance(enemy_elf):
+                    if does_win_fight(game, elf, enemy_elf):
+                        aggressive_attack_object(game, elf, enemy_elf)
+                        print elf, "attacking"
+                        continue
+
+                abs_location = []
+                closest_to_enemy = 9999
+                smallest_difference = 9999
+                best_loc = elf.location
+
+                circle_points = get_circle(game, elf.get_location(), elf.max_speed)
+                possible_movement_points = [[point, 1] for point in circle_points if is_in_game_map(game, point)]
+
+                possible_movement_points.append([elf.get_location(), 1])
+                print "turns_to_travel ", turns_to_travel(game, elf, enemy_elf, elf.max_speed)
+                if turns_to_travel(game, elf, enemy_elf, elf.max_speed) < 10:
                     for possible_location in possible_movement_points:
-                        if math.fabs(
-                                possible_location[0].distance(
-                                    Location(closest_wall, enemy_elf.get_location().col).towards(enemy_elf,
-                                                                                                 closest(game,
-                                                                                                         enemy_elf,
-                                                                                                         my_elves).distance(
-                                                                                                     enemy_elf))) +
-                                possible_location[0].distance(other_elf) - possible_location[
-                                    0].distance()) < smallest_difference:
-                            best_loc = possible_location[0]
-                            smallest_difference = math.fabs(
-                                possible_location[0].distance(
-                                    Location(closest_wall, enemy_elf.get_location().col).towards(enemy_elf,
-                                                                                                 closest(game,
-                                                                                                         enemy_elf,
-                                                                                                         my_elves).distance(
-                                                                                                     enemy_elf))) * 4 + 0.75 *
-                                possible_location[0].distance(other_elf))
-                        else:
-                            best_loc = elf.get_location().towards(enemy_elf.get_location(), game.elf_max_speed)
+                        print "abs ( -) ", abs(math.sqrt(
+                            possible_location[0].distance(enemy_elf) ** 2 + other_elf.distance(enemy_elf) ** 2) -
+                                               possible_location[0].distance(other_elf))
+                        if abs(math.sqrt(
+                                possible_location[0].distance(enemy_elf) ** 2 + other_elf.distance(enemy_elf) ** 2) -
+                               possible_location[0].distance(other_elf)) < smallest_difference:
+                            abs_location.append(possible_location[0])
+                            smallest_difference = abs(math.sqrt(
+                                possible_location[0].distance(enemy_elf) ** 2 + other_elf.distance(enemy_elf) ** 2) -
+                                                      possible_location[0].distance(other_elf))
+
+                    if abs_location:
+                        for possible_location in abs_location:
+                            if possible_location.distance(enemy_elf) < closest_to_enemy:
+                                best_loc = possible_location
+                                print "best_loc: ", best_loc
+                                closest_to_enemy = possible_location.distance(enemy_elf)
+
                     if elf.location != best_loc:
                         print "moved to best loc"
+                        print elf
                         elf.move_to(best_loc)
+
+
+                else:
+                    elf.move_to(enemy_elf)
 
     else:
         print "we don't have 2 elves alive"
     ## check if enemy elf can get farther if he can don't attack him
-'''
