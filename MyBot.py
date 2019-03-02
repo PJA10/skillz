@@ -37,6 +37,10 @@ def do_turn(game):
         Globals.init()
         Globals.prev_game = game
         Globals.is_enemy_elf_attacking_elves = False
+        if len(game.get_enemy_ice_trolls()) > 30:
+            Globals.Labyrinth = True
+        if len(game.get_enemy_portals()) == 5 and not game.get_all_enemy_elves():
+           Globals.mazgan = True
         if game.get_all_my_elves():
             Globals.defensive_elf = game.get_all_my_elves()[0]
             Globals.attacking_elfs = game.get_all_my_elves()
@@ -51,13 +55,14 @@ def do_turn(game):
     if game.turn < 8 and not game.get_my_mana_fountains():
         elves = copy.deepcopy(game.get_my_living_elves())
         if elves and len(elves) > 1:
-            build(game, elves[1], MANA_FOUNTAIN, get_new_mana_fountain_loc(game))
-            print "elf %s building MANA_FOUNTAIN at %s" % (elves[1], get_new_mana_fountain_loc(game))
-            elves.remove(elves[1])
-        arrow_strategy(game, elves)
+            loc = get_new_mana_fountain_loc(game)
+            closest_elf_to_loc = closest(game, loc, elves)
+            build(game, closest_elf_to_loc, MANA_FOUNTAIN, get_new_mana_fountain_loc(game))
+            print "elf %s building MANA_FOUNTAIN at %s" % (closest_elf_to_loc, get_new_mana_fountain_loc(game))
+            elves.remove(closest_elf_to_loc)
+        choose_strategy(game, elves)
     else:
-        arrow_strategy(game, game.get_my_living_elves())
-    
+        choose_strategy(game, game.get_my_living_elves())
     # rush_strat(game, game.get_my_living_elves())
 
     # old_do_turn(game)
@@ -137,3 +142,74 @@ def tests(game):
 
     print " ----------end--------- "
 
+def choose_strategy(game, elves):
+    """
+    This function is the main choosing strategy function
+    she determine that by try to determine_enemy_strategy 
+    and looking on the game status
+    
+    :param: game
+    :type: void
+    
+    """
+    
+    
+    
+    
+    if Globals.Labyrinth:
+        Counter_Labyrinth(game)
+    elif Globals.mazgan:
+        Counter_mazgan(game)
+    
+    else:
+        arrow_strategy(game, game.get_my_living_elves())
+
+
+
+
+
+
+
+def determine_enemy_strategy(game):
+    """
+    this function try to determine_what_strategy_is_an_enemy_using
+    
+    :param: game
+    :return: the name of the strategy
+    :type: string
+    
+    possible returns:
+    "rush"
+    "controling the center"
+    "bunker"
+    
+    """
+    
+    
+def Counter_mazgan(game):
+    
+    
+    for portal in game.get_my_portals():
+        if not game.get_my_tornadoes():
+            summon(game, portal, TORNADO)
+        if not portal.is_summoning:
+            summon(game, portal, ICE)
+    for elf in game.get_my_living_elves():
+        if game.get_enemy_lava_giants():
+            attack_object(game, elf, get_closest_enemy_creature(game, elf))
+        else:
+            attack_object(game, elf, game.get_enemy_castle())
+    
+    
+def Counter_Labyrinth(game):
+    
+    for elf in game.get_my_living_elves():
+        if elf.in_attack_range(game.get_enemy_castle()):
+            attack_object(game,elf,game.get_enemy_castle())
+        elif game.get_enemy_ice_trolls():
+            if elf.can_cast_invisibility() and not elf.invisible:
+                elf.cast_invisibility()
+            else:
+                elf.move_to(game.get_enemy_castle())
+        else: 
+                elf.move_to(game.get_enemy_castle())

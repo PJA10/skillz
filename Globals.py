@@ -11,6 +11,9 @@ def init():
     global possible_dangerous_enemy_portals
     global who_do_i_target
     global rush_attack_loc
+    global Labyrinth
+    global mazgan
+    mazgan = False
     defensive_portals = []
     defensive_elf = None
     attacking_elves = None
@@ -23,3 +26,4 @@ def init():
     who_do_i_target = {}
     possible_dangerous_enemy_portals = {}
     rush_attack_loc = None
+    Labyrinth = False

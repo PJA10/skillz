@@ -2,19 +2,15 @@
 from trainingBot import *
 from Attack import *
 
-
 def get_rush_attack_loc(game):
-    """
-
-    :param game:
-    :return:
-    """
     print "in get_rush_attack_loc"
+    
     
     if game.turn < 23:
         return game.get_enemy_castle()
     
     if game.turn == 23:
+        
         enemy_castle = game.get_enemy_castle()
         enemy_mana_fountains = game.get_enemy_mana_fountains()
         enemy_portals = game.get_enemy_portals()
@@ -33,11 +29,46 @@ def get_rush_attack_loc(game):
                 Globals.rush_attack_loc = closest_portal_to_castle.get_location()
                 return closest_portal_to_castle.get_location()
         
-        Globals.rush_attack_loc = enemy_castle.get_location().towards(Location(0, 0), game.castle_size + game.portal_size + 10)
-        return enemy_castle.get_location().towards(Location(0, 0), game.castle_size + game.portal_size + 10)
+        Globals.rush_attack_loc = enemy_castle.get_location().towards(Location(0,0), game.castle_size + game.portal_size + 10)
+        return enemy_castle.get_location().towards(Location(0,0), game.castle_size + game.portal_size + 10)
+    elif non_disdructive_needed_rush_attack_locs(game):
+        return closest(game, get_closest_my_elf(game, game.get_enemy_castle()),  non_disdructive_needed_rush_attack_locs(game))
+        
     else:
         return Globals.rush_attack_loc
         
+
+def non_disdructive_needed_rush_attack_locs(game):
+    
+    """
+    
+    """
+    
+    possible_locations = []
+    dodge_easy = does_win_fight(game, get_closest_my_elf(game, game.get_enemy_castle()),  get_closest_enemy_elf(game, game.get_enemy_castle()))
+    
+    for r in range(game.castle_size+ game.portal_size, game.get_my_castle().distance(game.get_enemy_castle()), 5):
+        for Location in get_circle(game, game.get_enemy_castle().get_location(), r):
+                if game.can_build_portal_at(Location): 
+                    if not game.get_enemy_living_elves() and not game.get_enemy_ice_trolls():
+                        possible_locations.append(Location)
+                    elif game.get_enemy_living_elves():
+                        if turns_to_travel(game, get_closest_enemy_elf(game,Location), Location) > game.portal_building_duration:
+                            if game.get_enemy_ice_trolls():
+                                if turns_to_travel(game, get_closest_enemy_ice_troll(game,Location), Location) > game.portal_building_duration:
+                                    possible_locations.append(Location)
+                            else:
+                                possible_locations.append(Location)
+                        
+                        elif dodge_easy:
+                            possible_locations.append(Location)
+                    
+        if possible_locations:
+            break
+    
+    return possible_locations
+     
+    
 
 def rush_strat(game, elves):
     """
@@ -68,17 +99,17 @@ def rush_strat(game, elves):
     if not rush_portals:
         build_rush_portal(game, attack_elf, rush_attack_loc)
 
+    elif non_disdructive_needed_rush_attack_locs(game):
+        build_rush_portal(game, attack_elf, get_rush_attack_loc(game))
     else:
         defend_rush_portals(game, attack_elf)
         defend_from_enemy_elves(game, 3, 4)
-        summon_lava_attack(game, rush_portals[0])
+    for i in range(0,len(rush_portals),1):
+        summon_lava_attack(game, rush_portals[i])
 
 
 def build_rush_portal(game, elf, rush_attack_loc):
     """
-
-    This function build the rush portal, if the given elf can build portal at the wanted loc, go build.\n
-    if there are disturbing building go attack them
 
     :param game:
     :type game: Game
@@ -97,22 +128,24 @@ def build_rush_portal(game, elf, rush_attack_loc):
             if is_safe(game, elf, 3):
                 build(game, elf, PORTAL, rush_attack_loc, no_mana_fountains=True)
                 print "attack elf %s building portal at: %s" % (elf, rush_attack_loc)
-
+            
             else:
                 smart_movement(game, elf, rush_attack_loc.get_location())
                 print "attack elf %s running away" % (elf)
         else:
             sneak_movement(game, elf, rush_attack_loc)
-
+    
     else:  # there are disturbing buildings
         closest_building_in_range = closest(game, elf, buildings_in_range)
-
-        if elf.in_attack_range(closest_building_in_range):
+        if elf.in_attack_range(game.get_enemy_castle()):
+            elf.attack(game.get_enemy_castle())
+        elif elf.in_attack_range(closest_building_in_range):
             if is_safe(game, elf) or does_win_fight(game, elf, closest_building_in_range):
                 attack_object(game, elf, closest_building_in_range)
                 print "attack elf %s attacking: %s" % (elf, closest_building_in_range)
 
             else:
+                
                 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 # need to think if this is our best move
                 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -124,24 +157,21 @@ def build_rush_portal(game, elf, rush_attack_loc):
 
 
 def defend_rush_portals(game, elf):
-    """
-
-    This function defend with a given elf the rush portal
-    The function will attack the closest enemy elf, if he is far the function will attack the closest enemy building
-
-    :param game:
-    :param elf:
-    :return:
-    """
     print "in defend_rush_portals"
+    """elf = attack_closest_enemy_game_obj(game, [elf])
+    if elf:
+        elf = elf[0]
+    else:
+        return"""
+    
     closest_enemy_elf = get_closest_enemy_elf(game, elf)
     if closest_enemy_elf and turns_to_travel(game, elf, closest_enemy_elf) < 10:
         print "get_closest_my_portal(game, elf)", get_closest_my_portal(game, elf)
         print "closest_enemy_elf.distance(get_closest_my_portal(game, elf))", closest_enemy_elf.distance(get_closest_my_portal(game, elf))
         print "closest_enemy_elf.in_range(get_closest_my_portal(game, elf), elf.max_speed + elf.attack_range +  game.portal_size) %s" % closest_enemy_elf.in_range(get_closest_my_portal(game, elf),  game.portal_size+ elf.max_speed + elf.attack_range)
-        if elf.in_attack_range(closest_enemy_elf) or closest_enemy_elf.in_range(get_closest_my_portal(game, elf), elf.max_speed + elf.attack_range + game.portal_size):
+        if elf.in_attack_range(closest_enemy_elf) or closest_enemy_elf.in_range(get_closest_my_portal(game, elf), elf.max_speed + elf.attack_range+ game.portal_size):
             
-            if does_win_fight(game, elf, closest_enemy_elf) or closest_enemy_elf.in_range(get_closest_my_portal(game, elf), elf.max_speed + elf.attack_range + game.portal_size):
+            if does_win_fight(game, elf, closest_enemy_elf) or closest_enemy_elf.in_range(get_closest_my_portal(game, elf), elf.max_speed + elf.attack_range+ game.portal_size):
                 attack_object(game, elf, closest_enemy_elf)
                 print "elf %s attacking enemy elf:%s" % (elf, closest_enemy_elf)
                 return
@@ -164,13 +194,7 @@ def defend_rush_portals(game, elf):
 
 
 def sneak_movement(game, elf, destination):
-    """
 
-    :param game:
-    :param elf:
-    :param destination:
-    :return:
-    """
     print "in sneak_movement"
     if is_safe(game, elf):
         elf_movement(game, elf, destination)
@@ -268,30 +292,3 @@ def get_rush_portals(game):
 
     return [close_portal for close_portal in game.get_my_portals()
             if close_portal.distance(enemy_castle) < distance_between_castles/4]
-
-
-def is_safe(game, elf, num_of_turns=2):
-    """
-
-    This function check if a given elf is safe, that's mean that he wont get hit from enemy ice trolls or elves in the
-    next 2 turns
-
-    :param game:
-    :param elf:
-    :return:
-    """
-
-    print "in safe"
-    ice_troll_safe_distance = num_of_turns * game.ice_troll_max_speed + game.ice_troll_attack_range
-
-    for enemy_ice_troll in is_targeted_by_enemy_icetroll(game, elf):
-        if enemy_ice_troll.in_range(elf, ice_troll_safe_distance):
-            return False
-
-    for enemy_elf in game.get_enemy_living_elves():
-        elf_safe_distance = num_of_turns * enemy_elf.max_speed + game.elf_attack_range
-        if enemy_elf.in_range(elf, elf_safe_distance):
-            return False
-
-    return True
-
