@@ -841,8 +841,11 @@ def get_next_arrow_portal_loc(game):
 def hunt_mana_fountains(game, elf):
     """
 
+    This fucntion hunt the enemy mana fountains. the fucntion attack with the given elf the closest mana fountains to
+     him.\n
+     the elf will use speed up when he will be 5 turns with speed up away from the mana fountains
+
     :param elf:
-    :return:
     :param game:
     :param elf:
     :return:

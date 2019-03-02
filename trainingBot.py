@@ -2048,6 +2048,13 @@ def hunt_enemy_elf_with_speed(game, my_elf, enemy_elf):
 
 def elf_escape(game, elf):
     """
+
+    This function escape with a given elf from close enemy elves to it, the function doesnt work currently because
+    in danger smart_move_to just run straight away
+
+    :param game:
+    :param elf:
+    :return:
     """
 
     close_enemy_elves = [enemy_elf for enemy_elf in game.get_enemy_living_elves() if
@@ -2077,6 +2084,8 @@ def elf_escape(game, elf):
 
 def smart_movement(game, elf, destination):
     """
+
+    This function is the handler of smart movement, currently the function just call smart_move_to
 
     :param game:
     :param elf:
