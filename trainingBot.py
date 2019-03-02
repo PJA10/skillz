@@ -24,6 +24,67 @@ ICE = "ice"
 LAVA = "lava"
 MANA_FOUNTAIN = "mana fountain"
 PORTAL = "portal"
+TORNADO = "tornado"
+
+def is_targeted_by_enemy_tornados(game, map_object):
+    """
+
+    This function returns a list of all the enemy's tornados who target a given map object.
+    if the returned list is empty then the given map object is safe
+
+    :param map_object: the map object which to check if is targeted bt ice trolls
+    :type map_object: MapObject
+    :return: return a list of the ice trolls which target obj
+    :type: [IceTroll]
+
+    """
+    tornados = []
+
+    if not map_object.type == "portal" and not map_object == "mana fountain":
+        for tornado in game.get_enemy_tornadoes():
+            if get_closest_my_building(game, tornado) == map_object:
+                if tornado.distance(map_object) / game.tornado_max_speed < tornado.current_health / game.tornado_suffocation_per_turn:
+                    tornados.append(tornado)
+    return tornados
+
+def is_targeted_by_my_tornados(game, map_object):
+    """
+
+    This function returns a list of all the enemy's tornados who target a given map object.
+    if the returned list is empty then the given map object is safe
+
+    :param map_object: the map object which to check if is targeted bt ice trolls
+    :type map_object: MapObject
+    :return: return a list of the ice trolls which target obj
+    :type: [IceTroll]
+
+    """
+    tornados = []
+
+    if not map_object.type == "portal" and not map_object == "mana fountain":
+        for tornado in game.get_my_tornadoes():
+            if get_closest_enemy_building(game, tornado) == map_object:
+                if tornado.distance(map_object) / game.tornado_max_speed + map_object.ccurrent_health / game.tornado_attack_multiplier < \
+                        tornado.current_health / game.tornado_suffocation_per_turn:
+                    tornados.append(tornado)
+    return tornados
+
+def is_worth_spawn_tornado(game, portal):
+    """
+    this function checks if its worth spawning tornado from a given portal
+
+    :param: game
+    :param: portal
+    :rreturns true if worth
+    :type: Boolean
+
+    """
+    target_building = get_closest_enemy_building(game, portal)
+
+    if portal.distance(target_building) / game.tornado_max_speed + map_object.current_health / game.tornado_attack_multiplier < game.tornado_max_health / game.tornado_suffocation_per_turn:
+
+        return True
+    return False
 
 
 def is_targeted_by_enemy_icetroll(game, map_object):
@@ -103,6 +164,29 @@ def get_closest_enemy_creature(game, map_object):
     """
 
     return closest(game, map_object, game.get_enemy_creatures())
+
+def get_closest_enemy_tornado(game, map_object):
+    """
+
+    This function return the closest enemy tornado to a given map object
+
+    :param map_object: an object on the map in order to find the closest creature to it
+    :return: the closest enemy's tornado to map_object
+    :type: Creature
+    """
+    return closest(game, map_object, game.get_enemy_tornadoes())
+
+def get_closest_my_tornado(game, map_object):
+
+    """
+    This function return the closest my tornado to a given map object
+
+    :param map_object: an object on the map in order to find the closest creature to it
+    :return: my tornado to map_object
+    :type: Creature
+    """
+    return closest(game, map_object, game.get_my_tornadoes())
+
 
 
 def get_closest_enemy_unit(game, map_object):
@@ -289,7 +373,8 @@ def summon(game, portal, creature_type_str):
 
     summon_dic = {
         "ice": (portal.can_summon_ice_troll, portal.summon_ice_troll),
-        "lava": (portal.can_summon_lava_giant, portal.summon_lava_giant)
+        "lava": (portal.can_summon_lava_giant, portal.summon_lava_giant),
+        "tornado": (portal.can_summon_tornado, portal.summon_tornado)
     }
     if creature_type_str not in summon_dic.keys():
         return False
@@ -373,8 +458,9 @@ def turns_to_travel(game, map_object, destination, max_speed=False, smart=False)
     return number_of_turns
 
 
-def smart_movement(game, elf, destination):
+def smart_move_to(game, elf, destination):
     """
+
     This function is moving an given elf towards a given destination safely
     The function will go the the next position which will get the lest damage to the elf
     \n the function wont fear from an enemy unit if that unit is the destination
@@ -414,7 +500,7 @@ def smart_movement(game, elf, destination):
     # print "im smart_movement after ice trolls targets time: %s" % (time.time()*1000-start_time*1000)
 
     for point in possible_movement_points:  # point is (loc, risk)
-        curr_next_turn_elf = copy.deepcopy(elf)
+        curr_next_turn_elf = deepcopy_map_object(game, elf)
         curr_next_turn_elf.location = point[0]  # the location of point
         if is_enemy_elf_attacking_elves(game):
             for enemy_elf in game.get_enemy_living_elves():
@@ -438,7 +524,6 @@ def smart_movement(game, elf, destination):
                 elif curr_next_turn_enemy_elf.distance(point[0]) <= game.elf_attack_range:
                     point[1] += RISK_AMOUNT * game.elf_attack_multiplier * 2
                     get_hit_set.add(point[0])
-
 
         for next_turn_enemy_ice_troll in next_turn_enemy_icetrolls_list:
             if next_turn_enemy_ice_troll == destination:
@@ -564,9 +649,11 @@ def predict_next_turn_creatures(game):
     :type: ([LavaGiants], [LavaGiants], [IceTroll], [IceTroll])
     """
 
+    start_time = time.time()
     next_turn_my_lava_giant_list, next_turn_enemy_lava_giant_list = predict_next_turn_lava_giants(game)
     next_turn_my_icetrolls_list, next_turn_enemy_icetrolls_list = predict_next_turn_ice_trolls(game)
 
+    print "end predict_next_turn_creatures time:%s" % (time.time()*1000-start_time*1000)
     return next_turn_my_lava_giant_list, next_turn_enemy_lava_giant_list,\
             next_turn_my_icetrolls_list, next_turn_enemy_icetrolls_list
 
@@ -644,7 +731,7 @@ def predict_next_turn_my_ice_trolls(game, known_target=False):
     for my_icetroll in game.get_my_ice_trolls():
         if my_icetroll.current_health == my_icetroll.suffocation_per_turn: # if the troll is going to die
             continue
-        next_turn_my_icetroll = deepcopy_ice_troll(game, my_icetroll)
+        next_turn_my_icetroll = deepcopy_map_object(game, my_icetroll)
         next_turn_my_icetroll.current_health -= game.ice_troll_suffocation_per_turn
         if not known_target:
             target = Globals.who_do_i_target.get(my_icetroll)
@@ -657,7 +744,7 @@ def predict_next_turn_my_ice_trolls(game, known_target=False):
     return next_turn_my_icetroll_list
 
 
-def deepcopy_ice_troll(game, ice_troll):
+def deepcopy_map_object(game, map_object):
     """
 
     This function is a faster deepcopy for an ice troll object
@@ -669,9 +756,9 @@ def deepcopy_ice_troll(game, ice_troll):
     :return: a deep copy of ice_troll
     """
 
-    new_icetroll = copy.copy(ice_troll)
-    new_icetroll.location = copy.deepcopy(ice_troll.location)
-    return new_icetroll
+    new_map_object = copy.copy(map_object)
+    new_map_object.location = copy.deepcopy(map_object.location)
+    return new_map_object
 
 
 def predict_next_turn_enemy_ice_trolls(game, known_target=False):
@@ -690,7 +777,7 @@ def predict_next_turn_enemy_ice_trolls(game, known_target=False):
     for enemy_icetroll in game.get_enemy_ice_trolls():
         if enemy_icetroll.current_health == enemy_icetroll.suffocation_per_turn: # if the troll is going to die
             continue
-        next_turn_enemy_icetroll = deepcopy_ice_troll(game, enemy_icetroll)
+        next_turn_enemy_icetroll = deepcopy_map_object(game, enemy_icetroll)
         next_turn_enemy_icetroll.current_health -= game.ice_troll_suffocation_per_turn
         if not known_target:
             target = Globals.who_do_i_target.get(enemy_icetroll)
@@ -720,7 +807,7 @@ def predict_next_turn_lava_giants(game):
     for my_lava_giant in game.get_my_lava_giants():
         if my_lava_giant.current_health == my_lava_giant.suffocation_per_turn: # if the giant is going to die
             continue
-        next_turn_my_lava_giant = copy.deepcopy(my_lava_giant)
+        next_turn_my_lava_giant = deepcopy_map_object(game, my_lava_giant)
         next_turn_my_lava_giant.current_health -= game.lava_giant_suffocation_per_turn
         if not can_attack(game, my_lava_giant, target):
             next_turn_my_lava_giant.location = my_lava_giant.get_location().towards(target, game.lava_giant_max_speed)
@@ -732,7 +819,7 @@ def predict_next_turn_lava_giants(game):
     for enemy_lava_giant in game.get_enemy_lava_giants():
         if enemy_lava_giant.current_health == enemy_lava_giant.suffocation_per_turn: # if the giant is going to die
             continue
-        next_turn_enemy_lava_giant = copy.deepcopy(enemy_lava_giant)
+        next_turn_enemy_lava_giant = deepcopy_map_object(game, enemy_lava_giant)
         next_turn_enemy_lava_giant.current_health -= game.lava_giant_suffocation_per_turn
         if not can_attack(game, enemy_lava_giant, target):
             next_turn_enemy_lava_giant.location = enemy_lava_giant.get_location().towards(target, game.lava_giant_max_speed)
@@ -776,7 +863,7 @@ def predict_next_turn_enemy_lava_giants(game):
     for enemy_lava_giant in game.get_enemy_lava_giants():
         if enemy_lava_giant.current_health == enemy_lava_giant.suffocation_per_turn:  # if the giant is going to die
             continue
-        next_turn_enemy_lava_giant = copy.deepcopy(enemy_lava_giant)
+        next_turn_enemy_lava_giant = deepcopy_map_object(game, enemy_lava_giant)
         next_turn_enemy_lava_giant.current_health -= game.lava_giant_suffocation_per_turn
         if not can_attack(game, enemy_lava_giant, target):
             next_turn_enemy_lava_giant.location = enemy_lava_giant.get_location().towards(target,
@@ -819,7 +906,7 @@ def predict_next_turn_given_lava_giants(game, lava_giant_list):
     for enemy_lava_giant in lava_giant_list:
         if enemy_lava_giant.current_health == enemy_lava_giant.suffocation_per_turn:  # if the giant is going to die
             continue
-        next_turn_enemy_lava_giant = copy.deepcopy(enemy_lava_giant)
+        next_turn_enemy_lava_giant = deepcopy_map_object(game, enemy_lava_giant)
         next_turn_enemy_lava_giant.current_health -= game.lava_giant_suffocation_per_turn
         if not can_attack(game, enemy_lava_giant, target):
             next_turn_enemy_lava_giant.location = enemy_lava_giant.get_location().towards(target,
@@ -861,7 +948,7 @@ def predict_next_turn_enemy_elves(game):
 
     for enemy_elf in game.get_enemy_living_elves():
         closest_my_elf = get_closest_my_elf(game, enemy_elf)
-        next_turn_enemy_elf = copy.deepcopy(enemy_elf)
+        next_turn_enemy_elf = deepcopy_map_object(game, enemy_elf)
         if closest_my_elf.distance(enemy_elf) < game.elf_max_speed:
             next_turn_enemy_elf.location = closest_my_elf.get_location()
         else:
@@ -886,7 +973,7 @@ def predict_next_turn_enemy_elves_from_history(game):
     next_turn_enemy_elves_list = []
 
     for elf in game.get_enemy_living_elves():
-        next_turn_elf = copy.deepcopy(elf)
+        next_turn_elf = deepcopy_map_object(game, elf)
         curr_loc = elf.get_location()
         for prev_elf in prev_game.get_enemy_living_elves():
             if prev_elf.id == elf.id:
@@ -943,7 +1030,7 @@ def predict_next_turn_enemy_elves_towards(game, given_enemy_elves, game_object):
     next_turn_enemy_elves_list = []
 
     for elf in given_enemy_elves:
-        next_turn_elf = copy.deepcopy(elf)
+        next_turn_elf = deepcopy_map_object(game, elf)
         curr_loc = elf.get_location()
         for prev_elf in prev_game.get_enemy_living_elves():
             if prev_elf.id == elf.id:
@@ -1665,29 +1752,29 @@ def does_win_fight(game, elf, attack_target):
         health_dif -= attack_target.current_health
     elif attack_target.current_health > 50:
         return False
-    # print "1health_dif: %s, elf: %s, atattack_target %s" % (health_dif, elf, attack_target)
+    print "1health_dif: %s, elf: %s, atattack_target %s" % (health_dif, elf, attack_target)
     for enemy_ice_troll in is_targeted_by_enemy_icetroll(game, elf):
         turns_to_elf = turns_to_travel(game, enemy_ice_troll, elf)
         if turns_to_elf < 5:
             health_dif -= 1/max(turns_to_elf, 1) * 10
-    # print "2health_dif:", health_dif
+    print "2health_dif:", health_dif
     for my_ice_troll in is_targeted_by_my_icetroll(game, attack_target):
         turns_to_attack_target = turns_to_travel(game, my_ice_troll, attack_target)
         if turns_to_attack_target < 5:
             health_dif += 1/max(turns_to_attack_target, 1) * 10
-    # print "3health_dif:", health_dif
+    print "3health_dif:", health_dif
     for enemy_elf in game.get_enemy_living_elves():
         # print "enemy_elf: %s enemy_elf.distance(elf) %s" % (enemy_elf, enemy_elf.distance(elf))
         if attack_target != enemy_elf and enemy_elf.distance(elf) < game.elf_max_speed + elf.attack_range:
             health_dif -= 1
-    # print "4health_dif:", health_dif
+    print "4health_dif:", health_dif
     for my_elf in game.get_my_living_elves():
         if elf != my_elf and my_elf.distance(attack_target) < game.elf_max_speed + elf.attack_range:
             health_dif += my_elf.current_health
-    # print "health_dif:", health_dif
+    print "health_dif:", health_dif
     if isinstance(attack_target, Building):
         if health_dif > elf.current_health-1:
-            print "will win building"
+            print "will win building, yuval"
             return True
     if health_dif < 0:
         return False
@@ -1927,6 +2014,32 @@ def attack_dangerous_enemy_portals(game, elves_not_acted):
     return elves_not_acted
 
 
+def is_safe(game, elf, num_of_turns=2):
+    """
+
+    This function check if a given elf is safe, that's mean that he wont get hit from enemy ice trolls or elves in the
+    next 2 turns
+
+    :param game:
+    :param elf:
+    :return:
+    """
+
+    print "in safe"
+    ice_troll_safe_distance = num_of_turns * game.ice_troll_max_speed + game.ice_troll_attack_range
+
+    for enemy_ice_troll in is_targeted_by_enemy_icetroll(game, elf):
+        if enemy_ice_troll.in_range(elf, ice_troll_safe_distance):
+            return False
+
+    for enemy_elf in game.get_enemy_living_elves():
+        elf_safe_distance = num_of_turns * enemy_elf.max_speed + game.elf_attack_range
+        if enemy_elf.in_range(elf, elf_safe_distance):
+            return False
+
+    return True
+
+
 def hunt_enemy_elf_with_speed(game, my_elf, enemy_elf):
     """
     This function tries to hunt the given elf with a wall
@@ -1958,207 +2071,64 @@ def hunt_enemy_elf_with_speed(game, my_elf, enemy_elf):
 
 def elf_escape(game, elf):
     """
-    """
-    pass
 
-
-"""
-    enemys = [enemy_elf for enemy_elf in game.get_enemy_living_elves() if enemy_elf.distance(elf) < enemy_elf.max_speed + enemy_elf.attack_range]
-
-    for portal in gaem.get_my_portals():
-        if portal.distance
-        """
-
-
-def get_closest_wall(game, game_object):
-    """
-    This function return the closest wall to the given game object
-
-    :param game
-    :param game_object: the game object to find the closest wall to it
-    return: Location
-    """
-    distance_from_col = math.fabs(game_object.location.col - game.cols)
-    distance_from_row = math.fabs(game_object.location.row - game.rows)
-    if distance_from_col < game.cols / 2:
-        closest_col = game.cols
-    else:
-        closest_col = 0
-
-    if distance_from_row < game.rows / 2:
-        closest_row = game.rows
-    else:
-        closest_row = 0
-
-    if Location(closest_row, game_object.location.col).distance(game_object) < Location(game_object.location.row,
-                                                                                        closest_col).distance(
-            game_object):
-        closest_wall_location = Location(closest_row, game_object.location.col)
-    else:
-        closest_wall_location = Location(game_object.location.row, closest_col)
-    return closest_wall_location
-
-
-def hunt_enemy_elf_with_wall(game, enemy_elf, use_casts_to_close_distance=False, use_casts_to_kill=False):
-    """
-    This function tries to hunt the given elf with a wall
+    This function escape with a given elf from close enemy elves to it, the function doesnt work currently because
+    in danger smart_move_to just run straight away
 
     :param game:
-    :param enemy_elf: the elf to hunt
-    :param use_casts if the function can use casts in order to kill the enemy elf
-    :return: nothing
+    :param elf:
+    :return:
     """
-    if len(game.get_my_living_elves()) == 2:
-        distance_from_col = math.fabs(enemy_elf.location.col - game.cols)
-        distance_from_row = math.fabs(enemy_elf.location.row - game.rows)
-        if distance_from_col < game.cols / 2:
-            closest_col = game.cols
-        else:
-            closest_col = 0
 
-        if distance_from_row < game.rows / 2:
-            closest_row = game.rows
-        else:
-            closest_row = 0
-        if Location(closest_row, enemy_elf.location.col).distance(enemy_elf) < Location(enemy_elf.location.row,
-                                                                                        closest_col).distance(
-                enemy_elf):
-            closest_wall = closest_row
-        else:
-            closest_wall = closest_col
+    close_enemy_elves = [enemy_elf for enemy_elf in game.get_enemy_living_elves() if
+                         enemy_elf.distance(elf) < enemy_elf.max_speed + enemy_elf.attack_range]
 
-        next_turn_enemy_elf = predict_next_turn_enemy_elves_from_history(game, enemy_elf)
-        print "predict"
+    if not close_enemy_elves:
+        return False
 
-        '''        
-        for prev_enemy_elf in Globals.prev_game.get_enemy_living_elves():
-            if prev_enemy_elf.unique_id == enemy_elf.unique_id:
-                if prev_enemy_elf.get_location() == enemy_elf.get_location():
-                    print "prev"
-                    next_turn_enemy_elf = enemy_elf
-        '''
+    best_portal = None
+    best_portal_score = float('inf')
+    for portal in game.get_my_living_elves():
+        portal_score = portal.distance(elf)
+        for enemy_elf in close_enemy_elves:
+            portal_score += 1/max(portal.distance(enemy_elf), 0.000001)
 
-        elf1 = game.get_my_living_elves()[0]
-        elf2 = game.get_my_living_elves()[1]
-        my_elves = [elf1, elf2]
+        if portal_score < best_portal_score:
+            best_portal = portal
+            best_portal_score = portal_score
 
-        if Location(closest_row, enemy_elf.location.col).distance(enemy_elf) < Location(enemy_elf.location.row,
-                                                                                        closest_col).distance(
-                enemy_elf):
-            closest_wall = closest_row
-        else:
-            closest_wall = closest_col
-
-        elf1_dis = elf1.distance(enemy_elf)
-        elf2_dis = elf2.distance(enemy_elf)
-        current_distance_between_elves = elf1.distance(elf2)
-
-        best_loc = elf1.get_location()
-        enemy_elf_speed = 0
-
-        if not enemy_elf.is_building:
-            enemy_elf_speed = enemy_elf.max_speed
-
-        for elf in my_elves:
-            if elf == elf1:
-                other_elf = elf2
-            else:
-                other_elf = elf1
-
-            if elf.max_speed * game.speed_up_multiplier * game.speed_up_expiration_turns <= elf.distance(
-                    other_elf) + other_elf.max_speed * 3 and other_elf.distance(next_turn_enemy_elf) < elf.distance(
-                next_turn_enemy_elf) and use_casts_to_close_distance:
-                if game.get_my_mana > game.speed_up_cost and not is_have_speed_up(game, elf):
-                    elf.cast_speed_up()
-                    continue
-            if not is_have_speed_up(game, enemy_elf) and elf.can_cast_speed_up() and use_casts_to_kill:
-                elf.cast_speed_up()
-                continue
-
-            print "closest_wall = ", closest_wall
-            print "distance between elves - distance from enemy elf: ", abs(math.sqrt(
-                elf.distance(enemy_elf) ** 2 + other_elf.distance(enemy_elf) ** 2) - elf.distance(other_elf))
-
-            if elf.distance(enemy_elf) <= game.elf_attack_range - enemy_elf.max_speed:
-                # if elf.distance(enemy_elf) <= game.elf_attack_range - enemy_elf_speed:
-                print elf, "attacking"
-                attack_object(game, elf, enemy_elf, True)
-                continue
-
-            if elf.distance(next_turn_enemy_elf) == elf.distance(enemy_elf) and game.elf_attack_range <= elf.distance(
-                    enemy_elf):
-                print elf, "attacking because same place"
-                attack_object(game, elf, enemy_elf, True)
-                continue
-
-            abs_location = []
-            small_dif = []
-            closest_to_enemy = 9999
-            smallest_difference = 9999
-            best_loc = elf.location
-
-            circle_points = get_circle(game, elf.get_location(), elf.max_speed)
-            possible_movement_points = [[point, 1] for point in circle_points if is_in_game_map(game, point)]
-
-            possible_movement_points.append([elf.get_location(), 1])
-            print "turns_to_travel ", turns_to_travel(game, elf, enemy_elf, game.elf_max_speed)
-
-            '''
-            if turns_to_travel(game, elf, enemy_elf, game.elf_max_speed) < 4:
-                print "hunt elf with predict_enemy_elf_escape_from_elves"
-                print predict_enemy_elf_escape_from_elves(game, enemy_elf)
-                for possible_location in possible_movement_points:
-                    print "abs ( -) ", abs(math.sqrt(possible_location[0].distance(predict_enemy_elf_escape_from_elves(game, enemy_elf)) ** 2 + other_elf.distance(predict_enemy_elf_escape_from_elves(game, enemy_elf)) ** 2) - possible_location[0].distance(other_elf))
-                    if abs(math.sqrt(possible_location[0].distance(predict_enemy_elf_escape_from_elves(game, enemy_elf)) ** 2 + other_elf.distance(predict_enemy_elf_escape_from_elves(game, enemy_elf)) ** 2) - possible_location[0].distance(other_elf)) < smallest_difference:
-                        abs_location.append(possible_location[0])
-                        smallest_difference = abs(math.sqrt(possible_location[0].distance(predict_enemy_elf_escape_from_elves(game, enemy_elf)) ** 2 + other_elf.distance(predict_enemy_elf_escape_from_elves(game, enemy_elf)) ** 2) - possible_location[0].distance(other_elf)) 
-
-                if abs_location:
-                    for possible_location in abs_location:
-                        if possible_location.distance(enemy_elf) < closest_to_enemy:
-                            best_loc = possible_location
-                            print "best_loc: ", best_loc
-                            closest_to_enemy = possible_location.distance(next_turn_enemy_elf)
-
-                if elf.location != best_loc:
-                    print "moved to best loc"
-                    print elf
-                    elf.move_to(best_loc)
-            '''
-            if turns_to_travel(game, elf, enemy_elf, game.elf_max_speed) < 11:
-                for possible_location in possible_movement_points:
-                    if abs(math.sqrt(
-                            possible_location[0].distance(enemy_elf) ** 2 + other_elf.distance(enemy_elf) ** 2) -
-                           possible_location[0].distance(other_elf)) < smallest_difference:
-                        abs_location.append(possible_location[0])
-                        smallest_difference = abs(math.sqrt(
-                            possible_location[0].distance(enemy_elf) ** 2 + other_elf.distance(enemy_elf) ** 2) -
-                                                  possible_location[0].distance(other_elf))
-                        small_dif.append(smallest_difference)
-                        print "abs ( -) ", abs(math.sqrt(
-                            possible_location[0].distance(enemy_elf) ** 2 + other_elf.distance(enemy_elf) ** 2) -
-                                               possible_location[0].distance(other_elf))
-
-                if abs_location and small_dif:
-                    i = 0
-                    smallest_place = 9999
-                    while i < len(abs_location):
-                        if small_dif[i] + abs_location[i].distance(enemy_elf) < smallest_place:
-                            best_loc = abs_location[i]
-                            smallest_place = small_dif[i] + abs_location[i].distance(enemy_elf)
-                        i = i + 1
-
-                if elf.location != best_loc:
-                    print "moved to best loc"
-                    print elf
-                    elf.move_to(best_loc)
-
-
-            elif turns_to_travel(game, elf, enemy_elf, game.elf_max_speed) > 11:
-                elf.move_to(enemy_elf)
-
+    if best_portal:
+        smart_move_to(game, elf, best_portal)
+        print "elf_escape, elf: %s escape to %s" % (elf, best_portal)
+        return True
     else:
-        if does_win_fight(game, game.get_my_living_elves()[0], enemy_elf):
-            attack_object(game, game.get_my_living_elves()[0], enemy_elf)
+        return False
 
-    ## check if enemy elf can get farther if he can don't attack him
+
+def smart_movement(game, elf, destination):
+    """
+
+    This function is the handler of smart movement, currently the function just call smart_move_to
+
+    :param game:
+    :param elf:
+    :param destination:
+    :return:
+    """
+
+    prev_game = Globals.prev_game
+    close_enemy_elves = [enemy_elf for enemy_elf in game.get_enemy_living_elves() if
+                         enemy_elf.distance(elf) < enemy_elf.max_speed + enemy_elf.attack_range]
+
+    """
+    if not is_targeted_by_enemy_icetroll(game, elf) and close_enemy_elves:
+
+        last_turn_my_elf = get_by_unique_id(prev_game, elf.unique_id)
+        if last_turn_my_elf:
+            for enemy_elf in close_enemy_elves:
+                last_turn_enemy_elf = get_by_unique_id(prev_game, enemy_elf.unique_id)
+                if last_turn_enemy_elf and last_turn_enemy_elf.get_location().towards(last_turn_my_elf, last_turn_enemy_elf.max_speed) == enemy_elf.get_location():
+                    if elf_escape(game, elf):
+                        return"""
+
+    smart_move_to(game, elf, destination)

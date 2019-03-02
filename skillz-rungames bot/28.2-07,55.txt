@@ -1,0 +1,193 @@
+------------------
+against 7
+team_one_score: 91/150, team_two_score: 0/150
+we won
+------------------
+against 3
+team_one_score: 143/150, team_two_score: 0/150
+we won
+------------------
+against 1
+team_one_score: 16/150, team_two_score: 130/150
+we won
+------------------
+against 2
+team_one_score: 0/150, team_two_score: 123/150
+we lost
+------------------
+against 6
+team_one_score: 150/150, team_two_score: 0/150
+we won
+------------------
+against 8
+team_one_score: 119/150, team_two_score: 0/150
+we won
+------------------
+against 4
+team_one_score: 0/150, team_two_score: 81/150
+we lost
+
+DevTools listening on ws://127.0.0.1:65500/devtools/browser/f7bea38d-38eb-429b-8f80-83638d20fbdd
+------------------
+against 16
+team_one_score: 0/150, team_two_score: 28/150
+we lost
+------------------
+against 19
+team_one_score: 149/150, team_two_score: 0/150
+we won
+------------------
+against 17
+team_one_score: 148/150, team_two_score: 0/150
+we won
+------------------
+against 11
+team_one_score: 0/150, team_two_score: 90/150
+we lost
+------------------
+against 12
+team_one_score: 0/150, team_two_score: 120/150
+we lost
+------------------
+against 18
+team_one_score: 0/150, team_two_score: 73/150
+we lost
+------------------
+against 20
+team_one_score: 23/150, team_two_score: 0/150
+we won
+------------------
+against 13
+team_one_score: 0/150, team_two_score: 97/150
+we lost
+------------------
+against 15
+team_one_score: 150/150, team_two_score: 0/150
+we won
+------------------
+against 14
+team_one_score: 150/150, team_two_score: 0/150
+we won
+
+DevTools listening on ws://127.0.0.1:49216/devtools/browser/03a2296f-68d8-4edb-88ee-320749cec347
+------------------
+against 29
+team_one_score: 0/150, team_two_score: 135/150
+we lost
+------------------
+against 25
+team_one_score: 150/150, team_two_score: 0/150
+we won
+------------------
+against 27
+team_one_score: 96/150, team_two_score: 0/150
+we won
+------------------
+against 23
+team_one_score: 150/150, team_two_score: 0/150
+we won
+------------------
+against 22
+team_one_score: 0/150, team_two_score: 45/150
+we lost
+------------------
+against 30
+team_one_score: 0/150, team_two_score: 150/150
+we lost
+------------------
+against 26
+team_one_score: 0/150, team_two_score: 127/150
+we lost
+------------------
+against 28
+team_one_score: 150/150, team_two_score: 0/150
+we won
+------------------
+against 24
+team_one_score: 0/150, team_two_score: 36/150
+we lost
+------------------
+against 21
+team_one_score: 0/150, team_two_score: 24/150
+we lost
+DevTools listening on ws://127.0.0.1:49434/devtools/browser/b12604fd-0d54-42c0-8428-99613bbe0d09
+------------------
+against 40
+team_one_score: 64/150, team_two_score: 0/150
+we won
+------------------
+against 38
+team_one_score: 0/150, team_two_score: 1/150
+we lost
+------------------
+against 34
+team_one_score: 150/150, team_two_score: 0/150
+we won
+------------------
+against 39
+team_one_score: 150/150, team_two_score: 150/150
+dont know
+------------------
+against 32
+team_one_score: 0/150, team_two_score: 150/150
+we lost
+------------------
+against 31
+team_one_score: 46/150, team_two_score: 0/150
+we won
+------------------
+against 35
+team_one_score: 150/150, team_two_score: 150/150
+we won
+------------------
+against 39
+team_one_score: 142/150, team_two_score: 0/150
+we won
+------------------
+against 36
+team_one_score: 141/150, team_two_score: 0/150
+we won
+------------------
+against 33
+team_one_score: 0/150, team_two_score: 142/150
+we lost
+
+DevTools listening on ws://127.0.0.1:49528/devtools/browser/f6a8fcd3-5e06-494c-889f-f48927624376
+[9328:12436:0301/224244.189:ERROR:shader_disk_cache.cc(257)] Failed to create shader cache entry: -2
+------------------
+against 44
+team_one_score: 140/150, team_two_score: 0/150
+we won
+------------------
+against 48
+team_one_score: 150/150, team_two_score: 0/150
+we won
+
+DevTools listening on ws://127.0.0.1:49583/devtools/browser/65b87d20-1d09-43af-b337-c83290e7b9ab
+------------------
+against 59
+team_one_score: 0/150, team_two_score: 145/150
+we lost
+------------------
+against 53
+team_one_score: 64/150, team_two_score: 0/150
+we won
+------------------
+against 51
+team_one_score: 130/150, team_two_score: 0/150
+we won
+
+DevTools listening on ws://127.0.0.1:49644/devtools/browser/2646e21a-55f5-4b7d-99cf-0c6db28c2f4c
+[11968:10628:0301/224522.327:ERROR:latency_info.cc(147)] Surface::TakeLatencyInfoFromFrame, LatencyInfo vector size 101 is too big.
+------------------
+against 74
+team_one_score: 150/150, team_two_score: 0/150
+we won
+
+DevTools listening on ws://127.0.0.1:49691/devtools/browser/28429d4f-3389-42ca-8e18-a59081f0f069
+[18912:8944:0301/224639.831:ERROR:latency_info.cc(147)] Surface::TakeLatencyInfoFromFrame, LatencyInfo vector size 101 is too big.
+------------------
+against 102
+team_one_score: 133/150, team_two_score: 0/150
+we won
+bot time: 456.856999874

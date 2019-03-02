@@ -1,0 +1,189 @@
+------------------
+against 5
+team_one_score: 131/150, team_two_score: 0/150
+we won
+------------------
+against 3
+team_one_score: 100/150, team_two_score: 0/150
+we won
+------------------
+against 2
+team_one_score: 83/150, team_two_score: 0/150
+we won
+------------------
+against 9
+team_one_score: 150/150, team_two_score: 0/150
+we won
+------------------
+against 6
+team_one_score: 107/150, team_two_score: 0/150
+we won
+------------------
+against 7
+team_one_score: 80/150, team_two_score: 0/150
+we won
+------------------
+against 1
+team_one_score: 0/150, team_two_score: 143/150
+we lost
+------------------
+against 8
+team_one_score: 150/150, team_two_score: 0/150
+we won
+------------------
+against 14
+team_one_score: 142/150, team_two_score: 0/150
+we won
+------------------
+against 19
+team_one_score: 150/150, team_two_score: 0/150
+we won
+------------------
+against 17
+team_one_score: 107/150, team_two_score: 0/150
+we won
+------------------
+against 11
+team_one_score: 142/150, team_two_score: 0/150
+we won
+------------------
+against 20
+team_one_score: 149/150, team_two_score: 0/150
+we won
+------------------
+against 12
+team_one_score: 121/150, team_two_score: 0/150
+we won
+------------------
+against 13
+team_one_score: 99/150, team_two_score: 0/150
+we won
+------------------
+against 15
+team_one_score: 150/150, team_two_score: 0/150
+we won
+------------------
+against 18
+team_one_score: 150/150, team_two_score: 0/150
+we won
+------------------
+against 16
+team_one_score: 150/150, team_two_score: 0/150
+we won
+------------------
+against 14
+team_one_score: 142/150, team_two_score: 0/150
+we won
+------------------
+against 19
+team_one_score: 150/150, team_two_score: 0/150
+we won
+------------------
+against 17
+team_one_score: 107/150, team_two_score: 0/150
+we won
+------------------
+against 11
+team_one_score: 142/150, team_two_score: 0/150
+we won
+------------------
+against 20
+team_one_score: 149/150, team_two_score: 0/150
+we won
+------------------
+against 12
+team_one_score: 121/150, team_two_score: 0/150
+we won
+------------------
+against 13
+team_one_score: 99/150, team_two_score: 0/150
+we won
+------------------
+against 15
+team_one_score: 150/150, team_two_score: 0/150
+we won
+------------------
+against 18
+team_one_score: 150/150, team_two_score: 0/150
+we won
+------------------
+against 16
+team_one_score: 150/150, team_two_score: 0/150
+we won
+------------------
+against 23
+team_one_score: 72/150, team_two_score: 0/150
+we won
+------------------
+against 24
+team_one_score: 84/150, team_two_score: 0/150
+we won
+------------------
+against 26
+team_one_score: 54/150, team_two_score: 0/150
+we won
+------------------
+against 21
+team_one_score: 13/150, team_two_score: 0/150
+we won
+------------------
+against 28
+team_one_score: 150/150, team_two_score: 0/150
+we won
+------------------
+against 27
+team_one_score: 84/150, team_two_score: 0/150
+we won
+------------------
+against 22
+team_one_score: 0/150, team_two_score: 144/150
+we lost
+------------------
+against 25
+team_one_score: 31/150, team_two_score: 0/150
+we won
+------------------
+against 30
+team_one_score: 150/150, team_two_score: 0/150
+we won
+------------------
+against 29
+team_one_score: 87/150, team_two_score: 0/150
+we won
+------------------
+against 31
+team_one_score: 97/150, team_two_score: 0/150
+we won
+------------------
+against 39
+team_one_score: 133/150, team_two_score: 0/150
+we won
+------------------
+against 33
+team_one_score: 150/150, team_two_score: 0/150
+we won
+------------------
+against 34
+team_one_score: 143/150, team_two_score: 0/150
+we won
+------------------
+against 40
+team_one_score: 0/150, team_two_score: 103/150
+we lost
+------------------
+against 37
+team_one_score: 150/150, team_two_score: 0/150
+we won
+------------------
+against 32
+team_one_score: 143/150, team_two_score: 0/150
+we won
+------------------
+against 38
+team_one_score: 139/150, team_two_score: 0/150
+we won
+------------------
+against 35
+team_one_score: 142/150, team_two_score: 0/150
+we won
+bot time: 281.80099988

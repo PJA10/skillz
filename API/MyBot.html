@@ -38,6 +38,46 @@
 <div class="section" id="id1">
 <h2>MyBot<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <span class="target" id="module-MyBot"></span><dl class="function">
+<dt id="MyBot.choose_strategy">
+<code class="descclassname">MyBot.</code><code class="descname">choose_strategy</code><span class="sig-paren">(</span><em>game</em>, <em>elves</em><span class="sig-paren">)</span><a class="headerlink" href="#MyBot.choose_strategy" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is the main choosing strategy function
+she determine that by try to determine_enemy_strategy 
+and looking on the game status</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Param:</th><td class="field-body">game</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Type:</th><td class="field-body">void</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="MyBot.determine_enemy_strategy">
+<code class="descclassname">MyBot.</code><code class="descname">determine_enemy_strategy</code><span class="sig-paren">(</span><em>game</em><span class="sig-paren">)</span><a class="headerlink" href="#MyBot.determine_enemy_strategy" title="Permalink to this definition">¶</a></dt>
+<dd><p>this function try to determine_what_strategy_is_an_enemy_using</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Param:</th><td class="field-body">game</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the name of the strategy</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">string</td>
+</tr>
+</tbody>
+</table>
+<p>possible returns:
+“rush”
+“controling the center”
+“bunker”</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="MyBot.do_turn">
 <code class="descclassname">MyBot.</code><code class="descname">do_turn</code><span class="sig-paren">(</span><em>game</em><span class="sig-paren">)</span><a class="headerlink" href="#MyBot.do_turn" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function is the main function of the bot which is called every turn.</p>
@@ -61,6 +101,11 @@ print get_locations(game, game.get_all_elves())
 print get_closest_enemy_elf(game, game.get_my_living_elves()[0])
 print get_closest_enemy_portal(game, game.get_my_living_elves()[0])</p>
 </dd></dl>
+
+<dl class="function">
+<dt id="MyBot.update_enemy_ice_trolls_targets">
+<code class="descclassname">MyBot.</code><code class="descname">update_enemy_ice_trolls_targets</code><span class="sig-paren">(</span><em>game</em><span class="sig-paren">)</span><a class="headerlink" href="#MyBot.update_enemy_ice_trolls_targets" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </div>
 </div>
