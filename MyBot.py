@@ -162,7 +162,7 @@ def choose_strategy(game, elves):
         Counter_mazgan(game)
     
     else:
-        arrow_strategy(game, game.get_my_living_elves())
+        arrow_strategy(game, elves)
 
 
 

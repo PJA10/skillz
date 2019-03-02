@@ -26,6 +26,67 @@ MANA_FOUNTAIN = "mana fountain"
 PORTAL = "portal"
 TORNADO = "tornado"
 
+def is_targeted_by_enemy_tornados(game, map_object):
+    """
+
+    This function returns a list of all the enemy's tornados who target a given map object.
+    if the returned list is empty then the given map object is safe
+
+    :param map_object: the map object which to check if is targeted bt ice trolls
+    :type map_object: MapObject
+    :return: return a list of the ice trolls which target obj
+    :type: [IceTroll]
+    
+    """
+    tornados = []
+    
+    if not map_object.type == "portal" and not map_object == "mana fountain":
+        for tornado in game.get_enemy_tornadoes():
+            if get_closest_my_building(game, tornado) == map_object:
+                if tornado.distance(map_object) / game.tornado_max_speed < tornado.current_health / game.tornado_suffocation_per_turn:
+                    tornados.append(tornado)
+    return tornados
+
+def is_targeted_by_my_tornados(game, map_object):
+    """
+
+    This function returns a list of all the enemy's tornados who target a given map object.
+    if the returned list is empty then the given map object is safe
+
+    :param map_object: the map object which to check if is targeted bt ice trolls
+    :type map_object: MapObject
+    :return: return a list of the ice trolls which target obj
+    :type: [IceTroll]
+    
+    """
+    tornados = []
+    
+    if not map_object.type == "portal" and not map_object == "mana fountain":
+        for tornado in game.get_my_tornadoes():
+            if get_closest_enemy_building(game, tornado) == map_object:
+                if tornado.distance(map_object) / game.tornado_max_speed + map_object.ccurrent_health / game.tornado_attack_multiplier < \
+                        tornado.current_health / game.tornado_suffocation_per_turn:
+                    tornados.append(tornado)
+    return tornados
+    
+def is_worth_spawn_tornado(game, portal):
+    """
+    this function checks if its worth spawning tornado from a given portal
+    
+    :param: game
+    :param: portal
+    :rreturns true if worth
+    :type: Boolean
+    
+    """
+    target_building = get_closest_enemy_building(game, portal)
+    
+    if portal.distance(target_building) / game.tornado_max_speed + map_object.current_health / game.tornado_attack_multiplier < game.tornado_max_health / game.tornado_suffocation_per_turn: 
+            
+        return True
+    return False
+    
+
 def is_targeted_by_enemy_icetroll(game, map_object):
     """
 
@@ -2008,6 +2069,7 @@ def elf_escape(game, elf):
 
     if best_portal:
         smart_move_to(game, elf, best_portal)
+        print "elf_escape, elf: %s escape to %s" % (elf, best_portal)
         return True
     else:
         return False
@@ -2026,13 +2088,15 @@ def smart_movement(game, elf, destination):
     close_enemy_elves = [enemy_elf for enemy_elf in game.get_enemy_living_elves() if
                          enemy_elf.distance(elf) < enemy_elf.max_speed + enemy_elf.attack_range]
 
+    """
     if not is_targeted_by_enemy_icetroll(game, elf) and close_enemy_elves:
 
         last_turn_my_elf = get_by_unique_id(prev_game, elf.unique_id)
-        for enemy_elf in close_enemy_elves:
-            last_turn_enemy_elf = get_by_unique_id(prev_game, enemy_elf.unique_id)
-            if last_turn_enemy_elf.get_location().towards(last_turn_my_elf, last_turn_enemy_elf.max_seed) == enemy_elf.get_location():
-                if elf_escape(game, elf):
-                    return
+        if last_turn_my_elf:
+            for enemy_elf in close_enemy_elves:
+                last_turn_enemy_elf = get_by_unique_id(prev_game, enemy_elf.unique_id)
+                if last_turn_enemy_elf and last_turn_enemy_elf.get_location().towards(last_turn_my_elf, last_turn_enemy_elf.max_speed) == enemy_elf.get_location():
+                    if elf_escape(game, elf):
+                        return"""
 
     smart_move_to(game, elf, destination)

@@ -399,11 +399,11 @@ def defend_from_enemy_elves(game, max_number_of_icetrolls_on_unit, max_number_of
             prev_enemy_elf = get_by_unique_id(prev_game, enemy_elf.unique_id)
             if prev_enemy_elf:
                 prev_enemy_elf_distance = prev_enemy_elf.distance(portal)
-                if prev_enemy_elf_distance > curr_enemy_elf_distance:  # if the enemy elf is running away from portal
+                if prev_enemy_elf_distance < curr_enemy_elf_distance:  # if the enemy elf is running away from portal
                     continue
 
             attacking_pos = portal.get_location().towards(enemy_elf, game.portal_size + game.elf_attack_range)
-            if turns_to_travel(game, enemy_elf, attacking_pos) < 5 and not is_targeted_by_my_icetroll(game, enemy_elf):
+            if turns_to_travel(game, enemy_elf, attacking_pos) < 5:
                 summon_with_closest_portal(game, ICE, portal)
                 print "summon ice, close elf"
 
@@ -463,7 +463,7 @@ def arrow_def(game, elves_not_acted):
     :return: a list of all the elves who didn't act after the function has ended
     """
     start_time = time.time()
-    max_number_of_icetrolls_on_unit = 1
+    max_number_of_icetrolls_on_unit = 2
     max_number_of_ice_trolls_near_base = 3
 
     if game.get_my_castle().current_health < game.get_enemy_castle().current_health:
@@ -595,8 +595,8 @@ def arrow_attack(game, elves_not_acted):
         print "elves_not_acted2:", elves_not_acted
         for elf in reversed(elves_not_acted):
             print "final act, elf:%s" % elf
-            if game.get_my_mana() > game.mana_fountain_cost and len(game.get_my_mana_fountains()) < 5:
-                if elf.can_build_mana_fountain():
+            if game.get_my_mana() > game.mana_fountain_cost and len(game.get_my_mana_fountains()) < min(5, len(game.get_enemy_mana_fountains())+2):
+                if elf.can_build_mana_fountain() and is_safe(game, elf):
                     elf.build_mana_fountain()
                     print "elf %s is building mana_fountain"
                     continue
