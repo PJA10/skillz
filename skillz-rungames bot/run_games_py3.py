@@ -155,14 +155,14 @@ def main():
             print ("------------------")
             print ("against %s" % groups_dic[group][1])
             print ("team_one_score: %s, team_two_score: %s" % (team_one_score.text, team_two_score.text))
-            if team_one_score.text[:-4] > team_two_score.text[:-4]:
+            if int(team_one_score.text[:-4]) > int(team_two_score.text[:-4]):
                 # print "h"
 
                 if u"שפיה" in team_one_name.text:
                     print ("we won")
                 else:
                     print ("we lost")
-            elif team_two_score.text[:-4] > team_one_score.text[:-4]:
+            elif int(team_two_score.text[:-4]) > int(team_one_score.text[:-4]):
                 if u"שפיה" in team_two_name.text:
                     print ("we won")
                 else:

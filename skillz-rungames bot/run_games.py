@@ -8,7 +8,7 @@ from selenium.webdriver.common.keys import Keys
 import math
 import itertools as it
 
-
+#print ("h2")
 def main():
     start_time = time.time()
     large_groups_dic = {u"ישיבת צביה אשקלון 1": [0, 6],
@@ -18,14 +18,14 @@ def main():
                         u"חקלאי נהלל 1": [0, 22],
                         u"רונסון 1": [0, 14],
                         u"בני עקיבא 3": [0, 23],
-                        u"נזירות סנט גוזף 1": [0, 36],
+                        u"נזירות סנט גוזף 1": [0, 35],
                         u"אסף רמו 1": [0, 33],
                         u"רוטברג 6": [0, 13],
                         u"שוהם 1": [0, 11],
                         u"תיכון מכבים רעות 1": [0, 8],
                         u"מדעי תורני כפר בתיה 1": [0, 48],
                         u"עמי אסף 1": [0, 18],
-                        u"רוטברג 2": [0, 24],
+                        u"רוטברג 2": [0, 25],
                         u"אלתרמן 1": [0, 53],
                         u"מקיף אפרים קציר 4": [0, 32],
                         u"חיל האויר 1": [0, 20],
@@ -45,15 +45,15 @@ def main():
                         u"צביה אשקלון 2": [0, 15],
                         u"רביבים 1": [0, 3],
                         u"אורנית 1": [0, 17],
-                        u"אוסטרובסקי 1": [0, 25],
+                        u"אוסטרובסקי 1": [0, 24],
                         u"רעות-תיכ 1": [0, 26],
                         u"י אחד העם 3": [0, 27],
                         u"חברים 1": [0, 30],
                         u"אוסטרובסקי 2": [0, 34],
-                        u"אבין 3": [0, 35],
-                        u"בוטינסקי 1": [0, 38],
-                        u"אבין 2": [0, 39],
-                        u"רוגוזין 1": [0, 40]}
+                        u"אבין 3": [0, 40],
+                        u"בוטינסקי 1": [0, 37],
+                        u"אבין 2": [0, 38],
+                        u"רוגוזין 1": [0, 39]}
 
     for i in xrange(15):
         groups_dic = {}
@@ -155,15 +155,15 @@ def main():
             team_two_score = driver.find_element_by_xpath('//*[@id="score-ui"]/player-ui[2]/div/div[2]/div[2]/div/span')
             print "------------------"
             print "against %s" % groups_dic[group][1]
-            print "team_one_score: %s, team_two_score: %s" % (team_one_score.text, team_two_score.text)
-            if team_one_score.text[:-4] > team_two_score.text[:-4]:
-                # print "h"
+            print "team_one_score: %s, team_two_score: %s" % (team_one_score.text[:-4], team_two_score.text[:-4])
+            if int(team_one_score.text[:-4]) > int(team_two_score.text[:-4]):
+                # print ("h")
 
                 if u"שפיה" in unicode(team_one_name.text):
                     print "we won"
                 else:
                     print "we lost"
-            elif team_two_score.text[:-4] > team_one_score.text[:-4]:
+            elif int(team_two_score.text[:-4]) > int(team_one_score.text[:-4]):
                 if u"שפיה" in unicode(team_two_name.text):
                     print "we won"
                 else:
