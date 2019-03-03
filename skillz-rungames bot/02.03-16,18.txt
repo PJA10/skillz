@@ -1,0 +1,177 @@
+against 7
+team_one_score: 99/150, team_two_score: 0/150
+we won
+------------------
+against 3
+team_one_score: 0/150, team_two_score: 148/150
+we lost
+------------------
+against 1
+team_one_score: 42/150, team_two_score: 149/150
+we won
+------------------
+against 2
+team_one_score: 0/150, team_two_score: 60/150
+we lost
+------------------
+against 6
+team_one_score: 144/150, team_two_score: 0/150
+we won
+------------------
+against 8
+team_one_score: 143/150, team_two_score: 0/150
+we won
+------------------
+against 4
+team_one_score: 141/150, team_two_score: 0/150
+we won
+
+DevTools listening on ws://127.0.0.1:58646/devtools/browser/8b2dfc56-ff53-4a31-84e7-1cae1eadd716
+------------------
+against 17
+team_one_score: 150/150, team_two_score: 0/150
+we won
+------------------
+against 19
+team_one_score: 150/150, team_two_score: 0/150
+we won
+------------------
+against 16
+team_one_score: 132/150, team_two_score: 0/150
+we won
+------------------
+against 11
+team_one_score: 144/150, team_two_score: 0/150
+we won
+------------------
+against 12
+team_one_score: 0/150, team_two_score: 119/150
+we lost
+------------------
+against 18
+team_one_score: 145/150, team_two_score: 0/150
+we won
+------------------
+against 20
+team_one_score: 0/150, team_two_score: 150/150
+we lost
+------------------
+against 13
+team_one_score: 112/150, team_two_score: 0/150
+we won
+------------------
+against 15
+team_one_score: 150/150, team_two_score: 0/150
+we won
+------------------
+against 14
+team_one_score: 150/150, team_two_score: 0/150
+we won
+
+DevTools listening on ws://127.0.0.1:59599/devtools/browser/43bd7c08-e67b-4bbb-bd50-d784f11b1459
+------------------
+against 29
+team_one_score: 23/150, team_two_score: 0/150
+we won
+------------------
+against 25
+team_one_score: 150/150, team_two_score: 0/150
+we won
+------------------
+against 23
+team_one_score: 150/150, team_two_score: 0/150
+we won
+------------------
+against 22
+team_one_score: 112/150, team_two_score: 0/150
+we won
+------------------
+against 30
+team_one_score: 0/150, team_two_score: 150/150
+we lost
+------------------
+against 26
+team_one_score: 133/150, team_two_score: 0/150
+we won
+------------------
+against 27
+team_one_score: 128/150, team_two_score: 0/150
+we won
+------------------
+against 28
+team_one_score: 150/150, team_two_score: 0/150
+we won
+------------------
+against 24
+team_one_score: 132/150, team_two_score: 0/150
+we won
+------------------
+against 21
+team_one_score: 150/150, team_two_score: 0/150
+we won
+
+DevTools listening on ws://127.0.0.1:60933/devtools/browser/9a3dae59-ab25-4139-ad38-0ec9171f688a
+------------------
+against 40
+team_one_score: 141/150, team_two_score: 0/150
+we won
+------------------
+against 38
+team_one_score: 84/150, team_two_score: 0/150
+we won
+------------------
+against 34
+team_one_score: 150/150, team_two_score: 0/150
+we won
+------------------
+against 39
+team_one_score: 150/150, team_two_score: 0/150
+we won
+------------------
+against 35
+team_one_score: 140/150, team_two_score: 0/150
+we won
+------------------
+against 31
+team_one_score: 18/150, team_two_score: 0/150
+we won
+------------------
+against 32
+team_one_score: 36/150, team_two_score: 0/150
+we won
+------------------
+against 39
+team_one_score: 142/150, team_two_score: 0/150
+we won
+------------------
+against 36
+team_one_score: 150/150, team_two_score: 0/150
+we won
+------------------
+against 33
+team_one_score: 138/150, team_two_score: 0/150
+we won
+
+DevTools listening on ws://127.0.0.1:61698/devtools/browser/f05e4cc7-46d5-4e73-8ab6-cce3a895aa7b
+------------------
+against 44
+team_one_score: 133/150, team_two_score: 0/150
+we won
+------------------
+against 48
+team_one_score: 150/150, team_two_score: 0/150
+we won
+
+DevTools listening on ws://127.0.0.1:62214/devtools/browser/3ff320e2-e961-4e59-9589-097ddb06c64f
+------------------
+against 59
+team_one_score: 121/150, team_two_score: 0/150
+we won
+------------------
+against 53
+team_one_score: 37/150, team_two_score: 0/150
+we won
+------------------
+against 51
+team_one_score: 45/150, team_two_score: 0/150
+we won

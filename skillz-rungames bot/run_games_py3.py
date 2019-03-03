@@ -55,7 +55,7 @@ def main():
                         u"אבין 2": [0, 39],
                         u"רוגוזין 1": [0, 40]}
 
-    for i in xrange(15):
+    for i in range(15):
         groups_dic = {}
         for group in large_groups_dic:
             if i*10 < large_groups_dic[group][1] <= (i+1) * 10:
@@ -64,9 +64,7 @@ def main():
             continue
         d = DesiredCapabilities.CHROME
         d['loggingPrefs'] = {'browser': 'ALL'}
-        chrome_options = Options()
-        chrome_options.add_argument("no-proxy-server")
-        driver = webdriver.Chrome(executable_path='.\chromedriver\chromedriver.exe', chrome_options=chrome_options, desired_capabilities=d)
+        driver = webdriver.Chrome(executable_path='.\chromedriver\chromedriver.exe', desired_capabilities=d)
         driver.get("https://piratez.skillz-edu.org/home/")
 
         email = driver.find_element_by_id("id_email")
@@ -87,13 +85,14 @@ def main():
 
         # print "preesed tournament"
         for group in groups_dic:
-            driver.switch_to_window(driver.window_handles[0])
+            first_window = driver.window_handles[0]
+            driver.switch_to.window(first_window)
             race = driver.find_element_by_xpath('//*[@id="menu_button_try_to_win"]')
             race.send_keys(Keys.CONTROL + Keys.RETURN)
             #driver.find_element_by_tag_name('body').send_keys(Keys.COMMAND + 't')
 
             time.sleep(1)
-            driver.switch_to_window(driver.window_handles[-1])
+            driver.switch_to.window(driver.window_handles[-1])
 
             #driver.get("https://piratez.skillz-edu.org/group_dashboard/try_to_win/group/40956/select")
             driver.page_source.encode('utf-8')
@@ -110,7 +109,7 @@ def main():
             groups_dic[group][0] = driver.window_handles[-1]
 
         for group in groups_dic:
-            driver.switch_to_window(groups_dic[group][0])
+            driver.switch_to.window(groups_dic[group][0])
             play_link = driver.find_element_by_id("play-link")
 
             finished = False
@@ -123,7 +122,7 @@ def main():
             play_link.click()
 
             time.sleep(0.1)
-            driver.switch_to_window(groups_dic[group][0])
+            driver.switch_to.window(groups_dic[group][0])
             groups_dic[group][0] = driver.window_handles[driver.window_handles.index(groups_dic[group][0])+1]
             driver.close()
             time.sleep(0.1)
@@ -131,7 +130,7 @@ def main():
             time.sleep(1)
 
         for window, group in zip(driver.window_handles[1:], groups_dic):
-            driver.switch_to_window(window)
+            driver.switch_to.window(window)
             time.sleep(1)
             sound = driver.find_element_by_xpath('//*[@id="right-settings"]/volume-button/i')
             sound.click()
@@ -142,7 +141,7 @@ def main():
 
             time.sleep(3)
             next_turn = driver.find_element_by_xpath('//*[@id="left-settings"]/i[3]')
-            for i in xrange(2):
+            for i in range(2):
                 next_turn.click()
             time.sleep(2)
 
@@ -153,27 +152,27 @@ def main():
             team_one_score = driver.find_element_by_xpath('//*[@id="score-ui"]/player-ui[1]/div/div[2]/div[2]/div/span')
             team_two_name = driver.find_element_by_xpath('//*[@id="score-ui"]/player-ui[2]/div/div[2]/div[1]')
             team_two_score = driver.find_element_by_xpath('//*[@id="score-ui"]/player-ui[2]/div/div[2]/div[2]/div/span')
-            print "------------------"
-            print "against %s" % groups_dic[group][1]
-            print "team_one_score: %s, team_two_score: %s" % (team_one_score.text, team_two_score.text)
+            print ("------------------")
+            print ("against %s" % groups_dic[group][1])
+            print ("team_one_score: %s, team_two_score: %s" % (team_one_score.text, team_two_score.text))
             if team_one_score.text[:-4] > team_two_score.text[:-4]:
                 # print "h"
 
-                if u"שפיה" in unicode(team_one_name.text):
-                    print "we won"
+                if u"שפיה" in team_one_name.text:
+                    print ("we won")
                 else:
-                    print "we lost"
+                    print ("we lost")
             elif team_two_score.text[:-4] > team_one_score.text[:-4]:
-                if u"שפיה" in unicode(team_two_name.text):
-                    print "we won"
+                if u"שפיה" in team_two_name.text:
+                    print ("we won")
                 else:
-                    print "we lost"
+                    print ("we lost")
             else:
-                print "dont know"
+                print ("dont know")
 
         driver.quit()
 
-    print "bot time: %s" % str(time.time()-start_time)
+    print ("bot time: %s" % str(time.time()-start_time))
     time.sleep(160)
 
 main()
