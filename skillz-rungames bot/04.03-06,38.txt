@@ -1,0 +1,178 @@
+------------------
+against 7
+team_one_score: 116, team_two_score: 0
+we won
+------------------
+against 3
+team_one_score: 133, team_two_score: 0
+we won
+------------------
+against 1
+team_one_score: 149, team_two_score: 57
+we won
+------------------
+against 2
+team_one_score: 0, team_two_score: 142
+we lost
+------------------
+against 6
+team_one_score: 116, team_two_score: 95
+we won
+------------------
+against 8
+team_one_score: 76, team_two_score: 0
+we won
+------------------
+against 4
+team_one_score: 129, team_two_score: 0
+we won
+
+DevTools listening on ws://127.0.0.1:57522/devtools/browser/67ccd515-7018-4543-9a70-749881d92051
+------------------
+against 17
+team_one_score: 150, team_two_score: 0
+we won
+------------------
+against 19
+team_one_score: 122, team_two_score: 0
+we won
+------------------
+against 16
+team_one_score: 123, team_two_score: 0
+we won
+------------------
+against 11
+team_one_score: 0, team_two_score: 106
+we lost
+------------------
+against 12
+team_one_score: 0, team_two_score: 38
+we lost
+------------------
+against 18
+team_one_score: 138, team_two_score: 0
+we won
+------------------
+against 20
+team_one_score: 0, team_two_score: 150
+we lost
+------------------
+against 13
+team_one_score: 50, team_two_score: 0
+we won
+------------------
+against 15
+team_one_score: 150, team_two_score: 0
+we won
+------------------
+against 14
+team_one_score: 150, team_two_score: 0
+we won
+
+DevTools listening on ws://127.0.0.1:57639/devtools/browser/43865b19-8923-4970-871b-54c37b740141
+------------------
+against 29
+team_one_score: 0, team_two_score: 148
+we lost
+------------------
+against 24
+team_one_score: 140, team_two_score: 0
+we won
+------------------
+against 23
+team_one_score: 150, team_two_score: 0
+we won
+------------------
+against 22
+team_one_score: 112, team_two_score: 0
+we won
+------------------
+against 30
+team_one_score: 141, team_two_score: 0
+we won
+------------------
+against 26
+team_one_score: 0, team_two_score: 148
+we lost
+------------------
+against 27
+team_one_score: 106, team_two_score: 0
+we won
+------------------
+against 28
+team_one_score: 150, team_two_score: 0
+we won
+------------------
+against 25
+team_one_score: 150, team_two_score: 0
+we won
+------------------
+against 21
+team_one_score: 141, team_two_score: 0
+we won
+
+DevTools listening on ws://127.0.0.1:57747/devtools/browser/6f6af9aa-9a44-4840-a1d1-a2719654a88b
+------------------
+against 39
+team_one_score: 133, team_two_score: 0
+we won
+------------------
+against 37
+team_one_score: 95, team_two_score: 0
+we won
+------------------
+against 34
+team_one_score: 0, team_two_score: 86
+we lost
+------------------
+against 39
+team_one_score: 150, team_two_score: 0
+we won
+------------------
+against 40
+team_one_score: 134, team_two_score: 0
+we won
+------------------
+against 31
+team_one_score: 139, team_two_score: 0
+we won
+------------------
+against 32
+team_one_score: 129, team_two_score: 0
+we won
+------------------
+against 38
+team_one_score: 122, team_two_score: 0
+we won
+------------------
+against 35
+team_one_score: 136, team_two_score: 0
+we won
+------------------
+against 33
+team_one_score: 118, team_two_score: 0
+we won
+
+DevTools listening on ws://127.0.0.1:58001/devtools/browser/87958620-ed75-4e32-b360-d295f3f70382
+------------------
+against 44
+team_one_score: 101, team_two_score: 0
+we won
+------------------
+against 48
+team_one_score: 139, team_two_score: 0
+we won
+
+DevTools listening on ws://127.0.0.1:58272/devtools/browser/dbff64e6-bd69-4d76-99c8-2b42aa812895
+------------------
+against 59
+team_one_score: 114, team_two_score: 0
+we won
+------------------
+against 53
+team_one_score: 85, team_two_score: 0
+we won
+------------------
+against 51
+team_one_score: 132, team_two_score: 0
+we won
