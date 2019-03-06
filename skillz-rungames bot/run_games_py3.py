@@ -23,17 +23,14 @@ def main():
                         u"רוטברג 2": [0, 16],
                         u"אלתרמן 1": [0, 48],
                         u"חיל האויר 1": [0, 8],
-                        u"אוסטרובסקי 4": [0, 61],
                         u"טכנאים והנדסאים 1": [0, 43],
                         u"דה שליט 6": [0, 39],
                         u"הרצליה 2": [0, 14],
-                        u"שיבת חורב 3": [0, 54],
                         u"שיבת חורב 1": [0, 9],
                         u"רוטברג 4": [0, 17],
                         u"סנט גוזף 2": [0, 5],
                         u"דה שליט 2": [0, 12],
                         u"דה שליט 4": [0, 7],
-                        u"צביה אשקלון 2": [0, 59],
                         u"רביבים 1": [0, 30],
                         u"אורנית 1": [0, 47],
                         u"רעות-תיכ 1": [0, 50],
@@ -58,6 +55,27 @@ def main():
                         u"עש קררי 2": [0, 40],
                         u"אבין 2": [0, 28]}
 
+    d = DesiredCapabilities.CHROME
+    d['loggingPrefs'] = {'browser': 'ALL'}
+    driver = webdriver.Chrome(executable_path='.\chromedriver\chromedriver.exe', desired_capabilities=d)
+    driver.get("https://piratez.skillz-edu.org/home/")
+
+    email = driver.find_element_by_id("id_email")
+    email.send_keys("alon.w.10@gmail.com")
+
+    password = driver.find_element_by_id("id_password")
+    password.send_keys("alon1234")
+
+    submit = driver.find_element_by_id("submit_login")
+    # print "got submit"
+    # submit.set_attribute('style', 'width: 10%')
+    # print "changed submit width"
+    submit.click()
+    # print "clicked submit"
+
+    tournament = driver.find_element_by_id("tournament_button_1")
+    tournament.click()
+
     for i in range(15):
         groups_dic = {}
         for group in large_groups_dic:
@@ -65,26 +83,7 @@ def main():
                 groups_dic[group] = large_groups_dic[group]
         if not groups_dic:
             continue
-        d = DesiredCapabilities.CHROME
-        d['loggingPrefs'] = {'browser': 'ALL'}
-        driver = webdriver.Chrome('.\chromedriver\chromedriver.exe', desired_capabilities=d)
-        driver.get("https://piratez.skillz-edu.org/home/")
 
-        email = driver.find_element_by_id("id_email")
-        email.send_keys("alon.w.10@gmail.com")
-
-        password = driver.find_element_by_id("id_password")
-        password.send_keys("alon1234")
-
-        submit = driver.find_element_by_id("submit_login")
-        # print "got submit"
-        # submit.set_attribute('style', 'width: 10%')
-        # print "changed submit width"
-        submit.click()
-        # print "clicked submit"
-
-        tournament = driver.find_element_by_id("tournament_button_1")
-        tournament.click()
 
         # print "preesed tournament"
         for group in groups_dic:
@@ -173,7 +172,9 @@ def main():
             else:
                 print ("dont know")
 
-        driver.quit()
+            driver.close()
+
+
 
     print ("bot time: %s" % str(time.time()-start_time))
     time.sleep(160)
