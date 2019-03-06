@@ -67,7 +67,7 @@ def main():
             continue
         d = DesiredCapabilities.CHROME
         d['loggingPrefs'] = {'browser': 'ALL'}
-        driver = webdriver.Chrome('.\chromedriver\chromedriver.exe', desired_capabilities=d)
+        driver = webdriver.Chrome(r"C:\WebDriver\chromedriver.exe")
         driver.get("https://piratez.skillz-edu.org/home/")
 
         email = driver.find_element_by_id("id_email")
