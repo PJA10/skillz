@@ -94,7 +94,7 @@ def main():
             race.send_keys(Keys.CONTROL + Keys.RETURN)
             #driver.find_element_by_tag_name('body').send_keys(Keys.COMMAND + 't')
 
-            time.sleep(1)
+            #time.sleep(1)
             driver.switch_to_window(driver.window_handles[-1])
 
             #driver.get("https://piratez.skillz-edu.org/group_dashboard/try_to_win/group/40956/select")
@@ -124,17 +124,17 @@ def main():
 
             play_link.click()
 
-            time.sleep(0.1)
+            #time.sleep(0.1)
             driver.switch_to_window(groups_dic[group][0])
             groups_dic[group][0] = driver.window_handles[driver.window_handles.index(groups_dic[group][0])+1]
             driver.close()
-            time.sleep(0.1)
+            #time.sleep(0.1)
 
-            time.sleep(1)
+            #time.sleep(1)
 
         for window, group in zip(driver.window_handles[1:], groups_dic):
             driver.switch_to_window(window)
-            time.sleep(1)
+            #time.sleep(1)
             sound = driver.find_element_by_xpath('//*[@id="right-settings"]/volume-button/i')
             sound.click()
             turn = driver.find_element_by_xpath('//*[@id="turn"]')
@@ -142,11 +142,11 @@ def main():
                 if turn.text != "Turn 0/":
                     break
 
-            time.sleep(3)
+            #time.sleep(3)
             next_turn = driver.find_element_by_xpath('//*[@id="left-settings"]/i[3]')
             for i in xrange(2):
                 next_turn.click()
-            time.sleep(2)
+            #time.sleep(2)
 
             driver.find_element_by_xpath('/html/body').send_keys(Keys.END)
 

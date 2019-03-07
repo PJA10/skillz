@@ -51,16 +51,17 @@ def do_turn(game):
     update_enemy_ice_trolls_targets(game)
     update_dangerous_enemy_portals(game)
     # tests(game)
-
-    if game.turn < 8 and not game.get_my_mana_fountains():
-        elves = copy.deepcopy(game.get_my_living_elves())
+    print game.get_all_my_elves()
+    if game.turn < 20:
+        """elves = copy.deepcopy(game.get_my_living_elves())
         if elves and len(elves) > 1:
             loc = get_new_mana_fountain_loc(game)
             closest_elf_to_loc = closest(game, loc, elves)
             build(game, closest_elf_to_loc, MANA_FOUNTAIN, get_new_mana_fountain_loc(game))
             print "elf %s building MANA_FOUNTAIN at %s" % (closest_elf_to_loc, get_new_mana_fountain_loc(game))
             elves.remove(closest_elf_to_loc)
-        choose_strategy(game, elves)
+        choose_strategy(game, elves)"""
+        standard_map_opening(game)
     else:
         choose_strategy(game, game.get_my_living_elves())
     # rush_strat(game, game.get_my_living_elves())
@@ -154,8 +155,6 @@ def choose_strategy(game, elves):
     """
     
     
-    
-    
     if Globals.Labyrinth:
         Counter_Labyrinth(game)
     elif Globals.mazgan:
@@ -213,3 +212,9 @@ def Counter_Labyrinth(game):
                 elf.move_to(game.get_enemy_castle())
         else: 
                 elf.move_to(game.get_enemy_castle())
+
+
+def standard_map_opening(game):
+    arrow_strategy(game, [game.get_my_living_elves()[0]], is_hunt_mana_fountains=False, dont_attack=True)
+    if game.get_my_living_elves()[1] and game.can_build_mana_fountain_at(get_new_mana_fountain_loc(game)):
+        build(game, game.get_my_living_elves()[1], MANA_FOUNTAIN, get_new_mana_fountain_loc(game))
