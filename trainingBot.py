@@ -64,7 +64,7 @@ def is_targeted_by_my_tornados(game, map_object):
     if not map_object.type == "portal" and not map_object == "mana fountain":
         for tornado in game.get_my_tornadoes():
             if get_closest_enemy_building(game, tornado) == map_object:
-                if tornado.distance(map_object) / game.tornado_max_speed + map_object.ccurrent_health / game.tornado_attack_multiplier < \
+                if tornado.distance(map_object) / game.tornado_max_speed + map_object.current_health / game.tornado_attack_multiplier < \
                         tornado.current_health / game.tornado_suffocation_per_turn:
                     tornados.append(tornado)
     return tornados
@@ -518,17 +518,17 @@ def smart_move_to(game, elf, destination):
                 if distance_to_enemy_icetroll <= game.ice_troll_attack_range:
                     point[1] += RISK_AMOUNT * game.ice_troll_attack_multiplier * 2
                     get_hit_set.add(point[0])
-    print "im smart_movement after loop time: %s" % (time.time()*1000-start_time*1000)
+    #print "im smart_movement after loop time: %s" % (time.time()*1000-start_time*1000)
     
     
     best_point = min(possible_movement_points, key=lambda possible_point:
                                   possible_point[0].distance(destination) + 1000000 * possible_point[1])
-    print "possible_movement_points:", possible_movement_points
-    print "best_point: %s destination: %s" % (best_point, destination)
+    #print "possible_movement_points:", possible_movement_points
+    #print "best_point: %s destination: %s" % (best_point, destination)
     if best_point[0] in get_hit_set: # no place is safe
         if elf.can_cast_invisibility():
             elf.cast_invisibility()
-            print "invisibility!"
+            #print "invisibility!"
             return
         """
         closest_enemy_unit = get_closest_enemy_unit(game, elf)
@@ -536,7 +536,7 @@ def smart_move_to(game, elf, destination):
             attack_object(game, elf, get_closest_enemy_unit(game, elf))
             return
         """
-    print "im smart_movement end time: %s" % (time.time()*1000-start_time*1000)
+    #print "im smart_movement end time: %s" % (time.time()*1000-start_time*1000)
 
     elf_movement(game, elf, best_point[0])
 
@@ -631,7 +631,7 @@ def predict_next_turn_creatures(game):
     next_turn_my_lava_giant_list, next_turn_enemy_lava_giant_list = predict_next_turn_lava_giants(game)
     next_turn_my_icetrolls_list, next_turn_enemy_icetrolls_list = predict_next_turn_ice_trolls(game)
 
-    print "end predict_next_turn_creatures time:%s" % (time.time()*1000-start_time*1000)
+    #print "end predict_next_turn_creatures time:%s" % (time.time()*1000-start_time*1000)
     return next_turn_my_lava_giant_list, next_turn_enemy_lava_giant_list,\
             next_turn_my_icetrolls_list, next_turn_enemy_icetrolls_list
 
@@ -1121,7 +1121,7 @@ def build(game, elf, building_type_str, loc=False, no_mana_fountains=False):
 
     if not loc:
         loc = elf.get_location()
-    print "middle build %s" % (time.time()*1000-start_time*1000)
+    #print "middle build %s" % (time.time()*1000-start_time*1000)
     if elf.get_location() == loc:
         have_mana_fountain = game.get_my_mana_fountains()
         if not have_mana_fountain:
@@ -1131,14 +1131,14 @@ def build(game, elf, building_type_str, loc=False, no_mana_fountains=False):
         
         if build_dic[building_type_str][0]():  # if elf.can_build_building()
             build_dic[building_type_str][1]()  # then elf.build_building
-            print "end build %s" % (time.time()*1000-start_time*1000)
+            #print "end build %s" % (time.time()*1000-start_time*1000)
             return True
-        print ("Elf %s can't build %s at %s" % (elf, building_type_str, loc))
-        print "end build %s" % (time.time()*1000-start_time*1000)
+        #print ("Elf %s can't build %s at %s" % (elf, building_type_str, loc))
+        #print "end build %s" % (time.time()*1000-start_time*1000)
         return False
     else:
         smart_movement(game, elf, loc)
-        print "end build %s" % (time.time()*1000-start_time*1000)
+        #print "end build %s" % (time.time()*1000-start_time*1000)
         return True
 
 
@@ -1210,7 +1210,7 @@ def check_why_cant_build_building(game, buidling_location, building_radius):
         has_mana = False
 
     why_cant_build_portal = namedtuple("why_cant_build_portal", ["has_mana", "buildings_in_range"])
-    print "end check_why_cant_build_building has_mana:%s buildings_in_range: %s time: %s" % (has_mana, buildings_in_range, time.time()*1000-start_time*1000)
+    #print "end check_why_cant_build_building has_mana:%s buildings_in_range: %s time: %s" % (has_mana, buildings_in_range, time.time()*1000-start_time*1000)
     return why_cant_build_portal(has_mana, buildings_in_range)
 
 
@@ -1248,7 +1248,7 @@ def get_dangerous_enemy_lava_giant(game):
         hp_left = curr_health - (turns_to_castle * lava_giant.suffocation_per_turn)
         if hp_left > 2:
             close_enough_enemy_lava_giant.append(lava_giant)
-    print "dangerous enemy lava giants time: %s" % (time.time()*1000-start_time*1000)
+    # print "dangerous enemy lava giants time: %s" % (time.time()*1000-start_time*1000)
     return close_enough_enemy_lava_giant
 
 
@@ -1263,23 +1263,26 @@ def is_enemy_elf_attacking_elves(game):
     """
 
     last_turn_game = Globals.prev_game
-
+    if game.get_myself().id != last_turn_game.get_myself().id: # if the fucntion is called as the enemy side
+        return True
+        
     if Globals.is_enemy_elf_attacking:
         return True
     else:
+        #print "++is_enemy_elf_attacking_elves in else, game.get_my_living_elves()", game.get_my_living_elves()
         for last_turn_my_elf in last_turn_game.get_my_living_elves():
             curr_turn_my_elf = get_by_unique_id(game, last_turn_my_elf.unique_id)
             if not curr_turn_my_elf:
                 continue
             # get curr turn hp if only ice trolls have attacked last_turn_my_elf
-            curr_turn_expected_hp = get_my_unit_next_turn_health(last_turn_game, last_turn_my_elf,
-                                                                 include_elves=False)
-
+            
+            curr_turn_expected_hp = get_my_unit_next_turn_health(last_turn_game, last_turn_my_elf)
             if curr_turn_my_elf.current_health < curr_turn_expected_hp:  # if the actual hp is lower
+                curr_turn_expected_hp = get_my_unit_next_turn_health(last_turn_game, last_turn_my_elf)
                 for curr_turn_enemy_elf in game.get_enemy_living_elves():
                     if not has_moved(game, curr_turn_enemy_elf):  # if the enemy elf hasn't move
                         if not curr_turn_enemy_elf.is_building:  # and he doesn't build a portal
-                            if curr_turn_enemy_elf.in_attack_range(last_turn_my_elf):  # and he is in range to hit me
+                          if curr_turn_enemy_elf.in_attack_range(last_turn_my_elf):  # and he was in range to hit me
                                 Globals.is_enemy_elf_attacking = True  # then the enemy elf have attacked my elf
                                 return True
                                 
@@ -1307,7 +1310,7 @@ def does_gonna_die_next_turn(game, elf):
     :param elf: the elf we want to know if she will die next turn
     return: Boolean
     """
-    print "is_enemy_elf_attacking_elves ", is_enemy_elf_attacking_elves(game)
+    #print "is_enemy_elf_attacking_elves ", is_enemy_elf_attacking_elves(game)
     damage = 0
     # damage next turn
     if is_enemy_elf_attacking_elves(game):
@@ -1332,7 +1335,7 @@ def does_gonna_die_next_turn(game, elf):
             if get_closest_my_unit(game, enemy_ice_troll).unique_id == elf.unique_id:
                 damage += game.ice_troll_attack_multiplier\
                 
-    print "damage= ", damage            
+    # print "damage= ", damage            
     if elf.current_health <= damage:
         return True
     return False
@@ -1359,12 +1362,12 @@ def end_of_turn_hp(game, elf):
             if get_closest_my_unit(game, enemy_ice_troll).unique_id == elf.unique_id:
                 damage += game.ice_troll_attack_multiplier\
                 
-    print "damage= ", damage            
+    # print "damage= ", damage            
     return elf.current_health - damage
     
 
 
-def get_my_unit_next_turn_health(game, my_unit, include_elves = False):
+def get_my_unit_next_turn_health(game, my_unit, include_elves=False):
     """
 
     This function predict a given enemy unit next turn health
@@ -1378,21 +1381,20 @@ def get_my_unit_next_turn_health(game, my_unit, include_elves = False):
     """
 
     start_time = time.time()
-    #print "get_my_unit_next_turn_health"
     next_turn_hp = my_unit.current_health
     ice_trolls_that_target_me = is_targeted_by_enemy_icetroll(game, my_unit)
     if isinstance(my_unit, Creature):
         next_turn_hp -= my_unit.suffocation_per_turn
-
+    # print "get_my_unit_next_turn_health before close_ice_troll loop time: %s", (time.time()*1000-start_time*1000)
     for close_ice_troll in ice_trolls_that_target_me:
-            if can_attack(game, close_ice_troll, my_unit):
-                next_turn_hp -= game.ice_troll_attack_multiplier
-
-    if include_elves and is_enemy_elf_attacking_elves(game):
+        if can_attack(game, close_ice_troll, my_unit):
+            next_turn_hp -= game.ice_troll_attack_multiplier
+    # print "get_my_unit_next_turn_health after close_ice_troll loop time: %s", (time.time()*1000-start_time*1000)
+    if include_elves and (not my_unit.type == "Elf" or is_enemy_elf_attacking_elves(game)):
         for enemy_elf in game.get_enemy_living_elves():
             if enemy_elf.in_attack_range(my_unit):
                 next_turn_hp -= game.elf_attack_multiplier
-    #print "get_my_unit_next_turn_healthtime: %s", (time.time()*1000-start_time*1000)
+    # print "get_my_unit_next_turn_health time: %s", (time.time()*1000-start_time*1000)
     return next_turn_hp
 
 
@@ -1408,7 +1410,7 @@ def can_attack(game, attacking_unit, target):
     :return: if attacking_unit in range to attack defending_unit
     """
 
-    return attacking_unit.in_range(target, attacking_unit.attack_range)
+    return attacking_unit.distance(target) < attacking_unit.attack_range
 
 
 def get_by_unique_id(game, need_to_find_unique_id):
@@ -1559,7 +1561,7 @@ def get_closest_my_building(game, game_object):
 
 def swap_players(func):  # this is a decorators for doubling a function with swaped players
     def swaped_func(game, *args):
-        swaped_game = copy.deepcopy(game)
+        swaped_game = copy.copy(game)
         swaped_game._hx___me, swaped_game._hx___enemies = game.get_enemy(), [game.get_myself()]
         return func(swaped_game, *args)
     return swaped_func
@@ -1806,7 +1808,7 @@ def how_much_hp_in_x_turns(game, game_object, turns = 1):
     return health
 
 
-def does_win_fight(game, elf, attack_target, without_dying =  False):
+def does_win_fight_v1(game, elf, attack_target, without_dying =  False):
 
     health_dif = elf.current_health 
     if (attack_target.type == "Elf" and is_enemy_elf_attacking_elves(game)) or attack_target.type == "IceTroll":
@@ -1844,6 +1846,114 @@ def does_win_fight(game, elf, attack_target, without_dying =  False):
     else:
         return True
         
+        
+def does_win_fight(game, elf, attack_target, max_depth=10):
+    """
+
+    The function calculate who will win if *elf* and *attack_target* will start a fight this turn
+    The function thinks to the next *max_depth* turns what will happen with close ice trolls
+    :TODO: Add a data s tructer to not repeat the same params
+    
+    :param game:
+    :param elf: the elf to start a fight with
+    :param attack_target: the elf's target
+    :type attack_target: MapObject
+    :param max_depth: the max number of turns to calculate. take care of running time!!
+    :return: if elf is going to win or not
+    :type: Boolean
+    """
+    start_time = time.time()
+    curr_elf = deepcopy_map_object(game, elf)
+    curr_attack_target = deepcopy_map_object(game, attack_target)
+    curr_game = copy.deepcopy(game)
+    curr_turn = 0
+    curr_game._hx___me, curr_game._hx___enemies[0] = copy.deepcopy(game.get_myself()), copy.deepcopy(game.get_enemy())
+    
+    if attack_target.type == "IceTroll":
+        return False
+
+    print "!! elf: %s, attack_target %s, max_depth: %s, time:%s" % (elf, attack_target, max_depth, time.time()*1000-start_time*1000)
+    
+
+    ice_trolls_that_target_elf = is_targeted_by_enemy_icetroll(game, elf)
+    ice_trolls_that_target_attack_target = is_targeted_by_my_icetroll(game, attack_target)
+    curr_game.get_myself().ice_trolls = ice_trolls_that_target_attack_target
+    curr_game.get_enemy().ice_trolls = ice_trolls_that_target_elf
+    #print "ice_trolls_that_target_elf: %s, ice_trolls_that_target_attack_target: %s" % (ice_trolls_that_target_elf, ice_trolls_that_target_attack_target)
+    
+    # loop over the next turns until elf or attack_target will die
+    while curr_attack_target.current_health>0 and curr_elf.current_health>0  and curr_turn < max_depth:
+        print "-----%s----%s" % ( curr_turn, time.time()*1000-start_time*1000)
+
+        #print "enemy_ice_trolls: %s" % curr_game.get_enemy_ice_trolls()
+        #print ",".join(str((portal, portal.turns_to_summon)) for portal in curr_game.get_enemy_portals())
+        last_turn_elf = curr_elf
+        last_turn_attack_target = curr_attack_target
+        elf_next_turn_hp = get_my_unit_next_turn_health(curr_game, curr_elf, include_elves=True)
+        attack_target_next_turn_hp = get_enemy_unit_next_turn_health(curr_game, curr_attack_target, True)
+        print "curr_elf hp: %s, elf_next_turn_hp %s,  time:%s" % (curr_elf.current_health, elf_next_turn_hp,  time.time()*1000-start_time*1000)
+        print "curr_attack_target hp: %s, curr_attack_target %s, time:%s" % (curr_attack_target.current_health, attack_target_next_turn_hp, time.time()*1000-start_time*1000)
+
+        if not curr_elf.in_attack_range(attack_target):
+            curr_elf.location = curr_elf.get_location().towards(attack_target, game.elf_max_speed)
+        # print "befor predict_next_turn_ice_trolls time: %s" % (time.time()*1000-start_time*1000)
+
+
+        next_turn_enemy_icetroll_list = predict_next_turn_enemy_ice_trolls(curr_game, curr_elf)
+        next_turn_my_icetroll_list = predict_next_turn_my_ice_trolls(curr_game, curr_elf)
+        
+        # print "after predict_next_turn_ice_trolls time: %s" % (time.time()*1000-start_time*1000)
+        next_turn_enemy_elves_list = predict_next_turn_enemy_elves(curr_game)
+        for enemy_elf in curr_game.get_enemy_living_elves():
+            if not enemy_elf.in_attack_range(curr_elf):
+                for next_turn_enemy_elf in next_turn_enemy_elves_list:
+                    if next_turn_enemy_elf.id == enemy_elf.id:
+                        enemy_elf.location = next_turn_enemy_elf.get_location()
+        
+        new_my_ice_trolls, new_enemy_ice_trolls = predict_next_turn_new_ice_trolls(curr_game)
+        for new_my_ice_troll in new_my_ice_trolls:
+            if closest(game, new_my_ice_troll, game.get_enemy_creatures() + game.get_enemy_living_elves()) == attack_target:
+                next_turn_my_icetroll_list.append(new_my_ice_troll)
+        for new_enemy_ice_troll in new_enemy_ice_trolls:
+            if closest(game, new_enemy_ice_troll, game.get_my_creatures() + game.get_my_living_elves()) == elf:
+                next_turn_enemy_icetroll_list.append(new_enemy_ice_troll)
+        
+        curr_game.get_myself().ice_trolls = next_turn_my_icetroll_list
+        curr_game.get_enemy().ice_trolls = next_turn_enemy_icetroll_list
+        
+        curr_elf.current_health = elf_next_turn_hp
+        curr_attack_target.current_health = attack_target_next_turn_hp
+        
+        my_other_elves = game.get_my_living_elves()
+        my_other_elves.remove(last_turn_elf)
+        curr_game.get_myself().living_elves = my_other_elves + [curr_elf]
+        
+        # print "aviv time: %s" % (time.time()*1000-start_time*1000)
+
+        if attack_target.type == "Elf":
+            enemy_other_elves = game.get_enemy_living_elves()
+            enemy_other_elves.remove(last_turn_attack_target)
+            curr_game.get_enemy().living_elves = enemy_other_elves + [curr_attack_target]
+        
+        for portal in curr_game.get_all_portals():
+            if portal.is_summoning:
+                portal.turns_to_summon -= 1
+            if portal.turns_to_summon == 0:
+                portal.is_summoning = False
+        curr_turn += 1
+
+    print "does win fight time: %s", (time.time()*1000-start_time*1000)
+
+    if isinstance(attack_target, Building):
+        if curr_elf.current_health == elf.current_health:
+            print "will win building"
+            return True
+    if curr_elf.current_health > curr_attack_target.current_health:  # if we will  won
+        print "will win"
+        return True
+    else:  # if we lost or draw
+        print "will lose"
+        return False
 
 
 def is_attack_closest_enemy_portal(game, elf):
@@ -1933,6 +2043,7 @@ def attack_closest_enemy_game_obj(game, elves_not_acted):
                 return []
 
     for elf in copy.copy(elves_not_acted):
+        
         does_elf_attack_closest_enemy_portal =  is_attack_closest_enemy_portal(game, elf)
         if does_elf_attack_closest_enemy_portal:
             closest_enemy_portal = does_elf_attack_closest_enemy_portal  # is_attack_closest_enemy returns the target
@@ -1952,7 +2063,7 @@ def attack_closest_enemy_game_obj(game, elves_not_acted):
 
             elves_not_acted.remove(elf)
             continue
-
+        
         does_elf_attack_closest_enemy_elf = is_attack_closest_enemy_elf(game, elf)
         # print "yuiyui in for elf: %s does_elf_attack_closest_enemy_elf: %s" % (elf, does_elf_attack_closest_enemy_elf)
         if does_elf_attack_closest_enemy_elf:
@@ -1962,6 +2073,7 @@ def attack_closest_enemy_game_obj(game, elves_not_acted):
 
             elves_not_acted.remove(elf)
             continue
+        
 
     return elves_not_acted
 
@@ -2033,15 +2145,12 @@ def rush_to_loc(game, elf, destination):
     :param destination:
     :return:
     """
-    print "in rush_to_loc elf: %s, destination: %s" % (elf, destination)
-    print "elf.current_spells: %s" % elf.current_spells
-    print "elf.can_cast_speed_up(): %s" % elf.can_cast_speed_up()
-    print "is_have_speed_up(game, elf):" , is_have_speed_up(game, elf)
+
     if is_have_speed_up(game, elf):
         elf_movement(game, elf, destination)
     elif elf.can_cast_speed_up():
         elf.cast_speed_up()
-        print "cast_speed_up"
+        # print "cast_speed_up"
     else:
         smart_movement(game, elf, destination)
         
@@ -2102,14 +2211,14 @@ def attack_dangerous_enemy_portals(game, elves_not_acted):
                 dangerous_enemy_portals.append(portal)
 
     if dangerous_enemy_portals and elves_not_acted:
-        print "elves_not_acted", elves_not_acted
+        #print "elves_not_acted", elves_not_acted
         for portal in dangerous_enemy_portals:
             closest_elf_to_portal_loc = closest(game, portal, elves_not_acted)
             if not closest_elf_to_portal_loc or portal.current_health > 50:
                 break
             
             attack_object(game, closest_elf_to_portal_loc, portal)
-            print "portal: %s, closest_elf_to_portal_loc: %s" % (portal, closest_elf_to_portal_loc)
+            #print "portal: %s, closest_elf_to_portal_loc: %s" % (portal, closest_elf_to_portal_loc)
             elves_not_acted.remove(closest_elf_to_portal_loc)
 
     return elves_not_acted
@@ -2126,7 +2235,7 @@ def is_safe(game, elf, num_of_turns=2):
     :return:
     """
 
-    print "in safe"
+    #print "in safe"
     ice_troll_safe_distance = num_of_turns * game.ice_troll_max_speed + game.ice_troll_attack_range
 
     for enemy_ice_troll in is_targeted_by_enemy_icetroll(game, elf):
@@ -2163,7 +2272,7 @@ def hunt_enemy_elf_with_speed(game, my_elf, enemy_elf):
             attack_object(game, my_elf, enemy_elf)
             elves_not_acted.remove(my_elf)
     else:
-        print "our elf won't win"
+        #print "our elf won't win"
         smart_movement(game, my_elf, enemy_elf.get_location())
         elves_not_acted.remove(my_elf)
 
@@ -2193,7 +2302,7 @@ def elf_escape(game, elf):
 
     if best_portal:
         smart_move_to(game, elf, best_portal)
-        print "elf_escape, elf: %s escape to %s" % (elf, best_portal)
+        #print "elf_escape, elf: %s escape to %s" % (elf, best_portal)
         return True
     else:
         return False

@@ -174,7 +174,7 @@ def main():
                 print "dont know"
 
             driver.close()
-
+    driver.quit()
     print "bot time: %s" % str(time.time()-start_time)
     time.sleep(160)
 

@@ -52,18 +52,10 @@ def do_turn(game):
     update_dangerous_enemy_portals(game)
     # tests(game)
     print game.get_all_my_elves()
-    if game.turn < 20:
-        """elves = copy.deepcopy(game.get_my_living_elves())
-        if elves and len(elves) > 1:
-            loc = get_new_mana_fountain_loc(game)
-            closest_elf_to_loc = closest(game, loc, elves)
-            build(game, closest_elf_to_loc, MANA_FOUNTAIN, get_new_mana_fountain_loc(game))
-            print "elf %s building MANA_FOUNTAIN at %s" % (closest_elf_to_loc, get_new_mana_fountain_loc(game))
-            elves.remove(closest_elf_to_loc)
-        choose_strategy(game, elves)"""
-        standard_map_opening(game)
-    else:
-        choose_strategy(game, game.get_my_living_elves())
+    
+    
+    choose_strategy(game, game.get_my_living_elves())
+    
     # rush_strat(game, game.get_my_living_elves())
 
     # old_do_turn(game)
@@ -161,7 +153,11 @@ def choose_strategy(game, elves):
         Counter_mazgan(game)
     
     else:
-        arrow_strategy(game, elves)
+        if game.turn < 20:
+            standard_map_opening(game)
+        else:
+            basic_elvesless_defence(game)
+            arrow_strategy(game, elves)
 
 
 
@@ -215,6 +211,9 @@ def Counter_Labyrinth(game):
 
 
 def standard_map_opening(game):
-    arrow_strategy(game, [game.get_my_living_elves()[0]], is_hunt_mana_fountains=False, dont_attack=True)
-    if game.get_my_living_elves()[1] and game.can_build_mana_fountain_at(get_new_mana_fountain_loc(game)):
-        build(game, game.get_my_living_elves()[1], MANA_FOUNTAIN, get_new_mana_fountain_loc(game))
+    if len(game.get_my_living_elves()) > 1:
+        arrow_strategy(game, [game.get_my_living_elves()[0]], is_hunt_mana_fountains=False, dont_attack=True)
+        if game.get_my_living_elves()[1] and game.can_build_mana_fountain_at(get_new_mana_fountain_loc(game)):
+            build(game, game.get_my_living_elves()[1], MANA_FOUNTAIN, get_new_mana_fountain_loc(game))
+    elif game.get_my_living_elves():
+        build(game, game.get_my_living_elves()[0], MANA_FOUNTAIN, get_new_mana_fountain_loc(game))

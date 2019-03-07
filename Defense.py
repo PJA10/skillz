@@ -4,6 +4,7 @@ import Globals
 
 
 def basic_elvesless_defence(game):
+    
     """
     this function is responsble for the portal to summon_ice_troll when needed
     
@@ -12,43 +13,121 @@ def basic_elvesless_defence(game):
     :type void
     
     """
+    print ""
+    print "in basic_elvesless_defence"
+    print "__________________________"
+    max_number_of_icetrolls_on_unit = 3
     
-    for portal in game.get_my_portals() :
+    if game.get_my_portals():
+        available_portals = game.get_my_portals()
+        for portal in available_portals:
+            if portal.is_summoning:
+                available_portals.remove(portal)
+                if not available_portals:
+                            return
         
-        if are_elves_coming(game, portal):
-            print "summon_ice_troll because elves are coming!!"
-            if not summon(game,portal, ICE):
-                mana_state = "save mana"
-    
-    
-    sort_portal_by_best_to_defend(game)
-    print "enemy attack force: %s" % enemy_attacking_units_total_health(game)
-    print "our defence force %s"% current_defence_total_health(game)
-    print "%s portals should summon_ice_troll because of enemy attack force" %how_many_portals_should_defend_by_game_status(game)
-    for i in range(0, how_many_portals_should_defend_by_game_status(game), 1):
-        if len(game.get_my_portals()) > i:
-            summon(game,game.get_my_portals()[i], ICE)
-    
-    if len(dangerous_elves(game)) >= len(game.get_all_enemy_elves()) - 1:
-        spam_ice_troll(game)
-
-def spam_ice_troll(game):
+        
+        # priority num 1: if elf is backdooring us summon_ice_troll to kill him or waste his time
+        if game.get_enemy_living_elves():
+            if get_closest_enemy_elf(game, game.get_my_castle()).in_attack_range(game.get_my_castle()) and not is_targeted_by_my_icetroll(game, get_closest_enemy_elf(game, game.get_my_castle())):
+                if summon(game, closest(game, game.get_my_castle(), available_portals), ICE):
+                    if get_closest_my_portal(game, game.get_my_castle()) in available_portals:
+                        available_portals.remove(get_closest_my_portal(game, game.get_my_castle()))
+                    print "summoning ice because elves close to my castle" 
+                    if not available_portals:
+                            return
+        
+        #priority num 2: if enemy has dangerous portals, send tornados
+        safe_distence = (game.tornado_max_health - math.ceil(game.portal_max_health  / 2)) / game.tornado_summoning_duration * game.tornado_max_speed + 500
+        
+        print "safe distance from any portal is : %s"% safe_distence
+        safe_distence_from_castle = game.get_my_castle().distance(game.get_enemy_castle()) / 3
+        print "safe distance from my castle is : %s"%safe_distence_from_castle 
+        if game.get_enemy_portals():
+            if get_closest_enemy_portal(game, game.get_my_castle()).in_range(game.get_my_castle(), safe_distence_from_castle ) and not is_targeted_by_my_icetroll(game, get_closest_enemy_portal(game, game.get_my_castle())):
+                if summon(game, closest(game, get_closest_enemy_portal(game, game.get_my_castle()), available_portals), TORNADO):
+                    if get_closest_my_portal(game, game.get_my_castle()) in available_portals:
+                        available_portals.remove(get_closest_my_portal(game, game.get_my_castle()))
+                    print "summoning Tornado because to stop enemy rush" 
+                    if not available_portals:
+                            return
+        # priority num 2(extra) - sending the tornado before the portal was built
+        if game.get_enemy_living_elves():
+            if get_closest_enemy_elf(game, game.get_my_castle()).is_building and get_closest_enemy_elf(game, game.get_my_castle()).distance(game.get_my_castle()) < safe_distence_from_castle:
+                if summon(game, closest(game, game.get_my_castle(), available_portals), Tornado):
+                    if get_closest_my_portal(game, game.get_my_castle()) in available_portals:
+                        available_portals.remove(get_closest_my_portal(game, game.get_my_castle()))
+                    print "summoning ice because elves close to my castle" 
+                    if not available_portals:
+                            return
+                        
+        
+        if game.get_enemy_tornadoes():
+            for enemy_tornado in game.get_enemy_tornadoes():
+                
+                if len(is_targeted_by_my_icetroll(game, enemy_tornado)) > max_number_of_icetrolls_on_unit:
+                        continue
+                        
+                tornado_target = get_closest_my_building(game, enemy_tornado)
+                if tornado_target:
+                    attacking_pos = tornado_target.get_location().towards(enemy_tornado, tornado_target.size + enemy_tornado.attack_range)
+                    if turns_to_travel(game, enemy_tornado, attacking_pos) < game.ice_troll_summoning_duration + 4:
+                        if tornado_target.type == "Portal" and tornado_target.currently_summoning == "IceTroll":
+                            continue
+                        else:
+                            summon_with_closest_portal(game, ICE, attacking_pos)
+                            print "summon ice, close tornado"
+        
+        for portal in available_portals :
+            if game.get_enemy_portals():
+                if get_closest_enemy_portal(game, portal).distance(portal) < safe_distence and not is_targeted_by_my_tornados(game, get_closest_enemy_portal(game, portal)): 
+                    if summon(game, portal, TORNADO) and portal:
+                        if portal in available_portals: #  
+                            available_portals.remove(portal)
+                        if not available_portals: 
+                            return
+            if are_elves_coming(game, portal):
+                print "summon_ice_troll because elves are coming!!"
+                if summon(game, get_closest_my_portal(game, get_closest_enemy_elf(game, portal)), ICE) and portal:  # if elf come to destroy portal, send ice to kill her
+                    if portal in available_portals:
+                        available_portals.remove(portal)    
+                    if not available_portals:
+                        return
+        sort_portal_by_best_to_defend(game, available_portals)
+        
+        defend_from_enemy_lava_giants(game, available_portals)
+        print "enemy attack force: %s" % enemy_attacking_units_total_health(game)
+        print "our defence force %s"% current_defence_total_health(game)
+        print "%s portals should summon_ice_troll because of enemy attack force" %how_many_portals_should_defend_by_game_status(game)
+        for i in range(0, how_many_portals_should_defend_by_game_status(game), 1):
+            if len(available_portals) > i:
+                summon(game, available_portals[i], ICE)
+                if not available_portals:
+                    return
+        if len(dangerous_elves(game)) >= len(game.get_all_enemy_elves()) - 1 and not is_targeted_by_my_icetroll(game, get_closest_enemy_elf(game, game.get_my_castle())):
+            spam_ice_troll(game, available_portals)
+    else: 
+        print "no portals to defend" 
+def spam_ice_troll(game, available_portals):
     
     """
     this function says to the defence to spawn us many ice_trolls that he can
     
     :param: game
     :type: void
+    
     """
     
-    print "spaming ice_trolls!!"
+    
     if len(game.get_my_ice_trolls()) < len(game.get_enemy_lava_giants()):
-        if game.get_my_portals():
-            for portal in game.get_my_portals():
+        if available_portals:
+            for portal in available_portals:
                 if portal.distance(game.get_my_castle()) < portal.distance(game.get_enemy_castle()):
-                    summon(game, portal , ICE)
-    
-    
+                    if summon(game, portal , ICE):
+                        print "spaming ice_trolls!!"
+                        available_portals.remove(portal)
+                        if not available_portals:
+                            return
     
     
 def is_suicide_for_win_better_then_defend(game):
@@ -269,9 +348,9 @@ def current_defence_total_health(game):
     return total_my_defensive_units_health
          
 
-def sort_portal_by_best_to_defend(game):
+def sort_portal_by_best_to_defend(game, portals):
     
-    #not finished
+    
     
     """
     sorts our portals by best to defence
@@ -281,13 +360,24 @@ def sort_portal_by_best_to_defend(game):
     :type: void
     
     """
+    if get_dangerous_enemy_lava_giant(game):
+        portals = sorted(portals, key=lambda portal: portal.distance(game.get_my_castle()) + portal.distance(closest(game, portal, enemy_lava_giant_future_location(game))))
+    
     
     # the factor is min(portal.distance(closest_enemy_lava_giant_to_my_castle) + portal.distance(closest_enemy_lava_giant_to_my_castle))
     # if 2 portals has the same value the need to check if the closer to the enemy can spawn in time to be effective
     
+def enemy_lava_giant_future_location (game):
     
+    lava_giants_locations = []
     
-    
+    for lava_giant in get_dangerous_enemy_lava_giant(game):
+        if lava_giant.current_health < game.ice_troll_summoning_duration:
+            continue
+        else:
+            lava_giants_locations.append(lava_giant.get_location().towards(game.get_my_castle(), game.ice_troll_summoning_duration * game.lava_giant_max_speed))
+    return lava_giants_locations        
+
 def are_elves_coming(game, portal):
     """
     
@@ -312,11 +402,51 @@ def are_elves_coming(game, portal):
                     continue
                 
             attacking_pos = portal.get_location().towards(enemy_elf, game.portal_size + game.elf_attack_range)
-            if turns_to_travel(game, enemy_elf, attacking_pos) < game.ice_troll_summoning_duration + 1 and not is_targeted_by_my_icetroll(game, enemy_elf):
+            if turns_to_travel(game, enemy_elf, attacking_pos) / game.speed_up_multiplier < game.ice_troll_summoning_duration + 1 and not is_targeted_by_my_icetroll(game, enemy_elf):
                 return True
                 print "summon ice, close elf"
             
-            
+def defend_from_enemy_lava_giants(game, available_portals):
+    """
+
+    if there are dangerous enemy lava giants summon ice from a portal close to the lava giants location three turns from now.
+
+    :param game:
+    :param elves_not_acted: a list of all the elves who didn't act all ready.
+    :param max_number_of_icetrolls_on_unit: the max number of ice trolls on one unit
+    :param max_number_of_ice_trolls_near_base: the max number of ice trolls near base
+    :return: a list of all the elves who didn't act after the function has ended
+    """
+    
+    
+    arbitrary_number_of_turns = 6
+
+    max_distance = 3000
+    if game.get_enemy_portals():
+        max_distance = game.get_my_castle().distance(get_closest_enemy_portal(game, game.get_my_castle()))
+
+    for lava_giant in get_dangerous_enemy_lava_giant(game):
+        if game.get_my_mana() < game.ice_troll_cost:
+            break
+
+        if is_targeted_by_my_icetroll(game, lava_giant):
+            continue
+
+        num_of_turnes_to_my_castle = turns_to_travel(game, lava_giant, game.get_my_castle().get_location().towards(lava_giant, game.lava_giant_attack_range),
+                                                     game.lava_giant_max_speed)
+
+        if num_of_turnes_to_my_castle <= arbitrary_number_of_turns and \
+                not is_targeted_by_my_icetroll(game, lava_giant):
+            spawn_turn_lava_giant_loc = lava_giant.get_location().towards(game.get_my_castle(),
+                                                                          game.lava_giant_max_speed *
+                                                                          game.ice_troll_summoning_duration)
+            summon(game, closest(game, spawn_turn_lava_giant_loc, available_portals), ICE)
+            print "summon ice. defend from lava"
+
+    
+
+
+
 
 def build_bunker_fast(game, elves_not_acted):
     """
